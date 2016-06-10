@@ -125,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         new AlertDialog.Builder(this)
                 .setTitle("ETA")
                 .setMessage("The app needs to access your location in order to compute the time it takes to reach your destination. The app is useless if you do not grant this permission.")
+                .setCancelable(false)
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
