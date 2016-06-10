@@ -1,0 +1,335 @@
+package de.roughriders.jf.eta;
+
+import android.Manifest;
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.location.Location;
+import android.net.Uri;
+import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.View;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.AutocompleteFilter;
+import com.google.android.gms.location.places.AutocompletePrediction;
+import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.GeoDataApi;
+import com.google.android.gms.location.places.Places;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.maps.android.SphericalUtil;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import de.roughriders.jf.eta.adapters.PredictionsAdapter;
+
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+
+    private SlidingUpPanelLayout slidingPanel;
+    private static String TAG = "MainActivity";
+
+    private EditText destinationSearchBox;
+    private EditText targetPhoneBox;
+    private Button startButton;
+
+    private final int PICK_CONTACT = 0;
+    private final int SEARCH_RADIUS = 250;
+
+    private String targetPhoneNumber;
+    private String targetDestination;
+    private RecyclerView predictionsView;
+    private PredictionsAdapter predictionsAdapter;
+    private RecyclerView.LayoutManager predictionsLayoutManager;
+
+    private GoogleApiClient googleApiClient;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
+        initSlidingPanel();
+        connectToApiClient();
+        initDestinationEditText();
+        initPredictionsView();
+        targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
+        startButton = (Button)findViewById(R.id.startButton);
+
+        /*
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+        */
+    }
+
+    private void initPredictionsView(){
+        predictionsView = (RecyclerView)findViewById(R.id.predictionsList);
+        predictionsLayoutManager = new LinearLayoutManager(this);
+        predictionsView.setLayoutManager(predictionsLayoutManager);
+        predictionsAdapter = new PredictionsAdapter();
+        predictionsView.setAdapter(predictionsAdapter);
+    }
+
+    private void initDestinationEditText(){
+        destinationSearchBox = ((EditText)findViewById(R.id.editTextDestination));
+        setDestinationEditTextFocusListener();
+        setDestinationEditTextChangeListener();
+    }
+
+    private void setDestinationEditTextChangeListener(){
+        destinationSearchBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                String text = charSequence.toString();
+                Log.i(TAG, "Text in destionationSearchBox has changed, new content: " + text);
+                sendAutocompleteRequest(charSequence.toString());
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) { }
+        });
+    }
+    private void setDestinationEditTextFocusListener(){
+        destinationSearchBox.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+            }
+        });
+        destinationSearchBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+               if(b == true)
+                   slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+               else slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            }
+        });
+    }
+
+    private void initSlidingPanel(){
+        slidingPanel = (SlidingUpPanelLayout)findViewById(R.id.sliding_layout);
+        slidingPanel.setTouchEnabled(false);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (slidingPanel != null &&
+                (slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.EXPANDED || slidingPanel.getPanelState() == SlidingUpPanelLayout.PanelState.ANCHORED)) {
+            slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    public void selectContactButton_Clicked(View view){
+       showSelectContactPicker();
+    }
+
+    private void showSelectContactPicker(){
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+        startActivityForResult(intent, PICK_CONTACT);
+    }
+
+    public void onActivityResult(int reqCode, int resultCode, Intent data) {
+        super.onActivityResult(reqCode, resultCode, data);
+        switch (reqCode) {
+            case PICK_CONTACT:
+                processContactIntent(resultCode, data);
+                break;
+        }
+    }
+
+    private void processContactIntent(int resultCode, Intent intent){
+        if(resultCode == Activity.RESULT_OK)
+        {
+            Uri uri = intent.getData();
+            String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
+
+            Cursor cursor = getContentResolver().query(uri, projection,
+                    null, null, null);
+            cursor.moveToFirst();
+
+            int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+            String number = cursor.getString(numberColumnIndex);
+
+            int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+            String name = cursor.getString(nameColumnIndex);
+
+            Log.i(TAG, "Contact selected: name: " + name + " - phone: " + number);
+
+            targetPhoneNumber = number;
+
+            updateUi();
+        }
+    }
+
+    /**
+     * Initiates a connection to the Google API Client (needed for the places autocomplete).
+     */
+    private void connectToApiClient(){
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API).build();
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult result) {
+        Toast.makeText(this, "Connection to the Google API Client could not be established. Are you online?", Toast.LENGTH_SHORT).show();
+    }
+
+    private void sendAutocompleteRequest(String query){
+        try {
+            AutocompleteFilter filter = new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build();
+            LatLngBounds bounds = createBoundsFromLastKnownLocation();
+            PendingResult<AutocompletePredictionBuffer> result = Places.GeoDataApi.getAutocompletePredictions(googleApiClient, query, bounds, filter);
+            result.setResultCallback(new ResultCallback<AutocompletePredictionBuffer>() {
+                @Override
+                public void onResult(@NonNull AutocompletePredictionBuffer autocompletePredictions) {
+                    String statusMessage = autocompletePredictions.getStatus().getStatusMessage();
+                    Log.i(TAG, "Status of the predictions:\r\n" + statusMessage);
+                    Log.i(TAG, "Received " + autocompletePredictions.getCount() + " predictions.");
+
+                    predictionsAdapter.clear();
+
+                    for(int i = 0; i < autocompletePredictions.getCount(); i++){
+                        AutocompletePrediction prediction = autocompletePredictions.get(i);
+                        Log.i(TAG, prediction.getPrimaryText(null).toString() + " / " + prediction.getSecondaryText(null).toString());
+                        predictionsAdapter.addItem(prediction);
+                    }
+                }
+            });
+        }
+        catch(NullPointerException ex){
+            Log.e(TAG, ex.getMessage());
+        }
+    }
+
+    private LatLngBounds createBoundsFromLastKnownLocation(){
+        Location location = getLastKnownLocation();
+        if(location != null) {
+            Log.i(TAG, "last known location: " + location.getLatitude() + " - " + location.getLongitude());
+            LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
+            LatLng southWest = SphericalUtil.computeOffset(center, SEARCH_RADIUS * 1000 * Math.sqrt(2), 225);
+            LatLng northEast = SphericalUtil.computeOffset(center, SEARCH_RADIUS * 1000 * Math.sqrt(2), 45);
+            return new LatLngBounds(southWest, northEast);
+        } else {
+            throw new NullPointerException("getLastKnownLocation did not give any result");
+        }
+    }
+
+    private Location getLastKnownLocation(){
+        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            Location location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
+            return location;
+        }
+        else {
+            Toast.makeText(this, "The app is not allowed to access your location.", Toast.LENGTH_SHORT).show();
+            throw new IllegalStateException("App cannot run without location permission.");
+        }
+    }
+
+
+    public void startButton_Clicked(View view) {
+
+    }
+
+    /**
+     * Updates the ui with the values stored in the local variables.
+     */
+    private void updateUi(){
+        targetPhoneBox.setText(targetPhoneNumber);
+        destinationSearchBox.setText(targetDestination);
+
+        setControlEnable();
+    }
+
+    /**
+     * Pulls values from the ui and stores them in the corresponding variables.
+     */
+    private void updateFromUi(){
+        targetPhoneNumber = targetPhoneBox.getText().toString();
+        targetDestination = destinationSearchBox.getText().toString();
+    }
+
+    /**
+     * Checks the conditions for all controls to be enabled or not.
+     */
+    private void setControlEnable(){
+        setStartButtonEnabled();
+    }
+
+    /**
+     * Enable or disable the start-button.
+     */
+    private void setStartButtonEnabled(){
+        startButton.setEnabled(isValidStart());
+    }
+
+    /**
+     * Check the conditions for the start button to be enabled.
+     * @return
+     */
+    private boolean isValidStart(){
+        if(targetDestination.isEmpty())
+            return false;
+        if(targetPhoneNumber.isEmpty())
+            return  false;
+        return true;
+    }
+}
