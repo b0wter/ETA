@@ -12,65 +12,83 @@ import java.util.ArrayList;
 import java.util.List;
 
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.helpers.IRecyclerIndexedViewItemClicked;
+import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
+import de.roughriders.jf.eta.models.RecentDestination;
 
 /**
  * Created by b0wter on 6/9/16.
  */
-public class PredictionsAdapter extends RecyclerView.Adapter<PredictionsAdapter.ViewHolder> {
+public class PredictionsAdapter extends RecyclerView.Adapter<PredictionsAdapter.ViewHolder> implements IRecyclerIndexedViewItemClicked {
 
-    ArrayList<AutocompletePrediction> predictions;
+    ArrayList<RecentDestination> destinations;
+    List<IRecyclerViewItemClicked<RecentDestination>> itemClickedListeners = new ArrayList<>();
 
     public PredictionsAdapter(){
-        predictions = new ArrayList<>();
-    }
-
-    public PredictionsAdapter(ArrayList<AutocompletePrediction> predictions){
-        this.predictions = predictions;
+        destinations = new ArrayList<>();
     }
 
     @Override
     public PredictionsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_placeprediction, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view, this);
         return holder;
     }
 
     @Override
     public void onBindViewHolder(PredictionsAdapter.ViewHolder holder, int position) {
-        AutocompletePrediction prediction = predictions.get(position);
-        holder.primaryTextView.setText(prediction.getPrimaryText(null).toString());
-        holder.secondaryTextView.setText(prediction.getSecondaryText(null).toString());
+        RecentDestination prediction = destinations.get(position);
+        holder.primaryTextView.setText(prediction.primaryText);
+        holder.secondaryTextView.setText(prediction.secondaryText);
     }
 
     public void clear(){
-        predictions.clear();
+        destinations.clear();
         notifyDataSetChanged();
     }
 
     public void addItem(AutocompletePrediction prediction){
-        predictions.add(prediction);
-        notifyDataSetChanged();
-    }
-
-    public void addItems(List<AutocompletePrediction> predictions){
-        predictions.addAll(predictions);
+        destinations.add(RecentDestination.fromPrediction(prediction));
         notifyDataSetChanged();
     }
 
     @Override
     public int getItemCount() {
-        return predictions.size();
+        return destinations.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public void addOnItemclickedListener(IRecyclerViewItemClicked<RecentDestination> listener){
+        itemClickedListeners.add(listener);
+    }
+
+    public void removeOnItemClickedListener(IRecyclerViewItemClicked<RecentDestination> listener){
+        itemClickedListeners.remove(listener);
+    }
+
+    @Override
+    public void onItemClicked(int position) {
+        for(IRecyclerViewItemClicked<RecentDestination> listener : itemClickedListeners)
+            listener.onItemclicked(destinations.get(position));
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public TextView primaryTextView;
         public TextView secondaryTextView;
+        private IRecyclerIndexedViewItemClicked itemClickedListener;
 
-        public ViewHolder(View view){
+        public ViewHolder(View view, IRecyclerIndexedViewItemClicked onItemClickedListener){
             super(view);
+            view.setOnClickListener(this);
             primaryTextView = (TextView)view.findViewById(R.id.viewholder_placepredictions_primarytext);
             secondaryTextView = (TextView)view.findViewById(R.id.viewholder_placepredictions_secondarytext);
+            itemClickedListener = onItemClickedListener;
+        }
+
+        @Override
+        public void onClick(View view) {
+            if(itemClickedListener != null)
+                itemClickedListener.onItemClicked(getAdapterPosition());
         }
     }
 }
