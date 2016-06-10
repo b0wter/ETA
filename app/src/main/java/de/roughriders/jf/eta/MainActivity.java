@@ -2,6 +2,7 @@ package de.roughriders.jf.eta;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -12,8 +13,11 @@ import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -43,6 +47,9 @@ import com.google.maps.android.SphericalUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import de.roughriders.jf.eta.adapters.PredictionsAdapter;
+import de.roughriders.jf.eta.adapters.RecentDestinationsAdapter;
+import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
+import de.roughriders.jf.eta.models.RecentDestination;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -54,13 +61,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private Button startButton;
 
     private final int PICK_CONTACT = 0;
+    private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
     private final int SEARCH_RADIUS = 250;
 
     private String targetPhoneNumber;
     private String targetDestination;
+
     private RecyclerView predictionsView;
+    private CardView predictionsEmptyCardView;
+    private CardView predictionsCardView;
     private PredictionsAdapter predictionsAdapter;
-    private RecyclerView.LayoutManager predictionsLayoutManager;
+
+    private CardView recentDestinationsCardView;
+    private CardView recentDestinationsEmptyCardView;
+    private RecyclerView recentDestinationsView;
+    private RecentDestinationsAdapter recentDestinationsAdapter;
 
     private GoogleApiClient googleApiClient;
 
@@ -74,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         connectToApiClient();
         initDestinationEditText();
         initPredictionsView();
+        initRecentDestinationsView();
         targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
         startButton = (Button)findViewById(R.id.startButton);
 
@@ -89,12 +105,85 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         */
     }
 
+    @Override
+    public void onStart(){
+        super.onStart();
+        askOrCheckForLocationPermission();
+    }
+
+    private void askOrCheckForLocationPermission(){
+        if(wasLocationPermissionGranted())
+            return;
+        else
+            showLocationPermissionExplanationAndAsk();
+    }
+
+    private boolean wasLocationPermissionGranted(){
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+    private void showLocationPermissionExplanationAndAsk(){
+        new AlertDialog.Builder(this)
+                .setTitle("ETA")
+                .setMessage("The app needs to access your location in order to compute the time it takes to reach your destination. The app is useless if you do not grant this permission.")
+                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        askForLocationPermission();
+                    }
+                }).show();
+    }
+
+    private void askForLocationPermission(){
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_PERMISSION_KEY);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode){
+            case REQUEST_LOCATION_PERMISSION_KEY:{
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    // permission granted, yeah!
+                }
+                else {
+                    finish();
+                }
+            }
+        }
+    }
+
     private void initPredictionsView(){
+        predictionsCardView = (CardView)findViewById(R.id.sliding_layout_search_result_card);
+        predictionsEmptyCardView = (CardView)findViewById(R.id.sliding_layout_no_search_results_container);
         predictionsView = (RecyclerView)findViewById(R.id.predictionsList);
-        predictionsLayoutManager = new LinearLayoutManager(this);
+        RecyclerView.LayoutManager predictionsLayoutManager = new LinearLayoutManager(this);
         predictionsView.setLayoutManager(predictionsLayoutManager);
         predictionsAdapter = new PredictionsAdapter();
         predictionsView.setAdapter(predictionsAdapter);
+        predictionsAdapter.addOnItemclickedListener(new IRecyclerViewItemClicked<RecentDestination>() {
+            @Override
+            public void onItemclicked(RecentDestination item) {
+                Log.i(TAG, "A RecyclerView item has been clicked: " + item.toString());
+                onDestinationSelected(item);
+            }
+        });
+    }
+
+    private void initRecentDestinationsView(){
+        recentDestinationsCardView = (CardView)findViewById(R.id.sliding_layout_recent_destinations_card);
+        recentDestinationsEmptyCardView = (CardView)findViewById(R.id.sliding_layout_no_recent_destinations_card);
+        recentDestinationsView = (RecyclerView)findViewById(R.id.recentDestinations);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recentDestinationsView.setLayoutManager(layoutManager);
+        recentDestinationsAdapter = new RecentDestinationsAdapter(this);
+        recentDestinationsView.setAdapter(recentDestinationsAdapter);
+        if(recentDestinationsAdapter.size() > 0){
+            recentDestinationsCardView.setVisibility(View.VISIBLE);
+            recentDestinationsEmptyCardView.setVisibility(View.GONE);
+        }
+        else{
+            recentDestinationsCardView.setVisibility(View.GONE);
+            recentDestinationsEmptyCardView.setVisibility(View.VISIBLE);
+        }
     }
 
     private void initDestinationEditText(){
@@ -244,13 +333,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.i(TAG, "Status of the predictions:\r\n" + statusMessage);
                     Log.i(TAG, "Received " + autocompletePredictions.getCount() + " predictions.");
 
+                    findViewById(R.id.sliding_layout_search_result_card).setVisibility(View.VISIBLE);
                     predictionsAdapter.clear();
 
-                    for(int i = 0; i < autocompletePredictions.getCount(); i++){
-                        AutocompletePrediction prediction = autocompletePredictions.get(i);
-                        Log.i(TAG, prediction.getPrimaryText(null).toString() + " / " + prediction.getSecondaryText(null).toString());
-                        predictionsAdapter.addItem(prediction);
+                    if(autocompletePredictions.getCount() == 0) {
+                        predictionsCardView.setVisibility(View.GONE);
+                        predictionsEmptyCardView.setVisibility(View.VISIBLE);
                     }
+                    else {
+                        for (int i = 0; i < autocompletePredictions.getCount(); i++) {
+                            AutocompletePrediction prediction = autocompletePredictions.get(i);
+                            Log.i(TAG, prediction.getPrimaryText(null).toString() + " / " + prediction.getSecondaryText(null).toString());
+                            predictionsAdapter.addItem(prediction);
+                        }
+                        predictionsCardView.setVisibility(View.VISIBLE);
+                        predictionsEmptyCardView.setVisibility(View.GONE);
+                    }
+
+                    autocompletePredictions.release();
                 }
             });
         }
@@ -284,6 +384,18 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
+    private void onDestinationSelected(RecentDestination destination){
+        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+        destinationSearchBox.setText(destination.primaryText + " " + destination.secondaryText);
+        recentDestinationsAdapter.addItem(destination);
+        recentDestinationsCardView.setVisibility(View.VISIBLE);
+        recentDestinationsEmptyCardView.setVisibility(View.GONE);
+        RecentDestination.saveToSharedPreferences(recentDestinationsAdapter.getItems(), this);
+    }
+
+    public void clearSearchEditText_onClick(View view){
+        destinationSearchBox.setText("");
+    }
 
     public void startButton_Clicked(View view) {
 
@@ -326,10 +438,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      * @return
      */
     private boolean isValidStart(){
-        if(targetDestination.isEmpty())
+        if(targetDestination != null && targetDestination.isEmpty())
             return false;
-        if(targetPhoneNumber.isEmpty())
-            return  false;
+        if(targetPhoneNumber != null && targetPhoneNumber.isEmpty())
+            return false;
         return true;
     }
 }
