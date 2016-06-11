@@ -3,4 +3,10 @@
     <string name="action_settings">Settings</string>
     <string name="recent_destinations">Recent destinations</string>
     <string name="destination">Destination</string>
+    <string name="recent_trips">Recent trips</string>
+    <string name="send_arrival_notification">Send arrival notification</string>
+    <string name="send_almost_there_notification">Send almost there notification</string>
+    <string name="send_initial_notification">Send initial notification</string>
+    <string name="send_periodic_notifications">Send periodic notifications</string>
+    <string name="no_recent_trips">No recent trips</string>
 </resources>

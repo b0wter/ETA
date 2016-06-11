@@ -29,6 +29,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -48,6 +49,7 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import de.roughriders.jf.eta.adapters.PredictionsAdapter;
 import de.roughriders.jf.eta.adapters.RecentDestinationsAdapter;
+import de.roughriders.jf.eta.adapters.RecentTripsAdapter;
 import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
 import de.roughriders.jf.eta.models.RecentDestination;
 
@@ -72,10 +74,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private CardView predictionsCardView;
     private PredictionsAdapter predictionsAdapter;
 
+    private RecyclerView recentDestinationsView;
     private CardView recentDestinationsCardView;
     private CardView recentDestinationsEmptyCardView;
-    private RecyclerView recentDestinationsView;
     private RecentDestinationsAdapter recentDestinationsAdapter;
+
+    private RecyclerView recentTripsView;
+    private CardView recentTripsCardView;
+    private CardView noRecentTripsCardView;
+    private RecentTripsAdapter recentTripsAdapter;
 
     private GoogleApiClient googleApiClient;
 
@@ -90,6 +97,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initDestinationEditText();
         initPredictionsView();
         initRecentDestinationsView();
+        initRecentTripsView();
         targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
         startButton = (Button)findViewById(R.id.startButton);
 
@@ -184,6 +192,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         else{
             recentDestinationsCardView.setVisibility(View.GONE);
             recentDestinationsEmptyCardView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void initRecentTripsView(){
+        recentTripsView = (RecyclerView)findViewById(R.id.main_activity_recent_trips_list);
+        recentTripsAdapter = new RecentTripsAdapter(this);
+        noRecentTripsCardView = (CardView) findViewById(R.id.main_activity_no_recent_trips_card_view);
+        recentTripsCardView = (CardView)findViewById(R.id.main_activity_recent_trips_card_view);
+        recentTripsView.setLayoutManager(new LinearLayoutManager(this));
+        recentTripsView.setAdapter(recentTripsAdapter);
+        if(recentTripsAdapter.size() > 0){
+            recentTripsCardView.setVisibility(View.VISIBLE);
+            noRecentTripsCardView.setVisibility(View.GONE);
+        }
+        else{
+            recentTripsCardView.setVisibility(View.GONE);
+            noRecentTripsCardView.setVisibility(View.VISIBLE);
         }
     }
 
@@ -399,6 +424,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void startButton_Clicked(View view) {
+        updateFromUi();
+        if(!targetDestination.isEmpty() && !targetPhoneNumber.isEmpty())
+            startTrip();
+    }
+
+    public void startTrip(){
 
     }
 
