@@ -275,6 +275,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Intent intent = new Intent(this, PreparationActivity.class);
+            startActivity(intent);
             return true;
         }
 
@@ -448,7 +450,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Intent intent = new Intent(this, TripActivity.class);
         intent.putExtra(TripActivity.DESTINATION_EXTRA, targetDestination);
         intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneNumber);
-        intent.putExtra(TripActivity.NAME_EXTRA, currentContact.name);
+        if(currentContact != null)
+            intent.putExtra(TripActivity.NAME_EXTRA, currentContact.name);
         startActivity(intent);
     }
 
