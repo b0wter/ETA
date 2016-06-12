@@ -53,6 +53,8 @@
                         android:id="@+id/editTextDestination"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
                         android:backgroundTint="@android:color/transparent"
                         android:hint="@string/destination"
                         android:singleLine="true" />
@@ -88,6 +90,8 @@
                             android:layout_weight="1"
                             android:backgroundTint="@android:color/transparent"
                             android:hint="Phone"
+                            android:paddingLeft="10dp"
+                            android:paddingRight="10dp"
                             android:inputType="phone" />
 
                         <ImageButton
