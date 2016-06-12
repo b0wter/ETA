@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/colorPrimaryDark"
+    tools:context="de.roughriders.jf.eta.activities.PreparationActivity">
+
+    <LinearLayout
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ProgressBar
+            style="?android:attr/progressBarStyleHorizontal"
+            android:max="3"
+            android:progress="1"
+            android:foregroundTint="@color/colorAccent"
+            android:backgroundTint="@color/colorPrimaryDarkDark"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="1/3"
+                android:textSize="45sp"
+                android:textColor="@android:color/white"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/white"
+                android:id="@+id/trip_activity_destination_textview"
+                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="Querying Google Places API"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

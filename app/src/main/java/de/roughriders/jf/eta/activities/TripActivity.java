@@ -34,7 +34,7 @@ public class TripActivity extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         initControls();
         setIntentData();
-        setStatusBarColor();
+        //setStatusBarColor();
     }
 
     private void setStatusBarColor(){
@@ -104,7 +104,10 @@ public class TripActivity extends AppCompatActivity {
         destination = extras.getString(DESTINATION_EXTRA);
         destinationTextView.setText(destination);
         phoneNumber = extras.getString(PHONE_NUMBER_EXTRA);
-        name = extras.getString(NAME_EXTRA);
+        if(extras.containsKey(NAME_EXTRA))
+            name = extras.getString(NAME_EXTRA);
+        else
+            name = phoneNumber;
         nameTextView.setText(name);
     }
 

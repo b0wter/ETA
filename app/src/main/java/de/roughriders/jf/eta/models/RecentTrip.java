@@ -68,6 +68,12 @@ public class RecentTrip {
 
     @Override
     public String toString(){
+        if(date == null)
+            date = new Date(0);
+        if(destination == null)
+            destination = new RecentDestination("unknown", "unknown", "unknown");
+        if(contact == null)
+            contact = new Contact("unknown", "unknown");
         return String.valueOf(date.getTime()) + SERIALIZATION_FIELD_DELIMITER + destination.toString() + SERIALIZATION_FIELD_DELIMITER + contact.toString();
     }
 }

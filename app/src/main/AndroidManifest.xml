@@ -4,7 +4,7 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.SEND_SMS" />
 
     <application
         android:allowBackup="true"
@@ -30,15 +30,20 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".activities.TripActivity"
-            android:theme="@style/TripActivityTheme">
+            android:theme="@style/FullscreenActivityTheme"></activity>
 
+        <activity
+            android:name=".activities.PreparationActivity"
+            android:theme="@style/FullscreenActivityTheme"
+            >
         </activity>
+
     </application>
 
 </manifest>
