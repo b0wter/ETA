@@ -8,6 +8,7 @@ import android.preference.PreferenceManager;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -54,5 +55,19 @@ public class RecentTrip {
         }
         else
             return recentTrips;
+    }
+
+    public static void saveToSharedPreferences(List<RecentTrip> trips, Context context){
+        HashSet<String> set = new HashSet<>(trips.size());
+        for(RecentTrip trip : trips)
+            set.add(trip.toString());
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
+        editor.putStringSet(SHARED_PREFERENCES_KEY, set);
+        editor.apply();
+    }
+
+    @Override
+    public String toString(){
+        return String.valueOf(date.getTime()) + SERIALIZATION_FIELD_DELIMITER + destination.toString() + SERIALIZATION_FIELD_DELIMITER + contact.toString();
     }
 }

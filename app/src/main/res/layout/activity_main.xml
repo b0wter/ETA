@@ -146,6 +146,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:background="@android:color/white"
+                    android:layout_marginBottom="60dp"
                     android:padding="10dp">
 
                     <LinearLayout
@@ -163,6 +164,7 @@
 
                         <android.support.v7.widget.RecyclerView
                             android:id="@+id/main_activity_recent_trips_list"
+                            android:layout_marginBottom="10dp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content" />
 
@@ -204,6 +206,7 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:background="@color/colorAccent"
             android:text="Start"
+            android:onClick="startButton_Clicked"
             android:textColor="@android:color/primary_text_light" />
 
     </RelativeLayout>

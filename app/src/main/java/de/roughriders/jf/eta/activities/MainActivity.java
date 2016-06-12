@@ -1,4 +1,4 @@
-package de.roughriders.jf.eta;
+package de.roughriders.jf.eta.activities;
 
 import android.Manifest;
 import android.app.Activity;
@@ -47,11 +47,14 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.adapters.PredictionsAdapter;
 import de.roughriders.jf.eta.adapters.RecentDestinationsAdapter;
 import de.roughriders.jf.eta.adapters.RecentTripsAdapter;
 import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
+import de.roughriders.jf.eta.models.Contact;
 import de.roughriders.jf.eta.models.RecentDestination;
+import de.roughriders.jf.eta.models.RecentTrip;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -68,6 +71,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private String targetPhoneNumber;
     private String targetDestination;
+    private Contact currentContact;
+    private RecentDestination currentDestination;
 
     private RecyclerView predictionsView;
     private CardView predictionsEmptyCardView;
@@ -117,6 +122,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onStart(){
         super.onStart();
         askOrCheckForLocationPermission();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
     }
 
     private void askOrCheckForLocationPermission(){
@@ -323,6 +333,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             String name = cursor.getString(nameColumnIndex);
 
+            currentContact = new Contact(name, number);
+
             Log.i(TAG, "Contact selected: name: " + name + " - phone: " + number);
 
             targetPhoneNumber = number;
@@ -413,6 +425,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void onDestinationSelected(RecentDestination destination){
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
         destinationSearchBox.setText(destination.primaryText + " " + destination.secondaryText);
+        currentDestination = destination;
         recentDestinationsAdapter.addItem(destination);
         recentDestinationsCardView.setVisibility(View.VISIBLE);
         recentDestinationsEmptyCardView.setVisibility(View.GONE);
@@ -425,12 +438,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     public void startButton_Clicked(View view) {
         updateFromUi();
-        if(!targetDestination.isEmpty() && !targetPhoneNumber.isEmpty())
+        if(!targetDestination.isEmpty() && !targetPhoneNumber.isEmpty()) {
+            saveCurrentTrip();
             startTrip();
+        }
+        else
+            Toast.makeText(this, "You have to enter a phone number and a destination to start a trip.", Toast.LENGTH_SHORT).show();
+    }
+
+    private void saveCurrentTrip() {
+        recentTripsAdapter.addItem(new RecentTrip(System.currentTimeMillis(), currentDestination, currentContact));
+        RecentTrip.saveToSharedPreferences(recentTripsAdapter.getItems(), this);
     }
 
     public void startTrip(){
-
+        Intent intent = new Intent(this, TripActivity.class);
+        intent.putExtra(TripActivity.DESTINATION_EXTRA, targetDestination);
+        intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneNumber);
+        startActivity(intent);
     }
 
     /**

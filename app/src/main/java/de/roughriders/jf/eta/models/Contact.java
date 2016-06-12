@@ -20,4 +20,22 @@ public class Contact {
             throw new IllegalArgumentException("The string is not formatted correctly.");
         return new Contact(parts[0], parts[1]);
     }
+
+    @Override
+    public String toString(){
+        return name + SERIALIZATION_FIELD_DELIMITER + phone;
+    }
+
+    public String toNiceString(){
+        if(name.isEmpty())
+            if(phone.isEmpty())
+                return "<unknown>";
+            else
+                return phone;
+
+        if(phone.isEmpty())
+            return name;
+        else
+            return name + " (" + phone + ")";
+    }
 }
