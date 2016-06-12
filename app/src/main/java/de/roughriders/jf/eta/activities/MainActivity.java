@@ -97,25 +97,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
+        targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
+        startButton = (Button)findViewById(R.id.startButton);
+        initDestinationEditText();
         initSlidingPanel();
         connectToApiClient();
-        initDestinationEditText();
         initPredictionsView();
         initRecentDestinationsView();
         initRecentTripsView();
-        targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
-        startButton = (Button)findViewById(R.id.startButton);
-
-        /*
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-        */
     }
 
     @Override
@@ -264,6 +253,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void initSlidingPanel(){
         slidingPanel = (SlidingUpPanelLayout)findViewById(R.id.sliding_layout);
         slidingPanel.setTouchEnabled(false);
+        int[] coords = new int[2];
+        destinationSearchBox.getLocationInWindow(coords);
+        Log.i(TAG, String.valueOf(coords[0]));
+        Log.i(TAG, String.valueOf(coords[1]));
     }
 
     @Override
@@ -455,6 +448,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Intent intent = new Intent(this, TripActivity.class);
         intent.putExtra(TripActivity.DESTINATION_EXTRA, targetDestination);
         intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneNumber);
+        intent.putExtra(TripActivity.NAME_EXTRA, currentContact.name);
         startActivity(intent);
     }
 
