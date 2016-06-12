@@ -346,7 +346,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .enableAutoManage(this, this)
                 .addApi(LocationServices.API)
                 .addApi(Places.GEO_DATA_API)
-                .addApi(Places.PLACE_DETECTION_API).build();
+                .addApi(Places.PLACE_DETECTION_API)
+                .build();
     }
 
     @Override
