@@ -21,7 +21,6 @@ public class RecentDestination {
     public String placesId;
 
     public static final String SERIALIZATION_FIELD_DELIMITER = ";";
-    public static final String SERIALIZATION_ELEMENT_DELIMITER = "%";
     public static final String SHARED_PREFERENCES_KEY = "recentDestinations";
 
     private static final String TAG = "RecentDestination";
@@ -63,7 +62,7 @@ public class RecentDestination {
             set.add(destination.toString());
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putStringSet(SHARED_PREFERENCES_KEY, set);
-        editor.commit();
+        editor.apply();
         Log.i(TAG, "Recent destinations have been saved to the SharedPreferences");
     }
 

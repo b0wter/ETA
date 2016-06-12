@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.models.RecentTrip;
@@ -42,6 +43,8 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
     public int size(){
         return trips.size();
     }
+
+    public List<RecentTrip> getItems(){ return trips; }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {

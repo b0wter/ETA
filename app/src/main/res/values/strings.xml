@@ -9,4 +9,10 @@
     <string name="send_initial_notification">Send initial notification</string>
     <string name="send_periodic_notifications">Send periodic notifications</string>
     <string name="no_recent_trips">No recent trips</string>
+
+    <string name="title_activity_trip">TripActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="colon">:</string>
+    <string name="remaining_time">Remaining time</string>
 </resources>
