@@ -24,6 +24,10 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw" />
 
+        <service
+            android:name=".services.DistanceNotificationService"
+            android:exported="false"/>
+
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
@@ -36,7 +40,7 @@
 
         <activity
             android:name=".activities.TripActivity"
-            android:theme="@style/FullscreenActivityTheme"></activity>
+            android:theme="@style/FullscreenActivityTheme"/>
 
         <activity
             android:name=".activities.PreparationActivity"
