@@ -23,6 +23,12 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Places;
+import com.google.maps.DistanceMatrixApi;
+import com.google.maps.DistanceMatrixApiRequest;
+import com.google.maps.GeoApiContext;
+import com.google.maps.model.LatLng;
+
+import de.roughriders.jf.eta.R;
 
 /**
  * Created by b0wter on 6/12/16.
@@ -39,9 +45,12 @@ public class DistanceNotificationService extends IntentService implements Google
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
+    private GeoApiContext geoApiContext;
+    private Location currentLocation;
 
     public DistanceNotificationService(){
         super("DistanceNotificationService");
+        geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_debug_key));
     }
 
     @Override
@@ -104,7 +113,7 @@ public class DistanceNotificationService extends IntentService implements Google
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
-
+                    currentLocation = location;
                 }
             });
         } catch(SecurityException ex){
@@ -112,15 +121,15 @@ public class DistanceNotificationService extends IntentService implements Google
         }
     }
 
-    private Location getLastKnownLocation(){
-        int permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
-        if(permissionCheck == PackageManager.PERMISSION_GRANTED) {
-            Location location = LocationServices.FusedLocationApi.getLastLocation(apiClient);
-            return location;
-        }
-        else {
-            Toast.makeText(this, "The app is not allowed to access your location.", Toast.LENGTH_SHORT).show();
-            throw new IllegalStateException("App cannot run without location permission.");
-        }
+    private void requestTripDuration(Location location){
+        DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
+        request.origins(convertLocationToLatLng(location));
+        request.destinations(destination);
+
+    }
+
+    private LatLng convertLocationToLatLng(Location location){
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        return latLng;
     }
 }
