@@ -12,14 +12,18 @@ import java.util.Collection;
 import java.util.List;
 
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.helpers.IRecyclerIndexedViewItemClicked;
+import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
+import de.roughriders.jf.eta.models.RecentDestination;
 import de.roughriders.jf.eta.models.RecentTrip;
 
 /**
  * Created by b0wter on 6/11/16.
  */
-public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.ViewHolder> {
+public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.ViewHolder> implements IRecyclerIndexedViewItemClicked {
 
     ArrayList<RecentTrip> trips;
+    List<IRecyclerViewItemClicked<RecentTrip>> itemClickedListeners = new ArrayList<>();
 
     public RecentTripsAdapter(Context context){
         trips = RecentTrip.getFromSharedPreferences(context);
@@ -49,7 +53,7 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.viewholder_recenttrips, parent, false);
-        ViewHolder holder = new ViewHolder(view);
+        ViewHolder holder = new ViewHolder(view, this);
         return holder;
     }
 
@@ -65,15 +69,39 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
         return trips.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public void addOnItemclickedListener(IRecyclerViewItemClicked<RecentTrip> listener){
+        itemClickedListeners.add(listener);
+    }
+
+    public void removeOnItemClickedListener(IRecyclerViewItemClicked<RecentTrip> listener){
+        itemClickedListeners.remove(listener);
+    }
+
+    @Override
+    public void onItemClicked(int position) {
+        for(IRecyclerViewItemClicked<RecentTrip> listener : itemClickedListeners)
+            listener.onItemclicked(trips.get(position));
+    }
+
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public TextView primaryText;
         public TextView secondaryText;
+        private IRecyclerIndexedViewItemClicked itemClickedListener;
 
-        public ViewHolder(View view){
+        public ViewHolder(View view, IRecyclerIndexedViewItemClicked onItemClickedListener){
             super(view);
+            view.setOnClickListener(this);
+            itemView.setOnClickListener(this);
             primaryText = (TextView)view.findViewById(R.id.viewholder_recenttrips_primarytext);
             secondaryText = (TextView)view.findViewById(R.id.viewholder_recenttrips_secondarytext);
+            itemClickedListener = onItemClickedListener;
+        }
+
+        @Override
+        public void onClick(View view) {
+            if(itemClickedListener != null)
+                itemClickedListener.onItemClicked(getAdapterPosition());
         }
     }
 }

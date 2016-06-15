@@ -2,16 +2,20 @@ package de.roughriders.jf.eta.activities;
 
 import android.Manifest;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Window;
+import android.util.Log;
 import android.widget.TextView;
 
+import com.google.maps.model.Distance;
+
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.services.DistanceNotificationService;
 
 public class TripActivity extends AppCompatActivity {
 
@@ -27,6 +31,7 @@ public class TripActivity extends AppCompatActivity {
     public static String PHONE_NUMBER_EXTRA = "phoneExtra";
     public static String NAME_EXTRA = "nameExtra";
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
+    private static final String TAG = "TripActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,20 +39,26 @@ public class TripActivity extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         initControls();
         setIntentData();
-        //setStatusBarColor();
-    }
-
-    private void setStatusBarColor(){
-        Window window = getWindow();
-        window.setStatusBarColor(getColor(R.color.colorPrimaryDarkDark));
     }
 
     @Override
     public void onStart(){
         super.onStart();
         askOrCheckForSmsPermission();
+        startBackgroundService();
     }
 
+    private void startBackgroundService(){
+        Log.d(TAG, "starting background service");
+        Intent intent = new Intent(this, DistanceNotificationService.class);
+        intent.putExtra(DistanceNotificationService.COMMAND_EXTRA, DistanceNotificationService.COMMAND_START);
+        intent.putExtra(DistanceNotificationService.DESTINATION_EXTRA, destination);
+        intent.putExtra(DistanceNotificationService.PHONE_EXTRA, phoneNumber);
+        startService(intent);
+    }
+
+    // ----- SMS permission stuff -----
+    //
     private void askOrCheckForSmsPermission(){
         if(wasSmsPermissionGranted())
             return;
@@ -89,9 +100,8 @@ public class TripActivity extends AppCompatActivity {
             }
         }
     }
-
-
-
+    //
+    // -----------
 
     private void initControls(){
         destinationTextView = (TextView)findViewById(R.id.trip_activity_destination_textview);
@@ -110,6 +120,11 @@ public class TripActivity extends AppCompatActivity {
             name = phoneNumber;
         nameTextView.setText(name);
     }
+
+    private void startService(){
+        Intent serviceIntent = new Intent(this, DistanceNotificationService.class);
+    }
+
 
     @Override
     public void onBackPressed(){

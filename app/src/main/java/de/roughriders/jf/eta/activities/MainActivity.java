@@ -29,7 +29,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -40,7 +39,6 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
-import com.google.android.gms.location.places.GeoDataApi;
 import com.google.android.gms.location.places.Places;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -119,9 +117,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void askOrCheckForLocationPermission(){
-        if(wasLocationPermissionGranted())
-            return;
-        else
+        if(!wasLocationPermissionGranted())
             showLocationPermissionExplanationAndAsk();
     }
 
@@ -192,6 +188,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             recentDestinationsCardView.setVisibility(View.GONE);
             recentDestinationsEmptyCardView.setVisibility(View.VISIBLE);
         }
+        recentDestinationsAdapter.addOnItemclickedListener(new IRecyclerViewItemClicked<RecentDestination>() {
+            @Override
+            public void onItemclicked(RecentDestination item) {
+                Log.i(TAG, "A RecyclerView item has been selected: " + item.toString());
+                onDestinationSelected(item);
+            }
+        });
     }
 
     private void initRecentTripsView(){
@@ -209,6 +212,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             recentTripsCardView.setVisibility(View.GONE);
             noRecentTripsCardView.setVisibility(View.VISIBLE);
         }
+        recentTripsAdapter.addOnItemclickedListener(new IRecyclerViewItemClicked<RecentTrip>() {
+            @Override
+            public void onItemclicked(RecentTrip item) {
+                Log.i(TAG, "A RecyclerView item has been selected: " + item.toString());
+                currentContact = item.contact;
+                targetPhoneNumber = currentContact.phone;
+                targetPhoneBox.setText(targetPhoneNumber);
+                onDestinationSelected(item.destination);
+                /*
+                currentDestination = item.destination;
+                targetDestination = currentDestination.primaryText + " " + currentDestination.secondaryText;
+                destinationSearchBox.setText(targetDestination);
+                */
+            }
+        });
     }
 
     private void initDestinationEditText(){
@@ -500,4 +518,3 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         return true;
     }
 }
->>>>>>> 087e877f958ad110660ca81708ff9ef26bdf65cb

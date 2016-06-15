@@ -1,13 +1,15 @@
-package de.roughriders.jf.eta.helpers;
+package de.roughriders.jf.eta.services;
 
 import android.Manifest;
 import android.app.Dialog;
 import android.app.IntentService;
+import android.app.Service;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
@@ -28,12 +30,13 @@ import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.model.LatLng;
 
+import de.roughriders.jf.eta.BuildConfig;
 import de.roughriders.jf.eta.R;
 
 /**
  * Created by b0wter on 6/12/16.
  */
-public class DistanceNotificationService extends IntentService implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class DistanceNotificationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "DistanceNotification";
     public static final String COMMAND_EXTRA = "command";
@@ -49,26 +52,49 @@ public class DistanceNotificationService extends IntentService implements Google
     private Location currentLocation;
 
     public DistanceNotificationService(){
-        super("DistanceNotificationService");
-        geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_debug_key));
+        Log.d(TAG, "Instantiating new DistanceNotificationService");
+
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    public int onStartCommand(Intent intent, int flags, int startId){
+        Log.d(TAG, "received start command");
+        int result = super.onStartCommand(intent, flags, startId);
+
+        if(intent == null)
+            return result;
+
         Bundle extras = intent.getExtras();
         String command = extras.getString(COMMAND_EXTRA);
         switch(command){
             case COMMAND_START:
+                Log.d(TAG, "Service received COMMAND_START");
                 phoneNumber = extras.getString(PHONE_EXTRA);
                 destination = extras.getString(DESTINATION_EXTRA);
+                initService();
                 start();
                 break;
             case COMMAND_STOP:
+                Log.d(TAG, "Service received COMMAND_STOP");
                 stop();
                 break;
             default:
                 throw new IllegalArgumentException("Unknown command given: " + command);
         }
+        return result;
+    }
+
+    private void initService(){
+        if(BuildConfig.DEBUG)
+            geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_debug_key));
+        else
+            geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_production_key));
     }
 
     private void start(){
@@ -79,6 +105,7 @@ public class DistanceNotificationService extends IntentService implements Google
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .build();
+        apiClient.connect();
     }
 
     private void stop(){
@@ -89,7 +116,8 @@ public class DistanceNotificationService extends IntentService implements Google
     // GoogleAPIClient callback
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
+        Log.d(TAG, "Connection to Google Api Client established.");
+        startLocationUpdates();
     }
 
     // GoogleAPIClient callback
@@ -113,7 +141,9 @@ public class DistanceNotificationService extends IntentService implements Google
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
+                    Log.i(TAG, "Received location update: " + location.getLatitude() + "-" + location.getLongitude() + " " + location.getAccuracy());
                     currentLocation = location;
+                    requestTripDuration(location);
                 }
             });
         } catch(SecurityException ex){
@@ -121,11 +151,10 @@ public class DistanceNotificationService extends IntentService implements Google
         }
     }
 
-    private void requestTripDuration(Location location){
+    private void requestTripDuration(Location startLocation){
         DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
-        request.origins(convertLocationToLatLng(location));
+        request.origins(convertLocationToLatLng(startLocation));
         request.destinations(destination);
-
     }
 
     private LatLng convertLocationToLatLng(Location location){
