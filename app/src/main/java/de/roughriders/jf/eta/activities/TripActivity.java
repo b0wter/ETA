@@ -105,7 +105,7 @@ public class TripActivity extends AppCompatActivity {
 
     private void initControls(){
         destinationTextView = (TextView)findViewById(R.id.trip_activity_destination_textview);
-        remainingTimeTextView = (TextView)findViewById(R.id.trip_activity_minutes_remaining);
+        //remainingTimeTextView = (TextView)findViewById(R.id.trip_activity_minutes_remaining);
         nameTextView = (TextView)findViewById(R.id.trip_activity_name_textview);
     }
 
