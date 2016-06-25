@@ -28,6 +28,9 @@ import com.google.android.gms.location.places.Places;
 import com.google.maps.DistanceMatrixApi;
 import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
+import com.google.maps.PendingResult;
+import com.google.maps.model.DistanceMatrix;
+import com.google.maps.model.DistanceMatrixRow;
 import com.google.maps.model.LatLng;
 
 import de.roughriders.jf.eta.BuildConfig;
@@ -137,24 +140,41 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         LocationRequest request = new LocationRequest();
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         request.setInterval(5);
-        try {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
                     Log.i(TAG, "Received location update: " + location.getLatitude() + "-" + location.getLongitude() + " " + location.getAccuracy());
                     currentLocation = location;
-                    requestTripDuration(location);
+                    try {
+                        requestTripDuration(location);
+                    } catch(Exception ex){
+                        Log.e(TAG, "Error while trying to locate the user:\r\n" + ex.getMessage());
+                    }
                 }
             });
-        } catch(SecurityException ex){
-            Log.e(TAG, ex.getLocalizedMessage());
         }
     }
 
-    private void requestTripDuration(Location startLocation){
+    private void requestTripDuration(Location startLocation) throws Exception {
         DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
         request.origins(convertLocationToLatLng(startLocation));
         request.destinations(destination);
+        request.setCallback(new PendingResult.Callback<DistanceMatrix>() {
+            @Override
+            public void onResult(DistanceMatrix result) {
+                Log.i(TAG, "Distance matrix request was successfull.");
+                for(DistanceMatrixRow row : result.rows){
+                    //Log.i(TAG, row)
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable e) {
+                Log.e(TAG, e.getMessage());
+            }
+        });
+        request.await();
     }
 
     private LatLng convertLocationToLatLng(Location location){
