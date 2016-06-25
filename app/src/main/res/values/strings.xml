@@ -18,4 +18,5 @@
 
     <string name="api_debug_key">AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw"</string>
     <string name="api_production_key">AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is"</string>
+    <string name="contact">Contact</string>
 </resources>

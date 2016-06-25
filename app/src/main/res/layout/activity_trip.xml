@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:textColor="@color/colorAccent"
                 android:layout_height="wrap_content"
-                android:text="Destination"
+                android:text="@string/destination"
                 />
 
             <TextView
@@ -46,7 +46,7 @@
                 android:textColor="@color/colorAccent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Contact"
+                android:text="@string/contact"
                 />
 
             <TextView
@@ -61,59 +61,6 @@
 
         </LinearLayout>
 
-        <android.support.percent.PercentFrameLayout
-            android:layout_below="@id/trip_activity_destination_layout"
-            android:layout_centerInParent="true"
-            android:layout_margin="30dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <com.github.lzyzsd.circleprogress.ArcProgress
-                android:id="@+id/trip_activity_time_remaining"
-                app:layout_aspectRatio="100%"
-                app:layout_widthPercent="100%"
-                app:arc_bottom_text="Remaining"
-                app:arc_stroke_width="10dp"
-                app:arc_bottom_text_size="32sp"
-                app:arc_unfinished_color="@android:color/white"
-                app:arc_finished_color="@color/colorAccent"
-                app:arc_text_color="@android:color/white"
-                app:arc_suffix_text=""
-                app:arc_suffix_text_size="0dp"
-                app:arc_progress="66"
-                app:arc_text_size="0dp"
-                />
-
-        </android.support.percent.PercentFrameLayout>
-
-        <!--
-        <RelativeLayout
-            android:layout_centerInParent="true"
-            android:orientation="horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:layout_centerInParent="true"
-                android:id="@+id/trip_activity_minutes_remaining"
-                android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                android:textColor="@android:color/white"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:layout_toRightOf="@+id/trip_activity_minutes_remaining"
-                android:layout_alignParentTop="true"
-                android:text="minutes"
-                android:layout_marginLeft="5dp"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                android:textColor="@android:color/white"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content" />
-
-        </RelativeLayout>
-        -->
-
         <Button
             android:id="@+id/trip_activity_send_notification_button"
             android:layout_width="match_parent"
@@ -123,6 +70,66 @@
             android:background="@color/colorAccent"
             android:text="Send notification now"
             android:textColor="@android:color/primary_text_light" />
+
+        <RelativeLayout
+            android:layout_below="@id/trip_activity_destination_layout"
+            android:layout_above="@id/trip_activity_send_notification_button"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.percent.PercentFrameLayout
+                android:layout_centerInParent="true"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.github.lzyzsd.circleprogress.ArcProgress
+                    android:id="@+id/trip_activity_time_remaining"
+                    android:layout_gravity="center"
+                    app:layout_aspectRatio="100%"
+                    app:layout_widthPercent="100%"
+                    app:arc_bottom_text="Remaining"
+                    app:arc_stroke_width="10dp"
+                    app:arc_bottom_text_size="32sp"
+                    app:arc_unfinished_color="@android:color/white"
+                    app:arc_finished_color="@color/colorAccent"
+                    app:arc_text_color="@android:color/white"
+                    app:arc_suffix_text=""
+                    app:arc_suffix_text_size="0dp"
+                    app:arc_progress="66"
+                    app:arc_text_size="0dp"
+                    />
+
+            </android.support.percent.PercentFrameLayout>
+
+            <RelativeLayout
+                android:layout_centerInParent="true"
+                android:orientation="horizontal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_centerInParent="true"
+                    android:id="@+id/trip_activity_minutes_remaining"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
+                    android:textColor="@android:color/white"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:layout_toRightOf="@+id/trip_activity_minutes_remaining"
+                    android:layout_alignParentTop="true"
+                    android:text="minutes"
+                    android:layout_marginLeft="5dp"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@android:color/white"
+                    android:layout_width="200dp"
+                    android:layout_height="wrap_content" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+
 
     </RelativeLayout>
 
