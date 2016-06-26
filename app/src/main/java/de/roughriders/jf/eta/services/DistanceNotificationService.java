@@ -1,10 +1,10 @@
 package de.roughriders.jf.eta.services;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.app.IntentService;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -12,14 +12,10 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.ErrorDialogFragment;
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
@@ -30,11 +26,15 @@ import com.google.maps.DistanceMatrixApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.PendingResult;
 import com.google.maps.model.DistanceMatrix;
-import com.google.maps.model.DistanceMatrixRow;
+import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.LatLng;
 
-import de.roughriders.jf.eta.BuildConfig;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.activities.TripActivity;
+import de.roughriders.jf.eta.helpers.Converter;
 
 /**
  * Created by b0wter on 6/12/16.
@@ -47,12 +47,17 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String COMMAND_STOP = "stop";
     public static final String PHONE_EXTRA = "phoneExtra";
     public static final String DESTINATION_EXTRA = "destinationExtra";
-
+    private static final int NOTIFICATION_ID = 1;
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
     private GeoApiContext geoApiContext;
     private Location currentLocation;
+    private Notification.Builder notificationBuilder;
+
+    private long remainingDistanceInMeters;
+    private long remainingDuractionInSeconds;
+    private long lastupdateCheckTicks = -1;
 
     public DistanceNotificationService(){
         Log.d(TAG, "Instantiating new DistanceNotificationService");
@@ -74,17 +79,19 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             return result;
 
         Bundle extras = intent.getExtras();
+
+        // TODO: fix the intent the stop button of the notification send:
+        if(extras == null && intent.getAction().equals(COMMAND_STOP)) {
+            stop();
+            return result;
+        }
+
         String command = extras.getString(COMMAND_EXTRA);
         switch(command){
             case COMMAND_START:
-                Log.d(TAG, "Service received COMMAND_START");
-                phoneNumber = extras.getString(PHONE_EXTRA);
-                destination = extras.getString(DESTINATION_EXTRA);
-                initService();
-                start();
+                start(extras.getString(PHONE_EXTRA), extras.getString(DESTINATION_EXTRA));
                 break;
             case COMMAND_STOP:
-                Log.d(TAG, "Service received COMMAND_STOP");
                 stop();
                 break;
             default:
@@ -93,14 +100,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         return result;
     }
 
-    private void initService(){
-        if(BuildConfig.DEBUG)
-            geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_debug_key));
-        else
-            geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_production_key));
+    @Override
+    public void onDestroy(){
+        stop();
     }
 
-    private void start(){
+    private void initService(){
+        geoApiContext = new GeoApiContext().setApiKey(getString(R.string.api_server_key));
         apiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addApi(Places.GEO_DATA_API)
@@ -111,9 +117,19 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         apiClient.connect();
     }
 
+    private void start(String phone, String destination){
+        Log.d(TAG, "Service received COMMAND_START");
+        this.phoneNumber = phone;
+        this.destination = destination;
+        initService();
+        showNotification();
+    }
+
     private void stop(){
+        Log.d(TAG, "Service received COMMAND_STOP");
         if(apiClient != null)
             apiClient.disconnect();
+        removeNotification();
     }
 
     // GoogleAPIClient callback
@@ -141,9 +157,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
         request.setInterval(5);
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, new LocationListener() {
+            final LocationListener listener = new LocationListener() {
                 @Override
                 public void onLocationChanged(Location location) {
+                    LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
                     Log.i(TAG, "Received location update: " + location.getLatitude() + "-" + location.getLongitude() + " " + location.getAccuracy());
                     currentLocation = location;
                     try {
@@ -152,7 +169,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                         Log.e(TAG, "Error while trying to locate the user:\r\n" + ex.getMessage());
                     }
                 }
-            });
+            };
+            LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, listener);
         }
     }
 
@@ -164,9 +182,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             @Override
             public void onResult(DistanceMatrix result) {
                 Log.i(TAG, "Distance matrix request was successfull.");
-                for(DistanceMatrixRow row : result.rows){
-                    //Log.i(TAG, row)
-                }
+                // each row in the result represents one set of start/end points
+                // each row contains a set of several elements that represent one possible route to the target
+                // we dont send multiple start/end points so we can skip all but the first row
+                // additionally we are only interested in the fastest route so we only use the first element
+                DistanceMatrixElement element = result.rows[0].elements[0];
+                updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
+                //remainingDistanceInMeters = element.distance.inMeters;
+                //remainingDuractionInSeconds = element.duration.inSeconds;
             }
 
             @Override
@@ -177,8 +200,69 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         request.await();
     }
 
+    private void showNotification(){
+        Intent showTaskIntent = new Intent(getApplicationContext(), TripActivity.class);
+        showTaskIntent.setAction(Intent.ACTION_MAIN);
+        showTaskIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        showTaskIntent.addFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+
+        Intent callbackIntent = new Intent(COMMAND_STOP, null, this, DistanceNotificationService.class);
+        callbackIntent.putExtra(COMMAND_EXTRA, COMMAND_STOP);
+
+        PendingIntent serviceIntent = PendingIntent.getService(this, 1, callbackIntent, 0);
+
+        notificationBuilder = new Notification.Builder(getApplicationContext())
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText(getString(R.string.distancenotificationservice_is_initializing_notification_message))
+                .setSmallIcon(R.drawable.ic_directions_car_white_24dp)
+                .setWhen(System.currentTimeMillis())
+                .addAction(R.drawable.ic_stop_white_24dp, getString(R.string.stopCapital), serviceIntent)
+                .setOngoing(true);
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    private void updateNotification(){
+        String distance = Converter.formatDistance(remainingDistanceInMeters);
+        String duration = Converter.formatDuration(remainingDuractionInSeconds);
+
+        Date date = new Date(lastupdateCheckTicks);
+        String lastCheck = SimpleDateFormat.getTimeInstance().format(date);
+
+        String content = getString(R.string.distancenotificationservice_is_running_notification_message);
+        String longContent = getString(R.string.distancenotificationservice_is_running_notification_message_details);
+
+        content = content.replace("%%DISTANCE%%", distance).replace("%%DURATION%%", duration).replace("%%LASTCHECK%%", lastCheck);
+        longContent = longContent.replace("%%DISTANCE%%", distance).replace("%%DURATION%%", duration).replace("%%LASTCHECK%%", lastCheck);
+
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationBuilder.setContentText(content);
+        notificationBuilder.setStyle(new Notification.BigTextStyle().bigText(longContent));
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    private void removeNotification(){
+        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.cancel(NOTIFICATION_ID);
+    }
+
     private LatLng convertLocationToLatLng(Location location){
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         return latLng;
     }
+
+    private void onReachedDestination(){
+        //TODO: send arrival sms
+        // work is done, exit
+        stopSelf();
+    }
+
+    private void updateRemainingDistanceAndTime(long durationInSeconds, long distanceInMeters){
+        this.remainingDuractionInSeconds = durationInSeconds;
+        this.remainingDistanceInMeters = distanceInMeters;
+        this.lastupdateCheckTicks = System.currentTimeMillis();
+        updateNotification();
+    }
+
 }
