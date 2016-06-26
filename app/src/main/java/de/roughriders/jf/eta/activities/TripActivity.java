@@ -140,6 +140,7 @@ public class TripActivity extends AppCompatActivity {
                 .setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+                        stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
                         finish();
                     }
                 }).show();

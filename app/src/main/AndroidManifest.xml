@@ -19,10 +19,17 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is"/>
         -->
-        <!-- API Key for debugging -->
+        <!-- API Key for debugging (laptop)-->
+        <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw" />
+        -->
+
+        <!-- API Key for debugging (desktop)-->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0" />
 
         <service
             android:name=".services.DistanceNotificationService"

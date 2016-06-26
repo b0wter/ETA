@@ -17,6 +17,14 @@
     <string name="remaining_time">Remaining time</string>
 
     <string name="api_debug_key">AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw"</string>
+    <string name="api_debug_key_desktop">AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0</string>
     <string name="api_production_key">AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is"</string>
+    <string name="api_server_key">AIzaSyCCYBSRnOHJ2XWtvQYlE2igzwK_kqA_bls</string>
     <string name="contact">Contact</string>
+    <string name="stopCapital">Stop</string>
+    <string name="stop">stop</string>
+
+    <string name="distancenotificationservice_is_initializing_notification_message">Initializing the trip.</string>
+    <string name="distancenotificationservice_is_running_notification_message">Trip duration: %%DURATION%%, last updated on %%LASTCHECK%%.</string>
+    <string name="distancenotificationservice_is_running_notification_message_details">Remaining distance: %%DISTANCE%%. Duration: %%DURATION%%. Last updated on %%LASTCHECK%%.</string>
 </resources>
