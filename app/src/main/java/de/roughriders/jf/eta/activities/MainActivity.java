@@ -62,8 +62,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private EditText destinationSearchBox;
     private EditText targetPhoneBox;
     private Button startButton;
+    private boolean ignoreNextAddressBoxChange = false;
 
     private final int PICK_CONTACT = 0;
+    private final int PICK_ADDRESS = 1;
     private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
     private final int SEARCH_RADIUS = 250;
 
@@ -242,6 +244,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                // used to ignore setting the text from code
+                if(ignoreNextAddressBoxChange){
+                    ignoreNextAddressBoxChange = false;
+                    return;
+                }
                 String text = charSequence.toString();
                 Log.i(TAG, "Text in destionationSearchBox has changed, new content: " + text);
                 sendAutocompleteRequest(charSequence.toString());
@@ -293,7 +300,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            Intent intent = new Intent(this, PreparationActivity.class);
+            Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
         }
@@ -311,6 +318,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
+    public void selectContactForAddressButton(View view){
+        showSelectContactForAddressPicker();
+    }
+
+    private void showSelectContactForAddressPicker(){
+        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        intent.setType(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_TYPE);
+        startActivityForResult(intent, PICK_ADDRESS);
+    }
+
     public void selectContactButton_Clicked(View view){
        showSelectContactPicker();
     }
@@ -326,6 +343,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (reqCode) {
             case PICK_CONTACT:
                 processContactIntent(resultCode, data);
+                break;
+            case PICK_ADDRESS:
+                processAddresIntent(resultCode, data);
                 break;
         }
     }
@@ -352,6 +372,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             targetPhoneNumber = number;
 
+            updateUi();
+        }
+    }
+
+    private void processAddresIntent(int resultCode, Intent intent){
+        if(resultCode == Activity.RESULT_OK)
+        {
+            Uri uri = intent.getData();
+            String[] projection = { ContactsContract.CommonDataKinds.StructuredPostal.CITY, ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, ContactsContract.CommonDataKinds.StructuredPostal.STREET};
+
+            Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+            cursor.moveToFirst();
+
+            int streetColumnIndex = cursor.getColumnIndex(projection[2]);
+
+            String street = cursor.getString(streetColumnIndex);
+
+            currentDestination = new RecentDestination(street, "", "-1");
+            targetDestination = street;
             updateUi();
         }
     }
@@ -479,6 +518,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      */
     private void updateUi(){
         targetPhoneBox.setText(targetPhoneNumber);
+        ignoreNextAddressBoxChange = true;
         destinationSearchBox.setText(targetDestination);
 
         setControlEnable();

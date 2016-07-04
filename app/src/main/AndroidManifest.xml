@@ -19,21 +19,22 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is"/>
         -->
-        <!-- API Key for debugging (laptop)-->
+        <!-- API Key for debugging (laptop) -->
         <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw" />
         -->
 
-        <!-- API Key for debugging (desktop)-->
+
+        <!-- API Key for debugging (desktop) -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0" />
 
         <service
             android:name=".services.DistanceNotificationService"
-            android:exported="false"/>
+            android:exported="false" />
 
         <activity
             android:name=".activities.MainActivity"
@@ -41,20 +42,24 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.TripActivity"
-            android:theme="@style/FullscreenActivityTheme"/>
-
+            android:theme="@style/FullscreenActivityTheme" />
         <activity
             android:name=".activities.PreparationActivity"
-            android:theme="@style/FullscreenActivityTheme"
-            >
+            android:theme="@style/FullscreenActivityTheme"></activity>
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.roughriders.jf.eta.activities.MainActivity" />
         </activity>
-
     </application>
 
 </manifest>
