@@ -13,6 +13,7 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.telephony.SmsManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -302,6 +303,9 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         setNewLocationListener(interval);
     }
 
+    /**
+     * Checks if the user wants to send the app a sms.
+     */
     private void sendSmsIfNeeded(){
         if(isSmsNeeded())
             sendSms();
@@ -312,7 +316,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendSms(){
-        throw new Exception("Not implemented");
+        SmsManager sms = SmsManager.getDefault();
+        sms.sendTextMessage(phoneNumber, null, "I am on my way to you. As of " + new Date(lastupdateCheckTicks).toString() + " I am " + remainingDistanceInMeters/1000 + "km away. The trip will take ~" + remainingDuractionInSeconds / 60 + " minutes.", null, null);
     }
 
     private void showNotification(){
