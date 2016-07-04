@@ -17,7 +17,6 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -40,7 +39,7 @@ import de.roughriders.jf.eta.helpers.Converter;
 /**
  * Created by b0wter on 6/12/16.
  */
-public class DistanceNotificationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
+public class DistanceNotificationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener, PendingResult.Callback<DistanceMatrix> {
 
     private static final String TAG = "DistanceNotification";
     public static final String COMMAND_EXTRA = "command";
@@ -49,6 +48,9 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String PHONE_EXTRA = "phoneExtra";
     public static final String DESTINATION_EXTRA = "destinationExtra";
     private static final int NOTIFICATION_ID = 1;
+    private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
+    private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 50; // "size" of the target. used to check if the user is at his destination
+    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 10;         // maximum duration to decide whether the user has reached his destination or not
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
@@ -210,12 +212,21 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         request.await();
     }
 
+
     /**
      * Starts a new LocationListener. Requires that the remainingDurationInSeconds is up-to-date!
      */
     private void setNewLocationListener(){
         long nextUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
-        LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(nextUpdateInterval*1000).setFastestInterval(nextUpdateInterval*1000);
+        setNewLocationListener(nextUpdateInterval);
+    }
+
+    /**
+     * Starts a new LocationListener with the given tick rate.
+     * @param interval Interval for the LocationListener
+     */
+    private void setNewLocationListener(long interval){
+        LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval*1000).setFastestInterval(interval*1000);
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, this);
         else
@@ -230,7 +241,65 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onLocationChanged(Location location) {
         Log.i(TAG, "A location update has been recieved.");
         LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
+        computeRemainingDistanceAndTime(location);
+    }
 
+    /**
+     * Sends a distance matrix api request to get the remaining distance and duration.
+     * @param location
+     */
+    private void computeRemainingDistanceAndTime(Location location){
+        Log.i(TAG, "Setting callbacks for the distance matrix api");
+        DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
+        request.origins(convertLocationToLatLng(location));
+        request.destinations(destination);
+        request.setCallback(this);
+        try {
+            request.await();
+        } catch(Exception ex){
+            Log.e(TAG, "Encountered an error while awaiting the distance matrix api request: " + ex.getMessage());
+            setRetryLocationListener();
+        }
+    }
+
+    /**
+     * Callback for the distance matrix api requests.
+     * @param result
+     */
+    @Override
+    public void onResult(DistanceMatrix result) {
+        Log.i(TAG, "Received distance matrix api result.");
+        DistanceMatrixElement element = result.rows[0].elements[0];
+        updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
+
+        if(isSmsNeeded())
+            sendSms();
+
+        if(hasReachedDestination())
+            onReachedDestination();
+    }
+
+    private boolean hasReachedDestination(){
+        boolean distanceCheck = remainingDistanceInMeters < TARGET_DESTINATION_RADIUS_IN_METERS;
+        boolean durationCheck = remainingDuractionInSeconds < TARGET_DURATION_LOWER_LIMIT_IN_SECONDS;
+        return distanceCheck && durationCheck;
+    }
+
+    /**
+     * Callback for the distance matrix api requests.
+     * @param e
+     */
+    @Override
+    public void onFailure(Throwable e) {
+        Log.e(TAG, "A distance matrix api call has failed. Reason: " + e.getMessage());
+        setRetryLocationListener();
+    }
+
+    private void setRetryLocationListener(){
+        long defaultUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
+        long interval = Math.min(defaultUpdateInterval, MAX_API_RETRY_INTERVAL_IN_SECONDS);
+        Log.i(TAG, "Scheduling a new LocationListener with an interval of " + String.valueOf(interval) + " seconds.");
+        setNewLocationListener(interval);
     }
 
     private void sendSmsIfNeeded(){
@@ -243,7 +312,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendSms(){
-
+        throw new Exception("Not implemented");
     }
 
     private void showNotification(){
@@ -336,4 +405,5 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
     }
+
 }
