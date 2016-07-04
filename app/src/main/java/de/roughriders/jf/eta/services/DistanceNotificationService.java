@@ -17,6 +17,7 @@ import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.FusedLocationProviderApi;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -39,7 +40,7 @@ import de.roughriders.jf.eta.helpers.Converter;
 /**
  * Created by b0wter on 6/12/16.
  */
-public class DistanceNotificationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class DistanceNotificationService extends Service implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
     private static final String TAG = "DistanceNotification";
     public static final String COMMAND_EXTRA = "command";
@@ -136,7 +137,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Connection to Google Api Client established.");
-        startLocationUpdates();
+        startLocationUpdates(5);
     }
 
     // GoogleAPIClient callback
@@ -152,10 +153,15 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         stop();
     }
 
-    private void startLocationUpdates(){
+    /**
+     * Starts the first location update to compute the initial remaining distance and time.
+     * @param interval
+     */
+    private void startLocationUpdates(int interval){
         LocationRequest request = new LocationRequest();
         request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        request.setInterval(5);
+        request.setInterval(interval);
+        request.setFastestInterval(interval);
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             final LocationListener listener = new LocationListener() {
                 @Override
@@ -174,6 +180,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         }
     }
 
+    /**
+     * Computes the initial remaining distance and duration.
+     * @param startLocation
+     * @throws Exception
+     */
     private void requestTripDuration(Location startLocation) throws Exception {
         DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
         request.origins(convertLocationToLatLng(startLocation));
@@ -188,8 +199,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                 // additionally we are only interested in the fastest route so we only use the first element
                 DistanceMatrixElement element = result.rows[0].elements[0];
                 updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
-                //remainingDistanceInMeters = element.distance.inMeters;
-                //remainingDuractionInSeconds = element.duration.inSeconds;
+                setNewLocationListener();
             }
 
             @Override
@@ -198,6 +208,42 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             }
         });
         request.await();
+    }
+
+    /**
+     * Starts a new LocationListener. Requires that the remainingDurationInSeconds is up-to-date!
+     */
+    private void setNewLocationListener(){
+        long nextUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
+        LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(nextUpdateInterval*1000).setFastestInterval(nextUpdateInterval*1000);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+            LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, this);
+        else
+            Log.e(TAG, "Cannot use the FusedLocationApi because the permission was not granted!");
+    }
+
+    /**
+     * Callback function for the FusedLocationService.
+     * @param location
+     */
+    @Override
+    public void onLocationChanged(Location location) {
+        Log.i(TAG, "A location update has been recieved.");
+        LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
+
+    }
+
+    private void sendSmsIfNeeded(){
+        if(isSmsNeeded())
+            sendSms();
+    }
+
+    private boolean isSmsNeeded(){
+        return true;
+    }
+
+    private void sendSms(){
+
     }
 
     private void showNotification(){
@@ -258,11 +304,36 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         stopSelf();
     }
 
+    /**
+     * Computes the time for the desired location updates. We try to keep this as big as possible.
+     * The closer the user gets to his destination the more frequent the location updates;
+     * @param secondsRemaining Duration of the remaining trip in seconds.
+     * @return Update interval in seconds.
+     */
+    private long computeUpdateInterval(long secondsRemaining){
+        final long veryFastUpdateIntervalMax = 5*60;
+        final long fastUpdateIntervalMax = 10*60;
+        final long mediumUpdateIntervalMax = 20*60;
+
+        final long veryFastUpdateInterval = 30;
+        final long fastUpdateInterval = 60;
+        final long mediumUpdateInterval = 150; // cannot use 2.5*60 without cast
+        final long longUpdateInterval = 10*60;
+
+        if(secondsRemaining <= veryFastUpdateIntervalMax)
+            return veryFastUpdateInterval;
+        else if(secondsRemaining <= fastUpdateIntervalMax)
+            return fastUpdateInterval;
+        else if(secondsRemaining <= mediumUpdateIntervalMax)
+            return mediumUpdateInterval;
+        else
+            return longUpdateInterval;
+    }
+
     private void updateRemainingDistanceAndTime(long durationInSeconds, long distanceInMeters){
         this.remainingDuractionInSeconds = durationInSeconds;
         this.remainingDistanceInMeters = distanceInMeters;
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
     }
-
 }
