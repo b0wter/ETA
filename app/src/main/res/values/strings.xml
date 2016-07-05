@@ -29,6 +29,11 @@
     <string name="distancenotificationservice_is_running_notification_message_details">Remaining distance: %%DISTANCE%%. Duration: %%DURATION%%. Last updated on %%LASTCHECK%%.</string>
     <string name="title_activity_settings">Settings</string>
 
+    <!-- Strings for sms -->
+    <string name="arrivalSms">I have arrived at %%DESTINATION%%.</string>
+    <string name="startTripSms">I am now on my way to %%DESTINATION%%. I will probably arrive in %%DURATION%%.</string>
+    <string name="duringTripSms">I am still on my way to %%DESTINATION%%. I'll be there in about %%DURATION%%.</string>
+
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->

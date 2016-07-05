@@ -31,11 +31,13 @@ import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.LatLng;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
+import de.roughriders.jf.eta.helpers.TripSnapshot;
 
 /**
  * Created by b0wter on 6/12/16.
@@ -58,14 +60,17 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private GeoApiContext geoApiContext;
     private Location currentLocation;
     private Notification.Builder notificationBuilder;
+    private ArrayList<TripSnapshot> tripSnapshots;
 
+    private long currentUpdateInterval;
     private long remainingDistanceInMeters;
     private long remainingDuractionInSeconds;
     private long lastupdateCheckTicks = -1;
+    private boolean isFirstRequest = true;
 
     public DistanceNotificationService(){
         Log.d(TAG, "Instantiating new DistanceNotificationService");
-
+        tripSnapshots = new ArrayList<>();
     }
 
     @Nullable
@@ -140,7 +145,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.d(TAG, "Connection to Google Api Client established.");
-        //startLocationUpdates(5);
         setNewLocationListener(10);
     }
 
@@ -158,21 +162,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     /**
-     * Starts a new LocationListener. Requires that the remainingDurationInSeconds is up-to-date!
-     */
-    private void setNewLocationListener(){
-        long nextUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
-        setNewLocationListener(nextUpdateInterval);
-    }
-
-    /**
      * Starts a new LocationListener with the given tick rate.
      * @param interval Interval for the LocationListener
      */
     private void setNewLocationListener(long interval){
         Log.d(TAG, "setNewLocationListener");
+        currentUpdateInterval = interval;
         interval *= 1000;
-        LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval).setFastestInterval(interval - 50).setNumUpdates(10);
+        LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval).setFastestInterval(interval - 5);
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Log.i(TAG, "Setting new LocationListener with an interval of " + interval + "ms.");
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, this);
@@ -198,27 +195,21 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      * @param location
      */
     private void computeRemainingDistanceAndTime(Location location){
-        Log.i(TAG, "Setting callbacks for the distance matrix api");
+        Log.d(TAG, "computeRemainingDistanceAndTime");
         DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
         request.origins(convertLocationToLatLng(location));
         request.destinations(destination);
-        //request.setCallback(this);
         try{
+            Log.d(TAG, "Trying to send DistanceMatrixApi-request.");
             DistanceMatrix result = request.await();
-            DistanceMatrixElement element = result.rows[0].elements[0];
-            updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
+            Log.d(TAG, "Received result from DistanceMatrixApi");
+            //DistanceMatrixElement element = result.rows[0].elements[0];
+            //updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
+            onResult(result);
         } catch(Exception ex){
+            Log.e(TAG, "Unable to send DistanceMatrixApi-request, error:");
             Log.e(TAG, ex.getMessage());
         }
-        //request.awaitIgnoreError();
-        /*
-        try {
-            request.await();
-        } catch(Exception ex){
-            Log.e(TAG, "Encountered an error while awaiting the distance matrix api request: " + ex.getMessage());
-            setRetryLocationListener();
-        }
-            */
     }
 
     /**
@@ -231,13 +222,32 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         DistanceMatrixElement element = result.rows[0].elements[0];
         updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
 
-        if(isSmsNeeded())
-            sendSms();
+        if(isFirstRequest)
+        {
+            isFirstRequest = false;
+            sendStartTripSms();
+        }
+        else if(isSmsNeeded())
+            sendTripSms();
 
         if(hasReachedDestination())
             onReachedDestination();
         else
-            setNewLocationListener();
+            updateLocationListener();
+    }
+
+    /**
+     * Checks if the update interval needs to change and triggers the setting of a new LocationListener.
+     * @return
+     */
+    private void updateLocationListener(){
+        long neededInterval = computeUpdateInterval(remainingDuractionInSeconds);
+        Log.d(TAG, "Required update interval: " + neededInterval + "; current interval: " + currentUpdateInterval);
+        if(currentUpdateInterval != neededInterval){
+            Log.d(TAG, "Updating LocationListener interval");
+            LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
+            setNewLocationListener(neededInterval);
+        }
     }
 
     private boolean hasReachedDestination(){
@@ -268,17 +278,42 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      */
     private void sendSmsIfNeeded(){
         if(isSmsNeeded())
-            sendSms();
+            sendTripSms();
     }
 
     private boolean isSmsNeeded(){
         return true;
     }
 
-    private void sendSms(){
+    private void sendStartTripSms(){
+        Log.d(TAG, "sendStartTripSms");
+        String text = getString(R.string.startTripSms);
+        sendSms(text);
+    }
+
+    private void sendTripSms(){
+        Log.d(TAG, "sendTripSms");
+        String text = getString(R.string.duringTripSms);
+        sendSms(text);
+    }
+
+    private void sendArrivalSms(){
+        Log.d(TAG, "sendArrivalSsms");
+        String text = getString(R.string.arrivalSms);
+        sendSms(text);
+    }
+
+    private void sendSms(String text){
         Log.d(TAG, "sendSms");
+        text = fillSmsTemplate(text);
         SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, "I am on my way to you. As of " + new Date(lastupdateCheckTicks).toString() + " I am " + remainingDistanceInMeters/1000 + "km away. The trip will take ~" + remainingDuractionInSeconds / 60 + " minutes.", null, null);
+        sms.sendTextMessage(phoneNumber, null, text, null, null);
+    }
+
+    private String fillSmsTemplate(String text){
+        text = text.replace("%%DESTINATION%%", destination);
+        text = text.replace("%%DURATION%%", Converter.formatDuration(remainingDuractionInSeconds));
+        return text;
     }
 
     private void showNotification(){
@@ -336,6 +371,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private void onReachedDestination(){
         //TODO: send arrival sms
         // work is done, exit
+        sendArrivalSms();
         stopSelf();
     }
 
@@ -370,6 +406,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.remainingDistanceInMeters = distanceInMeters;
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
+        tripSnapshots.add(new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds));
     }
 
 }
