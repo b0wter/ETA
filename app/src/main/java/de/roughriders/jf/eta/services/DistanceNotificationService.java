@@ -50,6 +50,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String COMMAND_STOP = "stop";
     public static final String PHONE_EXTRA = "phoneExtra";
     public static final String DESTINATION_EXTRA = "destinationExtra";
+    public static boolean IsServiceRunning = false;
+
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
     private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 50; // "size" of the target. used to check if the user is at his destination
@@ -128,6 +130,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
 
     private void start(String phone, String destination){
         Log.d(TAG, "Service received COMMAND_START");
+        IsServiceRunning = true;
         this.phoneNumber = phone;
         this.destination = destination;
         initService();
@@ -139,6 +142,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         if(apiClient != null)
             apiClient.disconnect();
         removeNotification();
+        IsServiceRunning = false;
     }
 
     // GoogleAPIClient callback
@@ -407,6 +411,15 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
         tripSnapshots.add(new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds));
+        sendUpdateBroadcast(durationInSeconds, distanceInMeters);
+    }
+
+    private void sendUpdateBroadcast(long durationInSeconds, long distanceInMeters){
+        Log.d(TAG, "Sending broadcast: " + TripActivity.SERVICE_BROADCAST_ACTION);
+        Intent intent = new Intent(TripActivity.SERVICE_BROADCAST_ACTION);
+        intent.putExtra(TripActivity.SERVICE_UPDATE_TIME_KEY, durationInSeconds);
+        intent.putExtra(TripActivity.SERVICE_UPDATE_DISTANCE_KEY, distanceInMeters);
+        sendBroadcast(intent);
     }
 
 }

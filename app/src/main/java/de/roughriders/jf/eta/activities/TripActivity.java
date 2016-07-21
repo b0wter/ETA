@@ -1,9 +1,15 @@
 package de.roughriders.jf.eta.activities;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -12,6 +18,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
 
+import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.google.maps.model.Distance;
 
 import de.roughriders.jf.eta.R;
@@ -22,16 +29,21 @@ public class TripActivity extends AppCompatActivity {
     private String destination;
     private String phoneNumber;
     private String name;
+    private BroadcastReceiver serviceUpdateBroadcastReceiver;
 
     private TextView destinationTextView;
     private TextView remainingTimeTextView;
     private TextView nameTextView;
+    private ArcProgress progressBar;
 
     public static String DESTINATION_EXTRA = "destinationExtra";
     public static String PHONE_NUMBER_EXTRA = "phoneExtra";
     public static String NAME_EXTRA = "nameExtra";
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
     private static final String TAG = "TripActivity";
+    public static final String SERVICE_BROADCAST_ACTION = "DISTANCE_NOTIFICATION_SERVICE_UPDATE";
+    public static final String SERVICE_UPDATE_TIME_KEY = "DISTANCE_NOTIFICATION_SERVICE_REMAINING_TIME";
+    public static final String SERVICE_UPDATE_DISTANCE_KEY = "DISTANCE_NOTIFICATION_SERVICE_REMAINING_DISTANCE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +51,14 @@ public class TripActivity extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         initControls();
         setIntentData();
+        registerServiceBroadCastReceiver();
+    }
+
+    @Override
+    protected void onDestroy(){
+        unregisterServiceBroadCastReceiver();
+        stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
+        super.onDestroy();
     }
 
     @Override
@@ -49,6 +69,11 @@ public class TripActivity extends AppCompatActivity {
     }
 
     private void startBackgroundService(){
+        if(DistanceNotificationService.IsServiceRunning) {
+            Log.i(TAG, "The DistanceNotificationService is already running, no need to start it again.");
+            return;
+        }
+
         Log.d(TAG, "starting background service");
         Intent intent = new Intent(this, DistanceNotificationService.class);
         intent.putExtra(DistanceNotificationService.COMMAND_EXTRA, DistanceNotificationService.COMMAND_START);
@@ -105,8 +130,9 @@ public class TripActivity extends AppCompatActivity {
 
     private void initControls(){
         destinationTextView = (TextView)findViewById(R.id.trip_activity_destination_textview);
-        //remainingTimeTextView = (TextView)findViewById(R.id.trip_activity_minutes_remaining);
+        remainingTimeTextView = (TextView)findViewById(R.id.trip_activity_minutes_remaining);
         nameTextView = (TextView)findViewById(R.id.trip_activity_name_textview);
+        progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
     }
 
     private void setIntentData(){
@@ -119,12 +145,41 @@ public class TripActivity extends AppCompatActivity {
         else
             name = phoneNumber;
         nameTextView.setText(name);
+        progressBar.setMax(Integer.MAX_VALUE);
     }
 
-    private void startService(){
-        Intent serviceIntent = new Intent(this, DistanceNotificationService.class);
+    private void registerServiceBroadCastReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(SERVICE_BROADCAST_ACTION);
+        serviceUpdateBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Bundle extras = intent.getExtras();
+                long remainingTimeInSeconds = extras.getLong(SERVICE_UPDATE_TIME_KEY);
+                long remainingDistanceInMeters = extras.getLong(SERVICE_UPDATE_DISTANCE_KEY);
+
+                int time, distance;
+                if(remainingTimeInSeconds > (long)Integer.MAX_VALUE)
+                    time = Integer.MAX_VALUE;
+                else
+                    time = (int)remainingTimeInSeconds;
+                if(remainingDistanceInMeters > (long)Integer.MAX_VALUE)
+                    distance = Integer.MAX_VALUE;
+                else
+                    distance = (int)remainingDistanceInMeters;
+
+                updateUi(time, distance);
+            }
+        };
+        registerReceiver(serviceUpdateBroadcastReceiver, filter);
     }
 
+    private void unregisterServiceBroadCastReceiver(){
+        if(serviceUpdateBroadcastReceiver != null) {
+            unregisterReceiver(serviceUpdateBroadcastReceiver);
+            serviceUpdateBroadcastReceiver = null;
+        }
+    }
 
     @Override
     public void onBackPressed(){
@@ -146,4 +201,13 @@ public class TripActivity extends AppCompatActivity {
                 }).show();
     }
 
+    private void updateUi(int remainingTimeInSeconds, int remainingDistanceInMeters){
+        ArcProgress progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
+        if(progressBar.getMax() == Integer.MAX_VALUE)
+            progressBar.setMax(remainingTimeInSeconds);
+        progressBar.setProgress(remainingTimeInSeconds);
+
+        int minutes = remainingTimeInSeconds / 60;
+        remainingTimeTextView.setText(minutes + "");
+    }
 }

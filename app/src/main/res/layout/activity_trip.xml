@@ -97,7 +97,7 @@
                     app:arc_text_color="@android:color/white"
                     app:arc_suffix_text=""
                     app:arc_suffix_text_size="0dp"
-                    app:arc_progress="66"
+                    app:arc_progress="0"
                     app:arc_text_size="0dp"
                     />
 
