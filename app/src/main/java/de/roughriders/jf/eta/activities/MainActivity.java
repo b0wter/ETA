@@ -423,6 +423,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     String statusMessage = autocompletePredictions.getStatus().getStatusMessage();
                     Log.i(TAG, "Status of the predictions:\r\n" + statusMessage);
                     Log.i(TAG, "Received " + autocompletePredictions.getCount() + " predictions.");
+                    Log.i(TAG, statusMessage);
 
                     findViewById(R.id.sliding_layout_search_result_card).setVisibility(View.VISIBLE);
                     predictionsAdapter.clear();
