@@ -53,6 +53,7 @@ import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
 import de.roughriders.jf.eta.models.Contact;
 import de.roughriders.jf.eta.models.RecentDestination;
 import de.roughriders.jf.eta.models.RecentTrip;
+import de.roughriders.jf.eta.services.DistanceNotificationService;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void onStart(){
         super.onStart();
         askOrCheckForLocationPermission();
+        startTripActivityIfServiceRunning();
     }
 
     @Override
@@ -154,6 +156,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     finish();
                 }
             }
+        }
+    }
+
+    private void startTripActivityIfServiceRunning(){
+        if(DistanceNotificationService.IsServiceRunning) {
+            Log.i(TAG, "Background service is running, starting TripActivity");
+            Intent intent = new Intent(this, TripActivity.class);
+            startActivity(intent);
         }
     }
 
