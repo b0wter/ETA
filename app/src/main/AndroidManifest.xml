@@ -49,9 +49,11 @@
         <activity
             android:name=".activities.TripActivity"
             android:theme="@style/FullscreenActivityTheme" />
+
         <activity
             android:name=".activities.PreparationActivity"
-            android:theme="@style/FullscreenActivityTheme"></activity>
+            android:theme="@style/FullscreenActivityTheme"/>
+
         <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -60,6 +62,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.roughriders.jf.eta.activities.MainActivity" />
         </activity>
+
     </application>
 
 </manifest>

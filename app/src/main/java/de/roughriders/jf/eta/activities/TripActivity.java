@@ -57,7 +57,7 @@ public class TripActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterServiceBroadCastReceiver();
-        stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
+        //stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
         super.onDestroy();
     }
 
@@ -65,13 +65,29 @@ public class TripActivity extends AppCompatActivity {
     public void onStart(){
         super.onStart();
         askOrCheckForSmsPermission();
-        startBackgroundService();
+        boolean serviceWasAlreadyRunning = !startBackgroundService();
+        if(serviceWasAlreadyRunning)
+            tryUpdatingFromService();
     }
 
-    private void startBackgroundService(){
+    private void tryUpdatingFromService(){
+        if (DistanceNotificationService.IsServiceRunning) {
+            Log.d(TAG, "Trying to get an update from the service");
+            Intent intent = new Intent(DistanceNotificationService.REQUEST_STATUS_BROADCAST);
+            sendBroadcast(intent);
+        }
+        else
+            Log.d(TAG, "The DistanceNotificationService is not running.");
+    }
+
+    /**
+     * Starts the background service with a check if already running.
+     * @return true if the service was started, false if it was already running
+     */
+    private boolean startBackgroundService(){
         if(DistanceNotificationService.IsServiceRunning) {
             Log.i(TAG, "The DistanceNotificationService is already running, no need to start it again.");
-            return;
+            return false;
         }
 
         Log.d(TAG, "starting background service");
@@ -80,6 +96,7 @@ public class TripActivity extends AppCompatActivity {
         intent.putExtra(DistanceNotificationService.DESTINATION_EXTRA, destination);
         intent.putExtra(DistanceNotificationService.PHONE_EXTRA, phoneNumber);
         startService(intent);
+        return true;
     }
 
     // ----- SMS permission stuff -----
@@ -129,6 +146,7 @@ public class TripActivity extends AppCompatActivity {
     // -----------
 
     private void initControls(){
+        Log.d(TAG, "initControls");
         destinationTextView = (TextView)findViewById(R.id.trip_activity_destination_textview);
         remainingTimeTextView = (TextView)findViewById(R.id.trip_activity_minutes_remaining);
         nameTextView = (TextView)findViewById(R.id.trip_activity_name_textview);
@@ -208,6 +226,9 @@ public class TripActivity extends AppCompatActivity {
         progressBar.setProgress(remainingTimeInSeconds);
 
         int minutes = remainingTimeInSeconds / 60;
-        remainingTimeTextView.setText(minutes + "");
+        if(remainingTimeTextView != null)
+            remainingTimeTextView.setText(minutes + "");
+        else
+            Log.e(TAG, "For whatever reason the remainingTimeTextView is a null reference! Is the view present in the landscape and regular layout?");
     }
 }
