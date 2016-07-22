@@ -5,7 +5,10 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -50,7 +53,9 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String COMMAND_STOP = "stop";
     public static final String PHONE_EXTRA = "phoneExtra";
     public static final String DESTINATION_EXTRA = "destinationExtra";
+    public static final String REQUEST_STATUS_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_UPDATE";
     public static boolean IsServiceRunning = false;
+
 
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
@@ -69,6 +74,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private long remainingDuractionInSeconds;
     private long lastupdateCheckTicks = -1;
     private boolean isFirstRequest = true;
+    private BroadcastReceiver updateRequestBroadcastReceiver;
 
     public DistanceNotificationService(){
         Log.d(TAG, "Instantiating new DistanceNotificationService");
@@ -135,6 +141,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.destination = destination;
         initService();
         showNotification();
+        registerUpdateRequestBroadcastReceiver();
     }
 
     private void stop(){
@@ -142,6 +149,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         if(apiClient != null)
             apiClient.disconnect();
         removeNotification();
+        unregisterUpdateRequestBroadcastReceiver();
         IsServiceRunning = false;
     }
 
@@ -163,6 +171,25 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e(TAG, "Connection to the Google Api Client failed.");
         stop();
+    }
+
+    private void registerUpdateRequestBroadcastReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(REQUEST_STATUS_BROADCAST);
+        updateRequestBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                sendUpdateBroadcast(remainingDuractionInSeconds, remainingDistanceInMeters);
+            }
+        };
+        registerReceiver(updateRequestBroadcastReceiver, filter);
+    }
+
+    private void unregisterUpdateRequestBroadcastReceiver(){
+        if(updateRequestBroadcastReceiver != null) {
+            unregisterReceiver(updateRequestBroadcastReceiver);
+            updateRequestBroadcastReceiver = null;
+        }
     }
 
     /**
