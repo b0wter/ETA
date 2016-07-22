@@ -54,6 +54,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String PHONE_EXTRA = "phoneExtra";
     public static final String DESTINATION_EXTRA = "destinationExtra";
     public static final String REQUEST_STATUS_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_UPDATE";
+    public static final String SERVICE_STOPPED_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED";
+    public static final String SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED_SUCCESS";
     public static boolean IsServiceRunning = false;
 
 
@@ -145,11 +147,16 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void stop(){
+        stop(false);
+    }
+
+    private void stop(boolean destinationReached){
         Log.d(TAG, "Service received COMMAND_STOP");
         if(apiClient != null)
             apiClient.disconnect();
         removeNotification();
         unregisterUpdateRequestBroadcastReceiver();
+        sendServiceStoppedBroadcast(destinationReached);
         IsServiceRunning = false;
     }
 
@@ -403,6 +410,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         //TODO: send arrival sms
         // work is done, exit
         sendArrivalSms();
+        stop(true);
         stopSelf();
     }
 
@@ -449,4 +457,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         sendBroadcast(intent);
     }
 
+    private void sendServiceStoppedBroadcast(boolean destinationReached){
+        Log.d(TAG, "Sending broadcast: " + SERVICE_STOPPED_BROADCAST);
+        Intent intent = new Intent(SERVICE_STOPPED_BROADCAST);
+        intent.putExtra(SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA, destinationReached);
+        sendBroadcast(intent);
+    }
 }

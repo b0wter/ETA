@@ -30,6 +30,7 @@ public class TripActivity extends AppCompatActivity {
     private String phoneNumber;
     private String name;
     private BroadcastReceiver serviceUpdateBroadcastReceiver;
+    private BroadcastReceiver serviceStoppedBroadcastReceiver;
 
     private TextView destinationTextView;
     private TextView remainingTimeTextView;
@@ -51,12 +52,12 @@ public class TripActivity extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         initControls();
         setIntentData();
-        registerServiceBroadCastReceiver();
+        registerBroadcastReceivers();
     }
 
     @Override
     protected void onDestroy(){
-        unregisterServiceBroadCastReceiver();
+        unregisterBroadCastReceivers();
         //stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
         super.onDestroy();
     }
@@ -166,6 +167,11 @@ public class TripActivity extends AppCompatActivity {
         progressBar.setMax(Integer.MAX_VALUE);
     }
 
+    private void registerBroadcastReceivers(){
+        registerServiceBroadCastReceiver();
+        registerServiceStoppedBroadCastReceiver();
+    }
+
     private void registerServiceBroadCastReceiver(){
         IntentFilter filter = new IntentFilter();
         filter.addAction(SERVICE_BROADCAST_ACTION);
@@ -192,12 +198,33 @@ public class TripActivity extends AppCompatActivity {
         registerReceiver(serviceUpdateBroadcastReceiver, filter);
     }
 
-    private void unregisterServiceBroadCastReceiver(){
+    private void registerServiceStoppedBroadCastReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DistanceNotificationService.SERVICE_STOPPED_BROADCAST);
+        serviceStoppedBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.i(TAG, "Received a service stopped broadcast.");
+                Bundle extras = intent.getExtras();
+                boolean finishedSuccessfully = extras.getBoolean(DistanceNotificationService.SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA);
+                finish();
+            }
+        };
+        registerReceiver(serviceStoppedBroadcastReceiver, filter);
+    }
+
+    private void unregisterBroadCastReceivers(){
         if(serviceUpdateBroadcastReceiver != null) {
             unregisterReceiver(serviceUpdateBroadcastReceiver);
             serviceUpdateBroadcastReceiver = null;
         }
+
+        if(serviceStoppedBroadcastReceiver != null) {
+            unregisterReceiver(serviceStoppedBroadcastReceiver);
+            serviceStoppedBroadcastReceiver = null;
+        }
     }
+
 
     @Override
     public void onBackPressed(){
