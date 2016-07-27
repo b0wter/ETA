@@ -32,15 +32,17 @@ import com.google.maps.PendingResult;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.LatLng;
+import com.google.repacked.kotlin.collections.BooleanIterator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
-import de.roughriders.jf.eta.helpers.TripSnapshot;
+import de.roughriders.jf.eta.models.TripSnapshot;
 
 /**
  * Created by b0wter on 6/12/16.
@@ -61,15 +63,15 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
 
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
-    private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 50; // "size" of the target. used to check if the user is at his destination
+    private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 75; // "size" of the target. used to check if the user is at his destination
     private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 10;         // maximum duration to decide whether the user has reached his destination or not
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
     private GeoApiContext geoApiContext;
-    private Location currentLocation;
     private Notification.Builder notificationBuilder;
     private ArrayList<TripSnapshot> tripSnapshots;
+    private int currentReferenceSnapshotIndex = 0;
 
     private long currentUpdateInterval;
     private long remainingDistanceInMeters;
@@ -260,18 +262,130 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         DistanceMatrixElement element = result.rows[0].elements[0];
         updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
 
+        sendTripStartSmsIfNeeded();
+        sendTripSmsIfNeeded();
+
+        if(hasReachedDestination()) {
+            Log.i(TAG, "Destination has been reached.");
+            onReachedDestination();
+        }
+        else {
+            Log.i(TAG, "Destination has not yet been reached.");
+            updateLocationListener();
+        }
+    }
+
+    private void sendTripStartSmsIfNeeded(){
         if(isFirstRequest)
         {
             isFirstRequest = false;
             sendStartTripSms();
         }
-        else if(isSmsNeeded())
-            sendTripSms();
+    }
 
-        if(hasReachedDestination())
-            onReachedDestination();
-        else
-            updateLocationListener();
+    private void sendTripSmsIfNeeded(){
+        Log.d(TAG, "sendTripSmsIfNeeded");
+        if(tripSnapshots.size() < 2) {
+            Log.i(TAG, "there is only a single tripLocationSnapshot available, quitting function");
+            return;
+        }
+
+        if(hasArrivalTimeChanged())
+            sendArrivalTimeChangedSms();
+        /*
+        //TODO: needs some kind of defining an absolute minimum
+        TripSnapshot secondToLastSnapshot = tripSnapshots.get(tripSnapshots.size()-2);
+        TripSnapshot lastSnapshot = tripSnapshots.get(tripSnapshots.size()-1);
+        ArrayList<Boolean> testResults = new ArrayList<>();
+
+        // --- check for relative difference
+        testResults.add(isDistanceTimeRatioAcceptable(lastSnapshot, secondToLastSnapshot));
+        testResults.add(isAbsoluteDistanceAcceptable(lastSnapshot, secondToLastSnapshot));
+
+
+        if(boolArrayContainsTrue(testResults))
+            sendTripSms();
+        */
+    }
+
+    private boolean hasArrivalTimeChanged(){
+        Log.d(TAG, "hasArrivalTimeChanged");
+        float acceptableRelativeTimeDifference = 0.1f;
+        TripSnapshot reference = tripSnapshots.get(currentReferenceSnapshotIndex);
+        TripSnapshot current = tripSnapshots.get(tripSnapshots.size()-1);
+
+        long lowerLimit = reference.getEstimatedArrivalTime(1-acceptableRelativeTimeDifference);
+        long upperLimit = reference.getEstimatedArrivalTime(1+acceptableRelativeTimeDifference);
+
+        Log.i(TAG, "lowerLimit: " + lowerLimit + "; upperLimit: " + upperLimit + "; current: " + current.getEstimatedArrivalTime());
+
+        if(current.getEstimatedArrivalTime() < lowerLimit || current.getEstimatedArrivalTime() > upperLimit) {
+            currentReferenceSnapshotIndex = tripSnapshots.indexOf(current);
+            return true;
+        }
+        else{
+            return false;
+        }
+    }
+
+    /**
+     * Tests if the speed of the last two distance matrix requests is is roughly the same.
+     * The main reason for this test is to check if there a traffic congestions ahead.
+     * (this test gets weaker the shorter the remaining distance)
+     * @param lastSnapshot
+     * @param secondToLastSnapshot
+     * @return
+     */
+    private boolean isDistanceTimeRatioAcceptable(TripSnapshot lastSnapshot, TripSnapshot secondToLastSnapshot){
+        float tolerableDistanceTimeRatioDifference = 0.1f;
+        if( lastSnapshot.getDistanceTimeRatio() * (1+tolerableDistanceTimeRatioDifference) > secondToLastSnapshot.getDistanceTimeRatio() ||
+                lastSnapshot.getDistanceTimeRatio() * (1-tolerableDistanceTimeRatioDifference) < secondToLastSnapshot.getDistanceTimeRatio()) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Tests if the actual average speed between the last two snapshots is within acceptable range of the speed that was given by the distance matrix request.
+     * @param lastSnapshot
+     * @param secondToLastSnapShot
+     * @return
+     */
+    private boolean isAbsoluteDistanceAcceptable(TripSnapshot lastSnapshot, TripSnapshot secondToLastSnapShot){
+        float acceptableRelativeSpeedDifference = 0.2f;
+        float lastSpeed = lastSnapshot.getDistanceTimeRatio();
+        float secondToLastSpeed = secondToLastSnapShot.getDistanceTimeRatio();
+        float actualSpeed = ((float)secondToLastSnapShot.remainingDistanceInMeters - lastSnapshot.remainingDistanceInMeters)/((float)lastSnapshot.time - secondToLastSnapShot.time);
+
+        Log.i(TAG, "lastSpeed: " + lastSpeed + "; secondToLastSpeed: " + secondToLastSpeed + "; actualSpeed: " + actualSpeed);
+
+        boolean tooSlow = lastSpeed * (1-acceptableRelativeSpeedDifference) > actualSpeed;
+        boolean tooFast = lastSpeed * (1+acceptableRelativeSpeedDifference) < actualSpeed;
+
+        return !tooSlow && !tooFast;
+    }
+
+    /**
+     * Checks if a list of boolean contains at least one true value;
+     * @param bools
+     * @return
+     */
+    private boolean boolArrayContainsTrue(List<Boolean> bools) {
+        return boolArrayContainsValue(bools, true);
+    }
+
+    /**
+     * Tests an array of booleans for a given value.
+     * @param bools
+     * @param value
+     * @return
+     */
+    private boolean boolArrayContainsValue(List<Boolean> bools, boolean value){
+        for(boolean b : bools){
+            if(b == value)
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -288,6 +402,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         }
     }
 
+    /**
+     * Gets triggered once the destination reached requirements are met. Is responsible for stopping the service,
+     * clearing the notification, etc..
+     * @return
+     */
     private boolean hasReachedDestination(){
         boolean distanceCheck = remainingDistanceInMeters < TARGET_DESTINATION_RADIUS_IN_METERS;
         boolean durationCheck = remainingDuractionInSeconds < TARGET_DURATION_LOWER_LIMIT_IN_SECONDS;
@@ -304,23 +423,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         setRetryLocationListener();
     }
 
+    /**
+     * Sets the location listener again in case it failed.
+     */
     private void setRetryLocationListener(){
         long defaultUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
         long interval = Math.min(defaultUpdateInterval, MAX_API_RETRY_INTERVAL_IN_SECONDS);
         Log.i(TAG, "Scheduling a new LocationListener with an interval of " + String.valueOf(interval) + " seconds.");
         setNewLocationListener(interval);
-    }
-
-    /**
-     * Checks if the user wants to send the app a sms.
-     */
-    private void sendSmsIfNeeded(){
-        if(isSmsNeeded())
-            sendTripSms();
-    }
-
-    private boolean isSmsNeeded(){
-        return true;
     }
 
     private void sendStartTripSms(){
@@ -335,8 +445,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         sendSms(text);
     }
 
+    private void sendArrivalTimeChangedSms(){
+        Log.d(TAG, "sendArrivalTimeChangedSms");
+        String text = getString(R.string.arrivalTimeChangedSms);
+        sendSms(text);
+    }
+
     private void sendArrivalSms(){
-        Log.d(TAG, "sendArrivalSsms");
+        Log.d(TAG, "sendArrivalSms");
         String text = getString(R.string.arrivalSms);
         sendSms(text);
     }

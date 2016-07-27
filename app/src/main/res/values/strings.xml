@@ -33,7 +33,7 @@
     <string name="arrivalSms">I have arrived at %%DESTINATION%%.</string>
     <string name="startTripSms">I am now on my way to %%DESTINATION%%. I will probably arrive in %%DURATION%%.</string>
     <string name="duringTripSms">I am still on my way to %%DESTINATION%%. I\'ll be there in about %%DURATION%%.</string>
-
+    <string name="arrivalTimeChangedSms">My arrival time has changed. I\'ll be there in about %%DURATION%%.</string>
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->
