@@ -32,7 +32,6 @@ import com.google.maps.PendingResult;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.LatLng;
-import com.google.repacked.kotlin.collections.BooleanIterator;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -42,6 +41,9 @@ import java.util.List;
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
+import de.roughriders.jf.eta.helpers.TripDataSource;
+import de.roughriders.jf.eta.helpers.TripSnapshotDataSource;
+import de.roughriders.jf.eta.models.Trip;
 import de.roughriders.jf.eta.models.TripSnapshot;
 
 /**
@@ -72,6 +74,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private Notification.Builder notificationBuilder;
     private ArrayList<TripSnapshot> tripSnapshots;
     private int currentReferenceSnapshotIndex = 0;
+    private TripSnapshotDataSource tripSnapshotDataSource;
+    private Trip trip;
 
     private long currentUpdateInterval;
     private long remainingDistanceInMeters;
@@ -146,6 +150,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         initService();
         showNotification();
         registerUpdateRequestBroadcastReceiver();
+        initDatabaseAndDatabaseObjects();
     }
 
     private void stop(){
@@ -159,6 +164,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         removeNotification();
         unregisterUpdateRequestBroadcastReceiver();
         sendServiceStoppedBroadcast(destinationReached);
+        tripSnapshotDataSource.close();
         IsServiceRunning = false;
     }
 
@@ -180,6 +186,15 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.e(TAG, "Connection to the Google Api Client failed.");
         stop();
+    }
+
+    private void initDatabaseAndDatabaseObjects(){
+        tripSnapshotDataSource = new TripSnapshotDataSource(this);
+        tripSnapshotDataSource.open();
+        TripDataSource tripDataSource = new TripDataSource(this);
+        tripDataSource.open();
+        trip = tripDataSource.createTrip();
+        tripDataSource.close();
     }
 
     private void registerUpdateRequestBroadcastReceiver(){
@@ -260,7 +275,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onResult(DistanceMatrix result) {
         Log.i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
-        updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
+        updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
 
         sendTripStartSmsIfNeeded();
         sendTripSmsIfNeeded();
@@ -556,12 +571,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             return longUpdateInterval;
     }
 
-    private void updateRemainingDistanceAndTime(long durationInSeconds, long distanceInMeters){
+    private void updateRemainingDistanceAndTime(long durationInSeconds, long distanceInMeters, String position, String destination){
         this.remainingDuractionInSeconds = durationInSeconds;
         this.remainingDistanceInMeters = distanceInMeters;
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
-        tripSnapshots.add(new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds));
+        //tripSnapshots.add(new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination));
+        tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id));
         sendUpdateBroadcast(durationInSeconds, distanceInMeters);
     }
 
