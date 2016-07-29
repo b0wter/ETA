@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="66.853027mm"
+   height="80.109581mm"
+   viewBox="0 0 236.88081 283.85284"
+   id="svg4191"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="icon_v2.svg"
+   inkscape:export-filename="C:\Users\evil-\Desktop\eta_icon_v2.png"
+   inkscape:export-xdpi="324.67532"
+   inkscape:export-ydpi="324.67532">
+  <defs
+     id="defs4193">
+    <clipPath
+       clipPathUnits="userSpaceOnUse"
+       id="clipPath4798">
+      <path
+         style="fill:#691a99;fill-opacity:1;fill-rule:evenodd;stroke:#691a99;stroke-width:0;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 580.58253,639.88599 699.35801,921.43221 254.3515,862.07429 Z"
+         id="path4800"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="cccc" />
+    </clipPath>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8"
+     inkscape:cx="35.641556"
+     inkscape:cy="139.70794"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1920"
+     inkscape:window-height="1027"
+     inkscape:window-x="2552"
+     inkscape:window-y="203"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata4196">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-47.273871,-79.007214)">
+    <path
+       style="fill:#68efad;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 47.273871,362.86005 165.96683,79.007214 284.15467,360.33465 165.96683,300.23061 Z"
+       id="path4264-5"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="ccccc"
+       inkscape:export-xdpi="324.67532"
+       inkscape:export-ydpi="324.67532" />
+    <g
+       id="g4160"
+       transform="translate(-414.65743,-561.01332)"
+       inkscape:export-xdpi="324.67532"
+       inkscape:export-ydpi="324.67532"
+       clip-path="url(#clipPath4798)">
+      <path
+         style="fill:#4a148c;fill-opacity:1;stroke:#9b26af;stroke-width:20;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 673.86449,789.53979 a 89.491257,89.996338 0 0 1 -89.49126,89.99634 89.491257,89.996338 0 0 1 -89.49126,-89.99634 89.491257,89.996338 0 0 1 89.49126,-89.99633 89.491257,89.996338 0 0 1 89.49126,89.99633 z"
+         id="path4173-9" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4299"
+         d="m 586.39355,790.2276 54.04316,31.31473"
+         style="fill:none;fill-rule:evenodd;stroke:#9b26af;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4299-2"
+         d="M 586.40199,789.82049 620.29704,767.3526"
+         style="fill:none;fill-rule:evenodd;stroke:#9b26af;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+  </g>
+</svg>

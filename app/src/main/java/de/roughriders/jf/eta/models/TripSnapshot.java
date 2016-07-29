@@ -8,6 +8,7 @@ public class TripSnapshot {
     public long time;
     public long remainingDistanceInMeters;
     public long remainingDurationInSeconds;
+    public long estimatedArrivalTime;
     public String position;
     public String destination;
     private float distanceTimeRatio;
@@ -24,21 +25,6 @@ public class TripSnapshot {
         else
             this.distanceTimeRatio = 0;
         this.tripId = tripId;
-    }
-
-    public float getDistanceTimeRatio(){
-        return distanceTimeRatio;
-    }
-
-    /**
-     * Returns the time (unix, millisecond epoch) of arrival estimated for this snapshot.
-     * @return
-     */
-    public long getEstimatedArrivalTime(){
-        return getEstimatedArrivalTime(1);
-    }
-
-    public  long getEstimatedArrivalTime(float timeMod){
-        return time + (long)(timeMod*remainingDurationInSeconds*1000);
+        this.estimatedArrivalTime = time + remainingDurationInSeconds*1000;
     }
 }

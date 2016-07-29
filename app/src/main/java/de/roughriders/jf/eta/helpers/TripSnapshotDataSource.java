@@ -15,7 +15,7 @@ public class TripSnapshotDataSource {
 
     private SQLiteDatabase database;
     private SQLiteHelper dbHelper;
-    private String[] allColumns = { SQLiteHelper.SNAPSHOT_COLUMN_ID, SQLiteHelper.SNAPSHOT_COLUMN_DESTINATION, SQLiteHelper.SNAPSHOT_COLUMN_POSITION, SQLiteHelper.SNAPSHOT_COLUMN_TIMESTAMP, SQLiteHelper.SNAPSHOT_COLUMN_REMAINING_TIME, SQLiteHelper.SNAPSHOT_COLUMN_REMAINING_TIME, SQLiteHelper.SNAPSHOT_COLUMN_TRIP_ID};
+    private String[] allColumns = { SQLiteHelper.SNAPSHOT_COLUMN_ID, SQLiteHelper.SNAPSHOT_COLUMN_DESTINATION, SQLiteHelper.SNAPSHOT_COLUMN_POSITION, SQLiteHelper.SNAPSHOT_COLUMN_TIMESTAMP, SQLiteHelper.SNAPSHOT_COLUMN_REMAINING_TIME, SQLiteHelper.SNAPSHOT_COLUMN_REMAINING_DISTANCE, SQLiteHelper.SNAPSHOT_COLUMN_TRIP_ID};
 
     public TripSnapshotDataSource(Context context){
         dbHelper = new SQLiteHelper(context);
