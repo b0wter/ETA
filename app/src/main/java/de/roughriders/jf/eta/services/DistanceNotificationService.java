@@ -337,7 +337,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         else
             maxDifference = 30*60;
 
-        Log.i(TAG, "Comparing ariival times: arrivalTimeDifference=" + arrivalTimeDifference + ", maxDifference=" + maxDifference);
+        Log.i(TAG, "Comparing arrival times: arrivalTimeDifference=" + arrivalTimeDifference + ", maxDifference=" + maxDifference);
         return arrivalTimeDifference < maxDifference;
     }
 
