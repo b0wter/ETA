@@ -68,7 +68,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:background="@color/colorAccent"
-            android:text="Send notification now"
+            android:text="@string/send_notification_now"
             android:textColor="@android:color/primary_text_light" />
 
         <RelativeLayout
@@ -89,7 +89,7 @@
                     android:layout_gravity="center"
                     app:layout_aspectRatio="100%"
                     app:layout_widthPercent="100%"
-                    app:arc_bottom_text="Remaining"
+                    app:arc_bottom_text="@string/remainingMinutesText"
                     app:arc_stroke_width="10dp"
                     app:arc_bottom_text_size="32sp"
                     app:arc_unfinished_color="@android:color/white"
@@ -120,7 +120,7 @@
                 <TextView
                     android:layout_toRightOf="@+id/trip_activity_minutes_remaining"
                     android:layout_alignParentTop="true"
-                    android:text="minutes"
+                    android:text="@string/minutes"
                     android:layout_marginLeft="5dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:textColor="@android:color/white"

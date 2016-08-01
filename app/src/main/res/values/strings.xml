@@ -91,4 +91,8 @@
     <string name="api_debug_key_desktop" translatable="false">AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0</string>
     <string name="api_production_key" translatable="false">AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is"</string>
     <string name="api_server_key" translatable="false">AIzaSyCCYBSRnOHJ2XWtvQYlE2igzwK_kqA_bls</string>
+    <string name="phone">Phone</string>
+    <string name="send_notification_now">Send notification now</string>
+    <string name="minutes">minutes</string>
+    <string name="remainingMinutesText">Remaining</string>
 </resources>
