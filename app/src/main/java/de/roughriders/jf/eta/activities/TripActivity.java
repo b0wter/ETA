@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -116,7 +117,7 @@ public class TripActivity extends AppCompatActivity {
     private void showSmsPermissionExplanationAndAsk(){
         new AlertDialog.Builder(this)
                 .setTitle("ETA")
-                .setMessage("The app needs your permission to send sms messages to the recipient to tell him/her how long it takes you to arrive.")
+                .setMessage(getString(R.string.smsPermissionNotGranted))
                 .setCancelable(false)
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
@@ -127,7 +128,7 @@ public class TripActivity extends AppCompatActivity {
     }
 
     private void askForSmsPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, REQUEST_SMS_PERMISSION_KEY);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_SMS_PERMISSION_KEY);
     }
 
     @Override
@@ -234,7 +235,7 @@ public class TripActivity extends AppCompatActivity {
     private void showExitAlert(){
         new AlertDialog.Builder(this)
                 .setTitle("ETA")
-                .setMessage("If you go back the app will no longer monitor your position and send status updates. Do you want to go back?")
+                .setMessage(getString(R.string.exit_hint))
                 .setCancelable(false)
                 .setNegativeButton(getString(android.R.string.no), null)
                 .setPositiveButton(getString(android.R.string.yes), new DialogInterface.OnClickListener() {

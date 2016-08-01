@@ -41,6 +41,7 @@ import java.util.List;
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
+import de.roughriders.jf.eta.helpers.Logger;
 import de.roughriders.jf.eta.helpers.TripDataSource;
 import de.roughriders.jf.eta.helpers.TripSnapshotDataSource;
 import de.roughriders.jf.eta.models.Trip;
@@ -66,7 +67,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
     private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 75; // "size" of the target. used to check if the user is at his destination
-    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 10;         // maximum duration to decide whether the user has reached his destination or not
+    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 30;         // maximum duration to decide whether the user has reached his destination or not
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
@@ -144,7 +145,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void start(String phone, String destination){
-        Log.d(TAG, "Service received COMMAND_START");
+        Logger.getInstance().d(TAG, "Service received COMMAND_START");
         IsServiceRunning = true;
         this.phoneNumber = phone;
         this.destination = destination;
@@ -159,33 +160,34 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void stop(boolean destinationReached){
-        Log.d(TAG, "Service received COMMAND_STOP");
+        Logger.getInstance().d(TAG, "Service received COMMAND_STOP");
         if(apiClient != null)
             apiClient.disconnect();
         removeNotification();
         unregisterUpdateRequestBroadcastReceiver();
         sendServiceStoppedBroadcast(destinationReached);
         tripSnapshotDataSource.close();
+        Logger.getInstance().close();
         IsServiceRunning = false;
     }
 
     // GoogleAPIClient callback
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.d(TAG, "Connection to Google Api Client established.");
+        Logger.getInstance().d(TAG, "Connection to Google Api Client established.");
         setNewLocationListener(10);
     }
 
     // GoogleAPIClient callback
     @Override
     public void onConnectionSuspended(int i) {
-        Log.i(TAG, "GoogleApiClient connection suspended.");
+        Logger.getInstance().i(TAG, "GoogleApiClient connection suspended.");
     }
 
     // GoogleAPIClient callback
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "Connection to the Google Api Client failed.");
+        Logger.getInstance().e(TAG, "Connection to the Google Api Client failed.");
         stop();
     }
 
@@ -222,16 +224,16 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      * @param interval Interval for the LocationListener
      */
     private void setNewLocationListener(long interval){
-        Log.d(TAG, "setNewLocationListener");
+        Logger.getInstance().d(TAG, "setNewLocationListener");
         currentUpdateInterval = interval;
         interval *= 1000;
         LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval).setFastestInterval(interval - 5);
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Log.i(TAG, "Setting new LocationListener with an interval of " + interval + "ms.");
+            Logger.getInstance().i(TAG, "Setting new LocationListener with an interval of " + interval + "ms.");
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, this);
         }
         else
-            Log.e(TAG, "Cannot use the FusedLocationApi because the permission was not granted!");
+            Logger.getInstance().e(TAG, "Cannot use the FusedLocationApi because the permission was not granted!");
     }
 
     /**
@@ -240,7 +242,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      */
     @Override
     public void onLocationChanged(Location location) {
-        Log.i(TAG, "A location update has been received.");
+        Logger.getInstance().i(TAG, "A location update has been received.");
         computeRemainingDistanceAndTime(location);
     }
 
@@ -249,20 +251,21 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      * @param location
      */
     private void computeRemainingDistanceAndTime(Location location){
-        Log.d(TAG, "computeRemainingDistanceAndTime");
+        Logger.getInstance().d(TAG, "computeRemainingDistanceAndTime");
+        Logger.getInstance().i(TAG, "location (lat/long): " + location.getLatitude() + "-" + location.getLongitude() + "; accuracy: " + location.getAccuracy());
         DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
         request.origins(convertLocationToLatLng(location));
         request.destinations(destination);
         try{
-            Log.d(TAG, "Trying to send DistanceMatrixApi-request.");
+            Logger.getInstance().d(TAG, "Trying to send DistanceMatrixApi-request.");
             DistanceMatrix result = request.await();
-            Log.d(TAG, "Received result from DistanceMatrixApi");
+            Logger.getInstance().d(TAG, "Received result from DistanceMatrixApi");
             //DistanceMatrixElement element = result.rows[0].elements[0];
             //updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
             onResult(result);
         } catch(Exception ex){
-            Log.e(TAG, "Unable to send DistanceMatrixApi-request, error:");
-            Log.e(TAG, ex.getMessage());
+            Logger.getInstance().e(TAG, "Unable to send DistanceMatrixApi-request, error:");
+            Logger.getInstance().e(TAG, ex.getMessage());
         }
     }
 
@@ -272,7 +275,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      */
     @Override
     public void onResult(DistanceMatrix result) {
-        Log.i(TAG, "Received distance matrix api result.");
+        Logger.getInstance().i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
         updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
 
@@ -280,11 +283,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         sendTripSmsIfNeeded();
 
         if(hasReachedDestination()) {
-            Log.i(TAG, "Destination has been reached.");
+            Logger.getInstance().i(TAG, "Destination has been reached.");
             onReachedDestination();
         }
         else {
-            Log.i(TAG, "Destination has not yet been reached.");
+            Logger.getInstance().i(TAG, "Destination has not yet been reached.");
             updateLocationListener();
         }
     }
@@ -298,30 +301,44 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendTripSmsIfNeeded(){
-        Log.d(TAG, "sendTripSmsIfNeeded");
+        Logger.getInstance().d(TAG, "sendTripSmsIfNeeded");
         if(tripSnapshots.size() < 2) {
-            Log.i(TAG, "there is only a single tripLocationSnapshot available, quitting function");
+            Logger.getInstance().i(TAG, "there is only a single tripLocationSnapshot available, quitting function");
             return;
         }
 
-        if(hasArrivalTimeChanged())
+        if(hasArrivalTimeChanged()) {
             sendArrivalTimeChangedSms();
+            currentReferenceSnapshotIndex = tripSnapshots.size()-1;
+        }
     }
 
     private boolean hasArrivalTimeChanged(){
-        Log.d(TAG, "hasArrivalTimeChanged");
+        Logger.getInstance().d(TAG, "hasArrivalTimeChanged");
 
         TripSnapshot reference = tripSnapshots.get(currentReferenceSnapshotIndex);
         TripSnapshot last = tripSnapshots.get(tripSnapshots.size()-1);
         TripSnapshot secondToLast = tripSnapshots.get(tripSnapshots.size()-2);
 
-        return !isWithinBounds(reference, last) && !isWithinBounds(reference, secondToLast);
+        boolean lastSnapshotWithinBounds = isWithinBounds(reference, last);
+        Logger.getInstance().i(TAG, "lastSnapshotWithinBounds: " + ((Boolean)lastSnapshotWithinBounds).toString());
+        boolean secondToLastSnapshotWithinBounds = isWithinBounds(reference, secondToLast);
+        Logger.getInstance().i(TAG, "secondToLastSnapshotWithinBounds: " + ((Boolean)secondToLastSnapshotWithinBounds).toString());
+        boolean timeChanged = (!lastSnapshotWithinBounds) && (!secondToLastSnapshotWithinBounds);
+        Logger.getInstance().i(TAG, "timechanged: " + ((Boolean)timeChanged).toString());
+
+        return timeChanged;
     }
 
     private boolean isWithinBounds(TripSnapshot reference, TripSnapshot snapshot){
-        Log.d(TAG, "isWithinBounds");
-        long arrivalTimeDifference = (long)(Math.abs(reference.estimatedArrivalTime - snapshot.estimatedArrivalTime)/1000);
-        long remainingTime = snapshot.remainingDurationInSeconds; //TODO: do you really want to use the remaining time?
+        Logger.getInstance().d(TAG, "isWithinBounds");
+        Logger.getInstance().i(TAG, "reference.estimatedArrivalTime: " + new Date(reference.getEstimatedArrivalTime()).toString() + "; raw: " + reference.getEstimatedArrivalTime());
+        Logger.getInstance().i(TAG, "snapshot.estimatedArrivalTime: " + new Date(snapshot.getEstimatedArrivalTime()).toString() + "; raw: " + snapshot.getEstimatedArrivalTime());
+
+        long arrivalTimeDifference = (long)(Math.abs(reference.getEstimatedArrivalTime() - snapshot.getEstimatedArrivalTime())/1000);
+        long remainingTime = snapshot.getRemainingDurationInSeconds(); //TODO: do you really want to use the remaining time?
+
+        Logger.getInstance().i(TAG, "snapshot.remainingDurationInSeconds: " + snapshot.getRemainingDurationInSeconds());
 
         long maxDifference;
         if(remainingTime < 5*60)
@@ -337,7 +354,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         else
             maxDifference = 30*60;
 
-        Log.i(TAG, "Comparing arrival times: arrivalTimeDifference=" + arrivalTimeDifference + ", maxDifference=" + maxDifference);
+        Logger.getInstance().i(TAG, "Comparing arrival times: arrivalTimeDifference=" + arrivalTimeDifference + ", maxDifference=" + maxDifference);
         return arrivalTimeDifference < maxDifference;
     }
 
@@ -347,16 +364,16 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      */
     private void updateLocationListener(){
         long neededInterval = computeUpdateInterval(remainingDuractionInSeconds);
-        Log.d(TAG, "Required update interval: " + neededInterval + "; current interval: " + currentUpdateInterval);
+        Logger.getInstance().d(TAG, "Required update interval: " + neededInterval + "; current interval: " + currentUpdateInterval);
 
         if(isInitialLocationFix){
-            Log.d(TAG, "Service is handling its first requests and is allowed to set higher intervals for the location updates");
+            Logger.getInstance().d(TAG, "Service is handling its first requests and is allowed to set higher intervals for the location updates");
             currentUpdateInterval = Long.MAX_VALUE;
             isInitialLocationFix = false;
         }
 
         if(currentUpdateInterval > neededInterval){
-            Log.d(TAG, "Updating LocationListener interval");
+            Logger.getInstance().d(TAG, "Updating LocationListener interval");
             LocationServices.FusedLocationApi.removeLocationUpdates(apiClient, this);
             setNewLocationListener(neededInterval);
         }
@@ -379,7 +396,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      */
     @Override
     public void onFailure(Throwable e) {
-        Log.e(TAG, "A distance matrix api call has failed. Reason: " + e.getMessage());
+        Logger.getInstance().e(TAG, "A distance matrix api call has failed. Reason: " + e.getMessage());
         setRetryLocationListener();
     }
 
@@ -389,36 +406,36 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private void setRetryLocationListener(){
         long defaultUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
         long interval = Math.min(defaultUpdateInterval, MAX_API_RETRY_INTERVAL_IN_SECONDS);
-        Log.i(TAG, "Scheduling a new LocationListener with an interval of " + String.valueOf(interval) + " seconds.");
+        Logger.getInstance().i(TAG, "Scheduling a new LocationListener with an interval of " + String.valueOf(interval) + " seconds.");
         setNewLocationListener(interval);
     }
 
     private void sendStartTripSms(){
-        Log.d(TAG, "sendStartTripSms");
+        Logger.getInstance().d(TAG, "sendStartTripSms");
         String text = getString(R.string.startTripSms);
         sendSms(text);
     }
 
     private void sendTripSms(){
-        Log.d(TAG, "sendTripSms");
+        Logger.getInstance().d(TAG, "sendTripSms");
         String text = getString(R.string.duringTripSms);
         sendSms(text);
     }
 
     private void sendArrivalTimeChangedSms(){
-        Log.d(TAG, "sendArrivalTimeChangedSms");
+        Logger.getInstance().d(TAG, "sendArrivalTimeChangedSms");
         String text = getString(R.string.arrivalTimeChangedSms);
         sendSms(text);
     }
 
     private void sendArrivalSms(){
-        Log.d(TAG, "sendArrivalSms");
+        Logger.getInstance().d(TAG, "sendArrivalSms");
         String text = getString(R.string.arrivalSms);
         sendSms(text);
     }
 
     private void sendSms(String text){
-        Log.d(TAG, "sendSms");
+        Logger.getInstance().d(TAG, "sendSms");
         text = fillSmsTemplate(text);
         SmsManager sms = SmsManager.getDefault();
         sms.sendTextMessage(phoneNumber, null, text, null, null);
@@ -516,12 +533,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.remainingDistanceInMeters = distanceInMeters;
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
-        tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id));
+        TripSnapshot newSnapshot = new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id);
+        //tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id));
+        tripSnapshots.add(newSnapshot);
         sendUpdateBroadcast(durationInSeconds, distanceInMeters);
     }
 
     private void sendUpdateBroadcast(long durationInSeconds, long distanceInMeters){
-        Log.d(TAG, "Sending broadcast: " + TripActivity.SERVICE_BROADCAST_ACTION);
+        Logger.getInstance().d(TAG, "Sending broadcast: " + TripActivity.SERVICE_BROADCAST_ACTION);
         Intent intent = new Intent(TripActivity.SERVICE_BROADCAST_ACTION);
         intent.putExtra(TripActivity.SERVICE_UPDATE_TIME_KEY, durationInSeconds);
         intent.putExtra(TripActivity.SERVICE_UPDATE_DISTANCE_KEY, distanceInMeters);
@@ -529,7 +548,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendServiceStoppedBroadcast(boolean destinationReached){
-        Log.d(TAG, "Sending broadcast: " + SERVICE_STOPPED_BROADCAST);
+        Logger.getInstance().d(TAG, "Sending broadcast: " + SERVICE_STOPPED_BROADCAST);
         Intent intent = new Intent(SERVICE_STOPPED_BROADCAST);
         intent.putExtra(SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA, destinationReached);
         sendBroadcast(intent);
