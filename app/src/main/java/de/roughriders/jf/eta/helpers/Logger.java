@@ -1,6 +1,7 @@
 package de.roughriders.jf.eta.helpers;
 
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -34,10 +35,12 @@ public class Logger {
         dir.mkdirs();
         File file = new File(dir, fileName);
         try {
-            stream = new FileOutputStream(file);
+            stream = new FileOutputStream(file, true);
             isStreamOpen = true;
         } catch(FileNotFoundException ex){
             Log.e("Logger", "Could not open log file!");
+        } catch(NullPointerException ex){
+            Log.e("Logger", "Could not find file. Most liklely due to not grating the write external storage.");
         }
     }
 
@@ -78,11 +81,13 @@ public class Logger {
             stream.write(nice.getBytes());
         } catch(IOException ex){
             Log.e("Logger", ex.getMessage());
+        } catch(NullPointerException ex){
+            Log.e("Logger", "NullPointerException while trying to write to log file. Most likely the write external storage permission was not granted.");
         }
     }
 
     private static String getNiceString(String s, String tag, String level){
         Date date = new Date(System.currentTimeMillis());
-        return date.toString() + " [" + level.toUpperCase() + "] <" + tag + "> " + s;
+        return date.toString() + " [" + level.toUpperCase() + "] <" + tag + "> " + s + "\r\n";
     }
 }

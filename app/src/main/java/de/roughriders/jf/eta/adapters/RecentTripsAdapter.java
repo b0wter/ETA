@@ -30,8 +30,22 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
     }
 
     public void addItem(RecentTrip trip){
-        trips.add(trip);
-        notifyDataSetChanged();
+        if(!alreadyContainsTrip(trip)) {
+            trips.add(trip);
+            notifyDataSetChanged();
+        }
+    }
+
+    private boolean alreadyContainsTrip(RecentTrip trip){
+        for(RecentTrip t : trips){
+            if(     trip.contact.name.equals(t.contact.name) &&
+                    trip.contact.phone.equals(t.contact.phone) &&
+                    trip.destination.primaryText.equals(t.destination.primaryText) &&
+                    trip.destination.secondaryText.equals(t.destination.secondaryText) &&
+                    trip.destination.placesId.equals(t.destination.placesId))
+                return true;
+        }
+        return false;
     }
 
     public void addItems(Collection<RecentTrip> trips){

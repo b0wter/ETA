@@ -10,6 +10,7 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -113,6 +114,25 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
         askOrCheckForLocationPermission();
         startTripActivityIfServiceRunning();
+        showLocationHint();
+    }
+
+    private void showLocationHint() {
+        String locationProviders = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+
+        if (locationProviders == null || locationProviders.equals("")) {
+            new AlertDialog.Builder(this)
+                    .setTitle("ETA")
+                    .setMessage(getString(R.string.activate_gps_hint))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    })
+                    .show();
+        }
     }
 
     @Override
@@ -511,7 +531,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void saveCurrentTrip() {
-        recentTripsAdapter.addItem(new RecentTrip(System.currentTimeMillis(), currentDestination, currentContact));
+
+        RecentDestination destination;
+        Contact contact;
+
+        if(currentDestination == null)
+            destination = new RecentDestination(targetDestination, " ", " ");
+        else
+            destination = currentDestination;
+
+        if(currentContact == null)
+            contact = new Contact("", targetPhoneNumber);
+        else
+            contact = currentContact;
+
+        recentTripsAdapter.addItem(new RecentTrip(System.currentTimeMillis(), destination, contact));
         RecentTrip.saveToSharedPreferences(recentTripsAdapter.getItems(), this);
     }
 

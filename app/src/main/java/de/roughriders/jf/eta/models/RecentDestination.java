@@ -38,7 +38,7 @@ public class RecentDestination {
     public static RecentDestination fromString(String s){
         String[] parts = s.split(SERIALIZATION_FIELD_DELIMITER);
         if(parts.length != 3)
-            throw new IllegalArgumentException("The string contains more than three parts.");
+            throw new IllegalArgumentException("The string contains more than three parts (delimiter: " + SERIALIZATION_FIELD_DELIMITER + ". String: " + s);
         return new RecentDestination(parts[0], parts[1], parts[2]);
     }
 
