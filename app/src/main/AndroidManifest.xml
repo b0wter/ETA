@@ -53,10 +53,6 @@
             android:theme="@style/FullscreenActivityTheme" />
 
         <activity
-            android:name=".activities.PreparationActivity"
-            android:theme="@style/FullscreenActivityTheme"/>
-
-        <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".activities.MainActivity">
