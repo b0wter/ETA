@@ -118,21 +118,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void showLocationHint() {
-        String locationProviders = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
 
-        if (locationProviders == null || locationProviders.equals("")) {
-            new AlertDialog.Builder(this)
-                    .setTitle("ETA")
-                    .setMessage(getString(R.string.activate_gps_hint))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
 
-                        }
-                    })
-                    .show();
-        }
     }
 
     @Override
@@ -522,12 +509,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     public void startButton_Clicked(View view) {
         updateFromUi();
-        if(!targetDestination.isEmpty() && !targetPhoneNumber.isEmpty()) {
-            saveCurrentTrip();
-            startTrip();
-        }
-        else
+        if(targetDestination.isEmpty() || !targetPhoneNumber.isEmpty()) {
             Toast.makeText(this, "You have to enter a phone number and a destination to start a trip.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if(!isGPSEnabled()) {
+            showGPSHint();
+            return;
+        }
+
+        saveCurrentTrip();
+        startTrip();
+    }
+
+    private void showGPSHint(){
+        new AlertDialog.Builder(this)
+            .setTitle("ETA")
+            .setMessage(getString(R.string.activate_gps_hint))
+            .setCancelable(false)
+            .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+
+                }
+            })
+            .show();
+    }
+
+    private boolean isGPSEnabled(){
+        String locationProviders = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
+        return locationProviders == null || locationProviders.equals("");
     }
 
     private void saveCurrentTrip() {
