@@ -99,7 +99,7 @@
                             android:layout_toStartOf="@+id/selectContactButton"
                             android:layout_weight="1"
                             android:backgroundTint="@android:color/transparent"
-                            android:hint="Phone"
+                            android:hint="@string/phone"
                             android:paddingLeft="10dp"
                             android:paddingRight="10dp"
                             android:inputType="phone" />
