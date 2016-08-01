@@ -114,12 +114,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
         askOrCheckForLocationPermission();
         startTripActivityIfServiceRunning();
-        showLocationHint();
-    }
-
-    private void showLocationHint() {
-
-
     }
 
     @Override
@@ -321,7 +315,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             startActivity(intent);
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

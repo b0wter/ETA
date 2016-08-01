@@ -36,14 +36,11 @@ import com.google.maps.model.LatLng;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
 import de.roughriders.jf.eta.helpers.Logger;
-import de.roughriders.jf.eta.helpers.TripDataSource;
-import de.roughriders.jf.eta.helpers.TripSnapshotDataSource;
 import de.roughriders.jf.eta.models.Trip;
 import de.roughriders.jf.eta.models.TripSnapshot;
 
@@ -75,7 +72,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private Notification.Builder notificationBuilder;
     private ArrayList<TripSnapshot> tripSnapshots;
     private int currentReferenceSnapshotIndex = 0;
-    private TripSnapshotDataSource tripSnapshotDataSource;
     private Trip trip;
 
     private long currentUpdateInterval;
@@ -152,7 +148,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         initService();
         showNotification();
         registerUpdateRequestBroadcastReceiver();
-        initDatabaseAndDatabaseObjects();
     }
 
     private void stop(){
@@ -166,7 +161,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         removeNotification();
         unregisterUpdateRequestBroadcastReceiver();
         sendServiceStoppedBroadcast(destinationReached);
-        tripSnapshotDataSource.close();
         Logger.getInstance().close();
         IsServiceRunning = false;
     }
@@ -189,15 +183,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Logger.getInstance().e(TAG, "Connection to the Google Api Client failed.");
         stop();
-    }
-
-    private void initDatabaseAndDatabaseObjects(){
-        tripSnapshotDataSource = new TripSnapshotDataSource(this);
-        tripSnapshotDataSource.open();
-        TripDataSource tripDataSource = new TripDataSource(this);
-        tripDataSource.open();
-        trip = tripDataSource.createTrip();
-        tripDataSource.close();
     }
 
     private void registerUpdateRequestBroadcastReceiver(){
