@@ -518,7 +518,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.remainingDistanceInMeters = distanceInMeters;
         this.lastupdateCheckTicks = System.currentTimeMillis();
         updateNotification();
-        TripSnapshot newSnapshot = new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id);
+        TripSnapshot newSnapshot = new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination);
         //tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id));
         tripSnapshots.add(newSnapshot);
         sendUpdateBroadcast(durationInSeconds, distanceInMeters);
