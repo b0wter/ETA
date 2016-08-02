@@ -9,14 +9,6 @@ public class TripSnapshot {
 
     private static final String TAG  = "TripSnapshot";
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
     public long getTime() {
         return time;
     }
@@ -71,36 +63,19 @@ public class TripSnapshot {
         this.destination = destination;
     }
 
-    public long getTripId() {
-        return tripId;
-    }
-
-    public void setTripId(long tripId) {
-        Logger.getInstance().i(TAG, "Changing tripId to " + tripId);
-        this.tripId = tripId;
-    }
-
-    private long id;
     private long time;
     private long remainingDistanceInMeters;
     private long remainingDurationInSeconds;
     private long estimatedArrivalTime;
     private String position;
     private String destination;
-    private long tripId;
 
-    public TripSnapshot(long id, long time, long remainingDistanceInMeters, long remainingDurationInSeconds, String position, String destination, long tripId){
-        this.id = id;
+    public TripSnapshot(long time, long remainingDistanceInMeters, long remainingDurationInSeconds, String position, String destination){
         this.time = time;
         this.remainingDistanceInMeters = remainingDistanceInMeters;
         this.remainingDurationInSeconds = remainingDurationInSeconds;
         this.position = position;
         this.destination = destination;
-        this.tripId = tripId;
         this.estimatedArrivalTime = time + remainingDurationInSeconds*1000;
-    }
-
-    public TripSnapshot(long time, long remainingDistanceInMeters, long remainingDurationInSeconds, String position, String destination, long tripId) {
-        this(-1, time, remainingDistanceInMeters, remainingDurationInSeconds, position, destination, tripId);
     }
 }

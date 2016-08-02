@@ -2,7 +2,7 @@
 <resources>
     <string name="action_settings">Einstellungen</string>
     <string name="activate_gps_hint">Bitte aktivieren Sie die Ortungsdienste. Ohne diese kann die App nicht korrekt arbeiten und keine Ankunftszeiten verschicken.</string>
-    <string name="arrivalSms" translatable="false">Ich bin angekommen, meine aktuelle Position ist %%DESTINATION%%.</string>
+    <string name="arrivalSms">Ich bin angekommen, meine aktuelle Position ist %%DESTINATION%%.</string>
     <string name="arrivalTimeChangedSms">Meine Ankunftszeit hat sich geändert. Ich werde in %%DURATION%% da sein.</string>
     <string name="contact">Kontakt</string>
     <string name="destination">Ziel</string>
@@ -23,7 +23,6 @@
     <string name="startTripSms">Ich bin jetzt auf dem Weg zu %%DESTINATION%%. Ich werde vermutlich in %%DURATION%% da sein.</string>
     <string name="stop">stop</string>
     <string name="stopCapital">Stop</string>
-    <string name="title_activity_settings">Einstellungen</string>
     <string name="title_activity_trip">Fahrt</string>
     <string name="phone">Nummer</string>
     <string name="send_notification_now">Sende Benachrichtigung.</string>

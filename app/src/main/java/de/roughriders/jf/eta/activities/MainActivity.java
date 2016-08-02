@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -51,6 +49,7 @@ import de.roughriders.jf.eta.adapters.PredictionsAdapter;
 import de.roughriders.jf.eta.adapters.RecentDestinationsAdapter;
 import de.roughriders.jf.eta.adapters.RecentTripsAdapter;
 import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
+import de.roughriders.jf.eta.helpers.Logger;
 import de.roughriders.jf.eta.models.Contact;
 import de.roughriders.jf.eta.models.RecentDestination;
 import de.roughriders.jf.eta.models.RecentTrip;
@@ -71,8 +70,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
     private final int SEARCH_RADIUS = 250;
 
-    private String targetPhoneNumber;
-    private String targetDestination;
+    //private String targetPhoneNumber;
+    //private String targetDestination;
     private Contact currentContact;
     private RecentDestination currentDestination;
 
@@ -230,14 +229,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onItemclicked(RecentTrip item) {
                 Log.i(TAG, "A RecyclerView item has been selected: " + item.toString());
                 currentContact = item.contact;
-                targetPhoneNumber = currentContact.phone;
-                targetPhoneBox.setText(targetPhoneNumber);
+                targetPhoneBox.setText(currentContact.phone);
                 onDestinationSelected(item.destination);
-                /*
-                currentDestination = item.destination;
-                targetDestination = currentDestination.primaryText + " " + currentDestination.secondaryText;
-                destinationSearchBox.setText(targetDestination);
-                */
             }
         });
     }
@@ -310,11 +303,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
+        /*
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
             return true;
         }
+        */
         return super.onOptionsItemSelected(item);
     }
 
@@ -333,16 +328,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void showSelectContactForAddressPicker(){
+        if(currentContact != null) {
+            if (!currentContact.phone.equals(targetPhoneBox.getText().toString()))
+                currentContact = new Contact("", targetPhoneBox.getText().toString());
+        }
+        else{
+            if(!targetPhoneBox.getText().toString().isEmpty()){
+                currentContact = new Contact("", targetPhoneBox.getText().toString());
+            }
+        }
         Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         intent.setType(ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_TYPE);
         startActivityForResult(intent, PICK_ADDRESS);
     }
 
     public void selectContactButton_Clicked(View view){
-       showSelectContactPicker();
+        showSelectContactPicker();
     }
 
     private void showSelectContactPicker(){
+        if(currentDestination != null){
+            if(!(destinationSearchBox.getText().toString().contains(currentDestination.primaryText) && destinationSearchBox.getText().toString().contains(currentDestination.secondaryText))){
+                currentDestination = new RecentDestination(destinationSearchBox.getText().toString(), " ", "unknown id");
+            }
+        }
+        else{
+            if(!destinationSearchBox.getText().toString().isEmpty())
+                currentDestination = new RecentDestination(destinationSearchBox.getText().toString(), " ", "unknown id");
+        }
+
         Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
         intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
         startActivityForResult(intent, PICK_CONTACT);
@@ -355,7 +369,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 processContactIntent(resultCode, data);
                 break;
             case PICK_ADDRESS:
-                processAddresIntent(resultCode, data);
+                processAddressIntent(resultCode, data);
                 break;
         }
     }
@@ -380,13 +394,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             Log.i(TAG, "Contact selected: name: " + name + " - phone: " + number);
 
-            targetPhoneNumber = number;
-
             updateUi();
         }
     }
 
-    private void processAddresIntent(int resultCode, Intent intent){
+    private void processAddressIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK)
         {
             Uri uri = intent.getData();
@@ -395,12 +407,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
             cursor.moveToFirst();
 
+            int cityColumnIndex = cursor.getColumnIndex(projection[0]);
+            int zipColumnIndex = cursor.getColumnIndex(projection[1]);
             int streetColumnIndex = cursor.getColumnIndex(projection[2]);
 
+            // the retrieved data is not necessarily stored in a logical fashion
+            // e.g. the whole address my be within the street
+            String city = cursor.getString(cityColumnIndex);
+            String zip = cursor.getString(zipColumnIndex);
             String street = cursor.getString(streetColumnIndex);
 
-            currentDestination = new RecentDestination(street, "", "-1");
-            targetDestination = street;
+            String primary = "", secondary = "";
+            if(city != null && zip != null && street != null){
+                primary = street;
+                secondary = zip + " " + city;
+            }
+            else if(city != null && street != null){
+                primary = street;
+                secondary = city;
+            }
+            else if(street != null && city == null){
+                // try to split
+                String[] parts = street.split(",");
+                if(parts.length == 3){
+                    primary = parts[0];
+                    secondary = parts[1] + " " + parts[2];
+                }
+                else if(parts.length == 2) {
+                    primary = parts[0];
+                    secondary = parts[1];
+                }
+                else if(parts.length == 1){
+                    primary = parts[0];
+                    secondary = "";
+                }
+                else {
+                    primary = street;
+                    secondary = "";
+                }
+            }
+
+            currentDestination = new RecentDestination(primary, secondary, "-1");
+            Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.primaryText + " <> " + currentDestination.secondaryText);
             updateUi();
         }
     }
@@ -502,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     public void startButton_Clicked(View view) {
         updateFromUi();
-        if(targetDestination.isEmpty() || targetPhoneNumber.isEmpty()) {
+        if(destinationSearchBox.getText().toString().isEmpty() || targetPhoneBox.getText().toString().isEmpty()) {
             Toast.makeText(this, "You have to enter a phone number and a destination to start a trip.", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -532,7 +580,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private boolean isGPSEnabled(){
         String locationProviders = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        return locationProviders == null || locationProviders.equals("");
+        return !(locationProviders == null || locationProviders.equals(""));
     }
 
     private void saveCurrentTrip() {
@@ -541,12 +589,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Contact contact;
 
         if(currentDestination == null)
-            destination = new RecentDestination(targetDestination, " ", " ");
+            destination = new RecentDestination(destinationSearchBox.getText().toString(), " ", " ");
         else
             destination = currentDestination;
 
         if(currentContact == null)
-            contact = new Contact("", targetPhoneNumber);
+            contact = new Contact("", targetPhoneBox.getText().toString());
         else
             contact = currentContact;
 
@@ -556,8 +604,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     public void startTrip(){
         Intent intent = new Intent(this, TripActivity.class);
-        intent.putExtra(TripActivity.DESTINATION_EXTRA, targetDestination);
-        intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneNumber);
+        intent.putExtra(TripActivity.DESTINATION_EXTRA, destinationSearchBox.getText().toString());
+        intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneBox.getText().toString());
         if(currentContact != null)
             intent.putExtra(TripActivity.NAME_EXTRA, currentContact.name);
         startActivity(intent);
@@ -567,9 +615,24 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      * Updates the ui with the values stored in the local variables.
      */
     private void updateUi(){
-        targetPhoneBox.setText(targetPhoneNumber);
+        if(currentContact != null)
+            targetPhoneBox.setText(currentContact.phone);
+
         ignoreNextAddressBoxChange = true;
-        destinationSearchBox.setText(targetDestination);
+
+        if(currentDestination != null) {
+            String destination;
+            if(!currentDestination.primaryText.isEmpty() && !currentDestination.secondaryText.isEmpty())
+                destination = currentDestination.primaryText + ", " + currentDestination.secondaryText;
+            else if(!currentDestination.primaryText.isEmpty() && currentDestination.secondaryText.isEmpty())
+                destination = currentDestination.primaryText;
+            else if(currentDestination.primaryText.isEmpty() && !currentDestination.secondaryText.isEmpty())
+                destination = currentDestination.secondaryText;
+            else
+                destination = "";
+            destination = destination.replace(", ,", ", ").replace(",,", ",");
+            destinationSearchBox.setText(destination);
+        }
 
         setControlEnable();
     }
@@ -578,8 +641,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      * Pulls values from the ui and stores them in the corresponding variables.
      */
     private void updateFromUi(){
-        targetPhoneNumber = targetPhoneBox.getText().toString();
-        targetDestination = destinationSearchBox.getText().toString();
+        if(currentContact != null)
+            currentContact.phone = targetPhoneBox.getText().toString();
+        else
+            currentContact = new Contact("", targetPhoneBox.getText().toString());
+
+        if(currentDestination != null)
+            currentDestination.primaryText = destinationSearchBox.getText().toString();
+        else
+            currentDestination = new RecentDestination(destinationSearchBox.getText().toString(), " ", "unknown id");
     }
 
     /**
@@ -601,9 +671,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
      * @return
      */
     private boolean isValidStart(){
-        if(targetDestination != null && targetDestination.isEmpty())
+        if(destinationSearchBox.getText().toString().isEmpty())
             return false;
-        if(targetPhoneNumber != null && targetPhoneNumber.isEmpty())
+        if(targetPhoneBox.getText().toString().isEmpty())
             return false;
         return true;
     }
