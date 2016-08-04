@@ -27,6 +27,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -570,7 +571,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(wasSmsPermissionGranted())
             saveCurrentTrip();
         else {
-            askForSmsPermission();
+            showSmsPermissionExplanationAndAsk();
             return;
         }
 
@@ -641,6 +642,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         intent.putExtra(DistanceNotificationService.COMMAND_EXTRA, DistanceNotificationService.COMMAND_START);
         intent.putExtra(DistanceNotificationService.DESTINATION_EXTRA, currentDestination.toNiceString());
         intent.putExtra(DistanceNotificationService.PHONE_EXTRA, currentContact.phone);
+        intent.putExtra(DistanceNotificationService.SEND_INITIAL_MESSAGE_EXTRA, ( findViewById(R.id.main_activity_initial_message)) != null ? ((CheckBox) findViewById(R.id.main_activity_initial_message)).isChecked() : false);
+        intent.putExtra(DistanceNotificationService.SEND_CONTINUOUS_UPDATES_EXTRA, ( findViewById(R.id.main_activity_continuous_updates)) != null ? ((CheckBox) findViewById(R.id.main_activity_continuous_updates)).isChecked() : false);
+        intent.putExtra(DistanceNotificationService.SEND_ALMOST_THERE_MESSAGE_EXTRA, ( findViewById(R.id.main_activity_almost_there_message)) != null ? ((CheckBox) findViewById(R.id.main_activity_almost_there_message)).isChecked() : false);
+        intent.putExtra(DistanceNotificationService.SEND_ARRIVAL_MESSAGE_EXTRA, ( findViewById(R.id.main_activity_arrival_message)) != null ? ((CheckBox) findViewById(R.id.main_activity_arrival_message)).isChecked() : false);
         startService(intent);
         return true;
     }

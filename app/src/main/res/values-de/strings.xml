@@ -17,7 +17,7 @@
     <string name="remaining_time">Verbleibende Zeit</string>
     <string name="send_almost_there_notification">Sende beinah da SMS.</string>
     <string name="send_arrival_notification">Sende Ankunfts-SMS.</string>
-    <string name="send_initial_notification">Sende initialie SMS.</string>
+    <string name="send_initial_notification">Sende initiale SMS.</string>
     <string name="send_periodic_notifications">Sende kontinuierliche Updates.</string>
     <string name="smsPermissionNotGranted">Die App benötigt Ihre Erlaubnis SMS zu versenden um Ihren Kontakt über Ihre Ankunftszeit zu informieren.</string>
     <string name="startTripSms">Ich bin jetzt auf dem Weg zu %%DESTINATION%%. Ich werde vermutlich in %%DURATION%% da sein.</string>
