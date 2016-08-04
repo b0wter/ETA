@@ -60,11 +60,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String REQUEST_SEND_SMS_UPDATE = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_SEND_SMS";
     public static boolean IsServiceRunning = false;
 
-
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
     private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 75; // "size" of the target. used to check if the user is at his destination
     private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 30;         // maximum duration to decide whether the user has reached his destination or not
+
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
@@ -72,7 +72,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private Notification.Builder notificationBuilder;
     private ArrayList<TripSnapshot> tripSnapshots;
     private int currentReferenceSnapshotIndex = 0;
-
+    private Converter converter;
     private long currentUpdateInterval;
     private long remainingDistanceInMeters;
     private long remainingDuractionInSeconds;
@@ -143,6 +143,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private void start(String phone, String destination){
         Logger.getInstance().d(TAG, "Service received COMMAND_START");
         IsServiceRunning = true;
+        converter = new Converter(this);
         this.phoneNumber = phone;
         this.destination = destination;
         initService();
@@ -457,7 +458,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
 
     private String fillSmsTemplate(String text){
         text = text.replace("%%DESTINATION%%", destination);
-        text = text.replace("%%DURATION%%", Converter.formatDuration(remainingDuractionInSeconds));
+        text = text.replace("%%DURATION%%", converter.formatDuration(remainingDuractionInSeconds));
         return text;
     }
 
@@ -485,8 +486,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void updateNotification(){
-        String distance = Converter.formatDistance(remainingDistanceInMeters);
-        String duration = Converter.formatDuration(remainingDuractionInSeconds);
+        String distance = converter.formatDistance(remainingDistanceInMeters);
+        String duration = converter.formatDuration(remainingDuractionInSeconds);
 
         Date date = new Date(lastupdateCheckTicks);
         String lastCheck = SimpleDateFormat.getTimeInstance().format(date);

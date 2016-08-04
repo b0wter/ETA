@@ -29,4 +29,9 @@
     <string name="minutes">Minuten</string>
     <string name="remainingMinutesText">verbleibend</string>
     <string name="sms_update_sent">Es wurde ein Update an den Kontakt geschickt.</string>
+    <string name="minute">Minute</string>
+    <string name="hours">Stunden</string>
+    <string name="hour">Stunde</string>
+    <string name="meters">Meter</string>
+    <string name="km">Km</string>
 </resources>
