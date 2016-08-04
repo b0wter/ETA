@@ -66,6 +66,17 @@ public class RecentDestination {
         Log.i(TAG, "Recent destinations have been saved to the SharedPreferences");
     }
 
+    public String toNiceString(){
+        if(!primaryText.isEmpty() && !secondaryText.isEmpty())
+            return primaryText + ", " + secondaryText;
+        else if(!primaryText.isEmpty() && secondaryText.isEmpty())
+            return primaryText;
+        else if(primaryText.isEmpty() && !secondaryText.isEmpty())
+            return secondaryText;
+        else
+            return "no text available";
+    }
+
     @Override
     public String toString(){
         return primaryText + SERIALIZATION_FIELD_DELIMITER + secondaryText + SERIALIZATION_FIELD_DELIMITER + placesId;
