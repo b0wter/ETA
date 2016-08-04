@@ -41,7 +41,6 @@ public class TripActivity extends AppCompatActivity {
     public static String DESTINATION_EXTRA = "destinationExtra";
     public static String PHONE_NUMBER_EXTRA = "phoneExtra";
     public static String NAME_EXTRA = "nameExtra";
-    private static final int REQUEST_SMS_PERMISSION_KEY = 0;
     private static final String TAG = "TripActivity";
     public static final String SERVICE_BROADCAST_ACTION = "DISTANCE_NOTIFICATION_SERVICE_UPDATE";
     public static final String SERVICE_UPDATE_TIME_KEY = "DISTANCE_NOTIFICATION_SERVICE_REMAINING_TIME";
@@ -59,17 +58,14 @@ public class TripActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterBroadCastReceivers();
-        //stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
+        stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
         super.onDestroy();
     }
 
     @Override
     public void onStart(){
         super.onStart();
-        askOrCheckForSmsPermission();
-        boolean serviceWasAlreadyRunning = !startBackgroundService();
-        if(serviceWasAlreadyRunning)
-            tryUpdatingFromService();
+        tryUpdatingFromService();
     }
 
     private void tryUpdatingFromService(){
@@ -81,71 +77,6 @@ public class TripActivity extends AppCompatActivity {
         else
             Log.d(TAG, "The DistanceNotificationService is not running.");
     }
-
-    /**
-     * Starts the background service with a check if already running.
-     * @return true if the service was started, false if it was already running
-     */
-    private boolean startBackgroundService(){
-        if(DistanceNotificationService.IsServiceRunning) {
-            Log.i(TAG, "The DistanceNotificationService is already running, no need to start it again.");
-            return false;
-        }
-
-        Log.d(TAG, "starting background service");
-        Intent intent = new Intent(this, DistanceNotificationService.class);
-        intent.putExtra(DistanceNotificationService.COMMAND_EXTRA, DistanceNotificationService.COMMAND_START);
-        intent.putExtra(DistanceNotificationService.DESTINATION_EXTRA, destination);
-        intent.putExtra(DistanceNotificationService.PHONE_EXTRA, phoneNumber);
-        startService(intent);
-        return true;
-    }
-
-    // ----- SMS permission stuff -----
-    //
-    private void askOrCheckForSmsPermission(){
-        if(wasSmsPermissionGranted())
-            return;
-        else
-            showSmsPermissionExplanationAndAsk();
-    }
-
-    private boolean wasSmsPermissionGranted(){
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private void showSmsPermissionExplanationAndAsk(){
-        new AlertDialog.Builder(this)
-                .setTitle("ETA")
-                .setMessage(getString(R.string.smsPermissionNotGranted))
-                .setCancelable(false)
-                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        askForSmsPermission();
-                    }
-                }).show();
-    }
-
-    private void askForSmsPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_SMS_PERMISSION_KEY);
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode){
-        case REQUEST_SMS_PERMISSION_KEY:{
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    // permission granted, yeah!
-                }
-                else {
-                    finish();
-                }
-            }
-        }
-    }
-    //
-    // -----------
 
     private void initControls(){
         Log.d(TAG, "initControls");
@@ -251,7 +182,7 @@ public class TripActivity extends AppCompatActivity {
         ArcProgress progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
         if(progressBar.getMax() == Integer.MAX_VALUE)
             progressBar.setMax(remainingTimeInSeconds);
-        progressBar.setProgress(remainingTimeInSeconds);
+        progressBar.setProgress(Math.min(remainingTimeInSeconds, progressBar.getMax()));
 
         int minutes = remainingTimeInSeconds / 60;
         if(remainingTimeTextView != null)

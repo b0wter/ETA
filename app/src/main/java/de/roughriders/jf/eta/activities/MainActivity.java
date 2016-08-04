@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int PICK_ADDRESS = 1;
     private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
     private final int SEARCH_RADIUS = 250;
+    private static final int REQUEST_SMS_PERMISSION_KEY = 0;
 
     //private String targetPhoneNumber;
     //private String targetDestination;
@@ -154,6 +155,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
                 else {
                     finish();
+                }
+            }
+            case REQUEST_SMS_PERMISSION_KEY:{
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    // permission granted, yeah!
+                }
+                else {
+                    //TODO: hier noch eine weitere Nachricht einblenden.
                 }
             }
         }
@@ -560,7 +569,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             return;
         }
 
-        saveCurrentTrip();
+        if(wasSmsPermissionGranted())
+            saveCurrentTrip();
+        else {
+            askForSmsPermission();
+            return;
+        }
+
         startTrip();
     }
 
@@ -603,6 +618,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void startTrip(){
+        startBackgroundService();
+
         Intent intent = new Intent(this, TripActivity.class);
         intent.putExtra(TripActivity.DESTINATION_EXTRA, destinationSearchBox.getText().toString());
         intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneBox.getText().toString());
@@ -610,6 +627,48 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             intent.putExtra(TripActivity.NAME_EXTRA, currentContact.name);
         startActivity(intent);
     }
+
+    /**
+     * Starts the background service with a check if already running.
+     * @return true if the service was started, false if it was already running
+     */
+    private boolean startBackgroundService(){
+        if(DistanceNotificationService.IsServiceRunning) {
+            Log.i(TAG, "The DistanceNotificationService is already running, no need to start it again.");
+            return false;
+        }
+
+        Log.d(TAG, "starting background service");
+        Intent intent = new Intent(this, DistanceNotificationService.class);
+        intent.putExtra(DistanceNotificationService.COMMAND_EXTRA, DistanceNotificationService.COMMAND_START);
+        intent.putExtra(DistanceNotificationService.DESTINATION_EXTRA, currentDestination.toNiceString());
+        intent.putExtra(DistanceNotificationService.PHONE_EXTRA, currentContact.phone);
+        startService(intent);
+        return true;
+    }
+
+    private boolean wasSmsPermissionGranted(){
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void showSmsPermissionExplanationAndAsk(){
+        new AlertDialog.Builder(this)
+                .setTitle("ETA")
+                .setMessage(getString(R.string.smsPermissionNotGranted))
+                .setCancelable(false)
+                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        askForSmsPermission();
+                    }
+                }).show();
+    }
+
+    private void askForSmsPermission(){
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_SMS_PERMISSION_KEY);
+    }
+    //
+    // -----------
 
     /**
      * Updates the ui with the values stored in the local variables.
