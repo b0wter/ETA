@@ -1,52 +1,45 @@
 package de.roughriders.jf.eta.helpers;
 
+import android.content.Context;
+
+import de.roughriders.jf.eta.R;
+
 /**
  * Created by evil- on 6/25/2016.
  */
 public class Converter {
 
-    /*
-    private static long shortDistanceInMeters = 5000;
-    public static void setShortDistanceInMeters(long value){
-        shortDistanceInMeters = value;
-    }
-    private static String shortDistanceFormat = "#.0";
-    public static void setShortDistanceFormat(String format){
-        shortDistanceFormat = format;
+    private Context context;
+    private String hour, hours, minute, minutes;
+    private String meters, km;
+
+    public Converter(Context context){
+        hour = context.getString(R.string.hour);
+        hours = context.getString(R.string.hours);
+        minute = context.getString(R.string.minute);
+        minutes = context.getString(R.string.minutes);
+        meters = context.getString(R.string.meters);
+        km = context.getString(R.string.km);
     }
 
-    private static long mediumDistanceInMeters = 1500;
-    public static void setMediumDistanceInMeters(long value){
-        mediumDistanceInMeters = value;
-    }
-    private static String mediumDistanceFormat = "#";
-    public static void setMediumDistanceFormat(String format){
-        mediumDistanceFormat = format;
-    }
-
-    private static String longDistanceFormat = "#";
-    public static void setLongDistanceFormat(String format){
-        longDistanceFormat = format;
-    }
-    */
-
-    private Converter(){}
-
-    public static String formatDistance(long distanceInMeters){
+    public String formatDistance(long distanceInMeters){
         String distance;
         if(distanceInMeters <= 5000)
-            distance = String.valueOf(distanceInMeters) + " meters";
+            distance = String.valueOf(distanceInMeters) + " " + meters;
         else if( distanceInMeters <= 15000)
-            distance = String.valueOf((int)(distanceInMeters/1000)) + "km";
+            distance = String.valueOf((int)(distanceInMeters/1000)) + km;
         else
-            distance = String.valueOf((int)(distanceInMeters/1000)) + "km";
+            distance = String.valueOf((int)(distanceInMeters/1000)) + km;
         return distance;
     }
 
-    public static String formatDuration(long durationInSeconds){
-        if(durationInSeconds <= 90*60)
-            return String.valueOf(durationInSeconds/60) + " minutes";
-        else
-            return String.format("%.2f", (float)(durationInSeconds)/60/60) + " hours";
+    public String formatDuration(long durationInSeconds){
+        if(durationInSeconds <= 90*60){
+            long duration = durationInSeconds/60;
+            return String.valueOf(duration) + " " + (duration == 1 ? minute : minutes);
+        }
+        else {
+            return String.format("%.2f", (float) (durationInSeconds) / 60 / 60) + " " + hours;
+        }
     }
 }

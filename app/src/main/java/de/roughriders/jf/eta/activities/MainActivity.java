@@ -71,8 +71,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int SEARCH_RADIUS = 250;
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
 
-    //private String targetPhoneNumber;
-    //private String targetDestination;
     private Contact currentContact;
     private RecentDestination currentDestination;
 
@@ -162,7 +160,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     // permission granted, yeah!
                 }
                 else {
-                    //TODO: hier noch eine weitere Nachricht einblenden.
+                    //TODO: needs an additional hint!
                 }
             }
         }

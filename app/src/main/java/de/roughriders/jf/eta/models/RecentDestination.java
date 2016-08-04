@@ -25,12 +25,12 @@ public class RecentDestination {
     private static final String TAG = "RecentDestination";
 
     public RecentDestination(String primaryText){
-        this.primaryText = primaryText;
+        this.primaryText = primaryText.trim();
     }
 
     public RecentDestination(String primaryText, String secondaryText){
-        this.primaryText = primaryText;
-        this.secondaryText = secondaryText;
+        this.primaryText = primaryText.trim();
+        this.secondaryText = secondaryText.trim();
     }
 
     public static RecentDestination fromPrediction(AutocompletePrediction prediction){
@@ -84,9 +84,9 @@ public class RecentDestination {
         if(!primaryText.isEmpty() && !secondaryText.isEmpty())
             return primaryText + ", " + secondaryText;
         else if(!primaryText.isEmpty() && secondaryText.isEmpty())
-            return primaryText;
+            return primaryText.trim();
         else if(primaryText.isEmpty() && !secondaryText.isEmpty())
-            return secondaryText;
+            return secondaryText.trim();
         else
             return "no text available";
     }

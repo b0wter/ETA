@@ -53,4 +53,9 @@
     <string name="minutes">minutes</string>
     <string name="remainingMinutesText">Remaining</string>
     <string name="sms_update_sent">An update has been sent.</string>
+    <string name="minute">minute</string>
+    <string name="hours">hours</string>
+    <string name="hour">hour</string>
+    <string name="meters">meters</string>
+    <string name="km">km</string>
 </resources>
