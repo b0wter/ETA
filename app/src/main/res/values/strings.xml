@@ -52,4 +52,5 @@
     <string name="send_notification_now">Send notification now</string>
     <string name="minutes">minutes</string>
     <string name="remainingMinutesText">Remaining</string>
+    <string name="sms_update_sent">An update has been sent.</string>
 </resources>

@@ -28,4 +28,5 @@
     <string name="send_notification_now">Sende Benachrichtigung.</string>
     <string name="minutes">Minuten</string>
     <string name="remainingMinutesText">verbleibend</string>
+    <string name="sms_update_sent">Es wurde ein Update an den Kontakt geschickt.</string>
 </resources>

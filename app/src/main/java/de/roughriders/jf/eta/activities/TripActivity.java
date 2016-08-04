@@ -17,12 +17,19 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.google.maps.model.Distance;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.helpers.Logger;
 import de.roughriders.jf.eta.services.DistanceNotificationService;
 
 public class TripActivity extends AppCompatActivity {
@@ -59,6 +66,7 @@ public class TripActivity extends AppCompatActivity {
     protected void onDestroy(){
         unregisterBroadCastReceivers();
         stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
+        Logger.getInstance().close();
         super.onDestroy();
     }
 
@@ -155,6 +163,24 @@ public class TripActivity extends AppCompatActivity {
             unregisterReceiver(serviceStoppedBroadcastReceiver);
             serviceStoppedBroadcastReceiver = null;
         }
+    }
+
+    public void onSendUpdateSmsClick(View view){
+        Log.d(TAG, "Trying to send an update sms.");
+        Intent intent = new Intent(DistanceNotificationService.REQUEST_SEND_SMS_UPDATE);
+        sendBroadcast(intent);
+        Toast.makeText(this, getString(R.string.sms_update_sent), Toast.LENGTH_SHORT).show();
+
+        // temporarily disable the button
+        //
+        final Button smsButton = (Button)findViewById(R.id.trip_activity_send_notification_button);
+        smsButton.setEnabled(false);
+        smsButton.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                smsButton.setEnabled(true);
+            }
+        }, 1500);
     }
 
 

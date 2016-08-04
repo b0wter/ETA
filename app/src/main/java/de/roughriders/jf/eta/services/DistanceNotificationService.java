@@ -41,7 +41,6 @@ import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
 import de.roughriders.jf.eta.helpers.Logger;
-import de.roughriders.jf.eta.models.Trip;
 import de.roughriders.jf.eta.models.TripSnapshot;
 
 /**
@@ -58,6 +57,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String REQUEST_STATUS_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_UPDATE";
     public static final String SERVICE_STOPPED_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED";
     public static final String SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED_SUCCESS";
+    public static final String REQUEST_SEND_SMS_UPDATE = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_SEND_SMS";
     public static boolean IsServiceRunning = false;
 
 
@@ -72,7 +72,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private Notification.Builder notificationBuilder;
     private ArrayList<TripSnapshot> tripSnapshots;
     private int currentReferenceSnapshotIndex = 0;
-    private Trip trip;
 
     private long currentUpdateInterval;
     private long remainingDistanceInMeters;
@@ -81,6 +80,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private boolean isFirstRequest = true;
     private boolean isInitialLocationFix = true;
     private BroadcastReceiver updateRequestBroadcastReceiver;
+    private BroadcastReceiver sendSmsBroadcastReceiver;
 
     public DistanceNotificationService(){
         Log.d(TAG, "Instantiating new DistanceNotificationService");
@@ -147,7 +147,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.destination = destination;
         initService();
         showNotification();
-        registerUpdateRequestBroadcastReceiver();
+        registerBroadcastReceivers();
     }
 
     private void stop(){
@@ -159,7 +159,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         if(apiClient != null)
             apiClient.disconnect();
         removeNotification();
-        unregisterUpdateRequestBroadcastReceiver();
+        unregisterBroadcastReceivers();
         sendServiceStoppedBroadcast(destinationReached);
         Logger.getInstance().close();
         IsServiceRunning = false;
@@ -185,6 +185,23 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         stop();
     }
 
+    private void registerBroadcastReceivers(){
+        registerUpdateRequestBroadcastReceiver();
+        registerSmsUpdateRequestBroadcastReceiver();
+    }
+
+    private void registerSmsUpdateRequestBroadcastReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(REQUEST_SEND_SMS_UPDATE);
+        sendSmsBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                sendTripSms();
+            }
+        };
+        registerReceiver(sendSmsBroadcastReceiver, filter);
+    }
+
     private void registerUpdateRequestBroadcastReceiver(){
         IntentFilter filter = new IntentFilter();
         filter.addAction(REQUEST_STATUS_BROADCAST);
@@ -195,6 +212,17 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             }
         };
         registerReceiver(updateRequestBroadcastReceiver, filter);
+    }
+
+    private void unregisterBroadcastReceivers(){
+        unregisterSmsUpdateRequestBroadcastReceiver();
+        unregisterUpdateRequestBroadcastReceiver();
+    }
+    private void unregisterSmsUpdateRequestBroadcastReceiver(){
+        if(sendSmsBroadcastReceiver != null){
+            unregisterReceiver(sendSmsBroadcastReceiver);
+            sendSmsBroadcastReceiver = null;
+        }
     }
 
     private void unregisterUpdateRequestBroadcastReceiver(){
@@ -263,6 +291,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.getInstance().i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
         updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
+        Logger.getInstance().i(TAG, "Current location: " + result.originAddresses[0] + "; destination: " + result.destinationAddresses[0]);
 
         sendTripStartSmsIfNeeded();
         sendTripSmsIfNeeded();

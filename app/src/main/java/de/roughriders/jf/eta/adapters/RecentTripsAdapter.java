@@ -41,8 +41,7 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
             if(     trip.contact.name.equals(t.contact.name) &&
                     trip.contact.phone.equals(t.contact.phone) &&
                     trip.destination.primaryText.equals(t.destination.primaryText) &&
-                    trip.destination.secondaryText.equals(t.destination.secondaryText) &&
-                    trip.destination.placesId.equals(t.destination.placesId))
+                    trip.destination.secondaryText.equals(t.destination.secondaryText))
                 return true;
         }
         return false;

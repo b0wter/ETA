@@ -358,12 +358,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void showSelectContactPicker(){
         if(currentDestination != null){
             if(!(destinationSearchBox.getText().toString().contains(currentDestination.primaryText) && destinationSearchBox.getText().toString().contains(currentDestination.secondaryText))){
-                currentDestination = new RecentDestination(destinationSearchBox.getText().toString(), " ", "unknown id");
+                currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
             }
         }
         else{
             if(!destinationSearchBox.getText().toString().isEmpty())
-                currentDestination = new RecentDestination(destinationSearchBox.getText().toString(), " ", "unknown id");
+                currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
         }
 
         Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
@@ -456,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
 
-            currentDestination = new RecentDestination(primary, secondary, "-1");
+            currentDestination = new RecentDestination(primary, secondary);
             Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.primaryText + " <> " + currentDestination.secondaryText);
             updateUi();
         }
@@ -604,7 +604,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Contact contact;
 
         if(currentDestination == null)
-            destination = new RecentDestination(destinationSearchBox.getText().toString(), " ", " ");
+            destination = new RecentDestination(destinationSearchBox.getText().toString());
         else
             destination = currentDestination;
 
@@ -692,8 +692,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             destination = destination.replace(", ,", ", ").replace(",,", ",");
             destinationSearchBox.setText(destination);
         }
-
-        setControlEnable();
     }
 
     /**
@@ -708,32 +706,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(currentDestination != null)
             currentDestination.primaryText = destinationSearchBox.getText().toString();
         else
-            currentDestination = new RecentDestination(destinationSearchBox.getText().toString(), " ", "unknown id");
-    }
-
-    /**
-     * Checks the conditions for all controls to be enabled or not.
-     */
-    private void setControlEnable(){
-        setStartButtonEnabled();
-    }
-
-    /**
-     * Enable or disable the start-button.
-     */
-    private void setStartButtonEnabled(){
-        startButton.setEnabled(isValidStart());
-    }
-
-    /**
-     * Check the conditions for the start button to be enabled.
-     * @return
-     */
-    private boolean isValidStart(){
-        if(destinationSearchBox.getText().toString().isEmpty())
-            return false;
-        if(targetPhoneBox.getText().toString().isEmpty())
-            return false;
-        return true;
+            currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
     }
 }
