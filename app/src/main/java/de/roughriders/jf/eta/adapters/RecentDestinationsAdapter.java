@@ -5,11 +5,9 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import de.roughriders.jf.eta.R;
@@ -30,13 +28,18 @@ public class RecentDestinationsAdapter extends RecyclerView.Adapter<RecentDestin
     }
 
     public void addItem(RecentDestination destination){
-        recentDestinations.add(destination);
-        notifyDataSetChanged();
+        if(!alreadyContainsDestination(destination)) {
+            recentDestinations.add(destination);
+            notifyDataSetChanged();
+        }
     }
 
-    public void addItems(Collection<RecentDestination> items){
-        recentDestinations.addAll(items);
-        notifyDataSetChanged();
+    private boolean alreadyContainsDestination(RecentDestination destination){
+        for(RecentDestination item : recentDestinations){
+            if(item.primaryText.equals(destination.primaryText) && item.secondaryText.equals(destination.secondaryText))
+                return true;
+        }
+        return false;
     }
 
     public int size(){

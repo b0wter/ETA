@@ -62,6 +62,7 @@
                 android:layout_height="match_parent">
 
                 <Button
+                    android:onClick="onSendUpdateSmsClick"
                     android:id="@+id/trip_activity_send_notification_button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -92,10 +93,11 @@
 
                 <com.github.lzyzsd.circleprogress.ArcProgress
                     android:id="@+id/trip_activity_time_remaining"
+                    android:layout_centerInParent="true"
                     android:layout_gravity="center"
                     app:layout_aspectRatio="100%"
-                    app:layout_widthPercent="100%"
-                    app:layout_heightPercent="100%"
+                    app:layout_heightPercent="90%"
+                    app:layout_widthPercent="90%"
                     app:arc_bottom_text="Remaining"
                     app:arc_stroke_width="10dp"
                     app:arc_bottom_text_size="32sp"
@@ -105,8 +107,7 @@
                     app:arc_suffix_text=""
                     app:arc_suffix_text_size="0dp"
                     app:arc_progress="0"
-                    app:arc_text_size="0dp"
-                    />
+                    app:arc_text_size="0dp"/>
 
             </android.support.percent.PercentFrameLayout>
 

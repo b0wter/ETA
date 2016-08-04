@@ -16,30 +16,44 @@ import java.util.Set;
  * Model to store and retrieve a recent destination to the SharedPreferences
  */
 public class RecentDestination {
-    public String primaryText;
-    public String secondaryText;
-    public String placesId;
+    public String primaryText = "";
+    public String secondaryText = "";
 
     public static final String SERIALIZATION_FIELD_DELIMITER = ";";
     public static final String SHARED_PREFERENCES_KEY = "recentDestinations";
 
     private static final String TAG = "RecentDestination";
 
-    public RecentDestination(String primaryText, String secondaryText, String placesId){
+    public RecentDestination(String primaryText){
+        this.primaryText = primaryText;
+    }
+
+    public RecentDestination(String primaryText, String secondaryText){
         this.primaryText = primaryText;
         this.secondaryText = secondaryText;
-        this.placesId = placesId;
     }
 
     public static RecentDestination fromPrediction(AutocompletePrediction prediction){
-        return new RecentDestination(prediction.getPrimaryText(null).toString(), prediction.getSecondaryText(null).toString(), prediction.getPlaceId());
+        return new RecentDestination(prediction.getPrimaryText(null).toString(), prediction.getSecondaryText(null).toString());
     }
 
     public static RecentDestination fromString(String s){
         String[] parts = s.split(SERIALIZATION_FIELD_DELIMITER);
-        if(parts.length != 3)
+        if(parts.length > 3)
             throw new IllegalArgumentException("The string contains more than three parts (delimiter: " + SERIALIZATION_FIELD_DELIMITER + ". String: " + s);
-        return new RecentDestination(parts[0], parts[1], parts[2]);
+        else if(parts.length == 3){
+            // this is maintained for legacy reasons, prior versions of this model included a Google Places ID
+            return new RecentDestination(parts[0], parts[1]);
+        }
+        else if(parts.length == 2){
+            return new RecentDestination(parts[0], parts[1]);
+        }
+        else if(parts.length == 1){
+            return new RecentDestination(parts[0]);
+        }
+        else {
+            throw new IllegalArgumentException("The string does not contain any text (besides delimiters). String: " + s);
+        }
     }
 
     public static ArrayList<RecentDestination> getFromSharedPreferences(Context context){
@@ -53,7 +67,7 @@ public class RecentDestination {
             return list;
         }
         else
-            return new ArrayList<RecentDestination>();
+            return new ArrayList<>();
     }
 
     public static void saveToSharedPreferences(List<RecentDestination> destinations, Context context){
@@ -79,6 +93,6 @@ public class RecentDestination {
 
     @Override
     public String toString(){
-        return primaryText + SERIALIZATION_FIELD_DELIMITER + secondaryText + SERIALIZATION_FIELD_DELIMITER + placesId;
+        return primaryText + SERIALIZATION_FIELD_DELIMITER + secondaryText;
     }
 }
