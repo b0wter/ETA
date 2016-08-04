@@ -54,6 +54,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String COMMAND_STOP = "stop";
     public static final String PHONE_EXTRA = "phoneExtra";
     public static final String DESTINATION_EXTRA = "destinationExtra";
+    public static final String SEND_CONTINUOUS_UPDATES_EXTRA = "continuousUpdatesExtra";
+    public static final String SEND_INITIAL_MESSAGE_EXTRA = "initialMessageUpdateExtra";
+    public static final String SEND_ALMOST_THERE_MESSAGE_EXTRA = "almostThereMessageExtra";
+    public static final String SEND_ARRIVAL_MESSAGE_EXTRA = "arrivalMessageExtra";
     public static final String REQUEST_STATUS_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_UPDATE";
     public static final String SERVICE_STOPPED_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED";
     public static final String SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED_SUCCESS";
@@ -63,8 +67,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
     private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 75; // "size" of the target. used to check if the user is at his destination
-    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 30;         // maximum duration to decide whether the user has reached his destination or not
+    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 20;         // maximum duration to decide whether the user has reached his destination or not
+    private static final long ALMOST_THERE_DURATION_IN_SECONDS = 5*60;
 
+    private boolean almostThereMessageSent = false;
+    private boolean sendInitialMessage;
+    private boolean sendContinuousMessage;
+    private boolean sendAlmostThereMessage;
+    private boolean sendArrivalMessage;
     private String phoneNumber;
     private String destination;
     private GoogleApiClient apiClient;
@@ -112,6 +122,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         String command = extras.getString(COMMAND_EXTRA);
         switch(command){
             case COMMAND_START:
+                setExtras(extras);
                 start(extras.getString(PHONE_EXTRA), extras.getString(DESTINATION_EXTRA));
                 break;
             case COMMAND_STOP:
@@ -149,6 +160,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         initService();
         showNotification();
         registerBroadcastReceivers();
+    }
+
+    private void setExtras(Bundle bundle){
+        sendInitialMessage = bundle.getBoolean(SEND_INITIAL_MESSAGE_EXTRA);
+        sendContinuousMessage = bundle.getBoolean(SEND_CONTINUOUS_UPDATES_EXTRA);
+        sendAlmostThereMessage = bundle.getBoolean(SEND_ALMOST_THERE_MESSAGE_EXTRA);
+        sendArrivalMessage = bundle.getBoolean(SEND_ARRIVAL_MESSAGE_EXTRA);
     }
 
     private void stop(){
@@ -296,6 +314,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
 
         sendTripStartSmsIfNeeded();
         sendTripSmsIfNeeded();
+        sendAlmostThereSmsIfNeeded();
 
         if(hasReachedDestination()) {
             Logger.getInstance().i(TAG, "Destination has been reached.");
@@ -325,6 +344,17 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         if(hasArrivalTimeChanged()) {
             sendArrivalTimeChangedSms();
             currentReferenceSnapshotIndex = tripSnapshots.size()-1;
+        }
+    }
+
+    private void sendAlmostThereSmsIfNeeded(){
+        Logger.getInstance().d(TAG, "sendAlmostThereSmsIfNeeded");
+        if(tripSnapshots.size()>0){
+            if(tripSnapshots.get(tripSnapshots.size()-1).getRemainingDurationInSeconds() < ALMOST_THERE_DURATION_IN_SECONDS)
+                if(!almostThereMessageSent) {
+                    sendAlmostThereSms();
+                    almostThereMessageSent = true;
+                }
         }
     }
 
@@ -402,7 +432,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private boolean hasReachedDestination(){
         boolean distanceCheck = remainingDistanceInMeters < TARGET_DESTINATION_RADIUS_IN_METERS;
         boolean durationCheck = remainingDuractionInSeconds < TARGET_DURATION_LOWER_LIMIT_IN_SECONDS;
-        return distanceCheck && durationCheck;
+        return distanceCheck || durationCheck;
     }
 
     /**
@@ -426,6 +456,9 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendStartTripSms(){
+        if(!sendInitialMessage)
+            return;
+
         Logger.getInstance().d(TAG, "sendStartTripSms");
         String text = getString(R.string.startTripSms);
         sendSms(text);
@@ -438,12 +471,25 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendArrivalTimeChangedSms(){
+        if(!sendContinuousMessage)
+            return;
+
         Logger.getInstance().d(TAG, "sendArrivalTimeChangedSms");
         String text = getString(R.string.arrivalTimeChangedSms);
         sendSms(text);
     }
 
+    private void sendAlmostThereSms(){
+        if(!sendAlmostThereMessage)
+            return;
+
+        Logger.getInstance().d(TAG, "sendAlmostThereSms");
+    }
+
     private void sendArrivalSms(){
+        if(!sendArrivalMessage)
+            return;
+
         Logger.getInstance().d(TAG, "sendArrivalSms");
         String text = getString(R.string.arrivalSms);
         sendSms(text);

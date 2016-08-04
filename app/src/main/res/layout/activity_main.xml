@@ -129,24 +129,28 @@
                         android:padding="10dp">
 
                         <CheckBox
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:checked="true"
-                            android:text="@string/send_periodic_notifications" />
-
-                        <CheckBox
+                            android:id="@+id/main_activity_initial_message"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="@string/send_initial_notification" />
 
                         <CheckBox
+                            android:id="@+id/main_activity_continuous_updates"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:text="@string/send_periodic_notifications" />
+
+                        <CheckBox
+                            android:id="@+id/main_activity_almost_there_message"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
                             android:text="@string/send_almost_there_notification" />
 
                         <CheckBox
+                            android:id="@+id/main_activity_arrival_message"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:checked="true"
