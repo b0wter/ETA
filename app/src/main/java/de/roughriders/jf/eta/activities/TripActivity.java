@@ -103,7 +103,7 @@ public class TripActivity extends AppCompatActivity {
         phoneNumber = extras.getString(PHONE_NUMBER_EXTRA);
         if(extras.containsKey(NAME_EXTRA))
             name = extras.getString(NAME_EXTRA);
-        else
+        if (name != null || name.isEmpty())
             name = phoneNumber;
         nameTextView.setText(name);
         progressBar.setMax(Integer.MAX_VALUE);
