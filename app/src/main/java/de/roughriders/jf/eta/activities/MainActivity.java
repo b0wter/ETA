@@ -439,10 +439,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 String[] parts = street.split(",");
                 if(parts.length == 3){
                     primary = parts[0];
+                    // sometimes the addresses are messed up and the city is saved in the street as well
+                    primary = primary.replace(parts[1], "").replace(parts[2], "");
                     secondary = parts[1] + " " + parts[2];
                 }
                 else if(parts.length == 2) {
                     primary = parts[0];
+                    // sometimes the addresses are messed up and the city is saved in the street as well
+                    primary = primary.replace(parts[1], "");
                     secondary = parts[1];
                 }
                 else if(parts.length == 1){
