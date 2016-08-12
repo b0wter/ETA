@@ -59,4 +59,5 @@
     <string name="no_search_results_found">No search results found.</string>
     <string name="search_results">Search results</string>
     <string name="no_recent_destinations">No recent destinations</string>
+    <string name="gps_needed_for_autocomplete">Location services are required for the autocompletion of places.</string>
 </resources>

@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
@@ -92,6 +93,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private GoogleApiClient googleApiClient;
 
+    private boolean locationServiceAutocompleteHintShown = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -113,6 +116,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
         askOrCheckForLocationPermission();
         startTripActivityIfServiceRunning();
+    }
+
+    private void showLocationServiceAutocompleteHint() {
+        if(locationServiceAutocompleteHintShown)
+            return;
+
+        locationServiceAutocompleteHintShown = true;
+        Toast.makeText(this, getString(R.string.gps_needed_for_autocomplete), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -280,8 +291,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         destinationSearchBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-               if(b == true)
+               if(b == true) {
                    slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
+                   showLocationServiceAutocompleteHint();
+               }
                else slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             }
         });
