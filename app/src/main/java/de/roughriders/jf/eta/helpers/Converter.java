@@ -2,6 +2,9 @@ package de.roughriders.jf.eta.helpers;
 
 import android.content.Context;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import de.roughriders.jf.eta.R;
 
 /**
@@ -22,6 +25,11 @@ public class Converter {
         km = context.getString(R.string.km);
     }
 
+    /**
+     * Transforms a distance into a string formatted in the current locale.
+     * @param distanceInMeters
+     * @return
+     */
     public String formatDistance(long distanceInMeters){
         String distance;
         if(distanceInMeters <= 5000)
@@ -33,6 +41,11 @@ public class Converter {
         return distance;
     }
 
+    /**
+     * Transforms a duration into a string formatted in the current locale.
+     * @param durationInSeconds
+     * @return
+     */
     public String formatDuration(long durationInSeconds){
         if(durationInSeconds <= 90*60){
             long duration = durationInSeconds/60;
@@ -41,5 +54,16 @@ public class Converter {
         else {
             return String.format("%.2f", (float) (durationInSeconds) / 60 / 60) + " " + hours;
         }
+    }
+
+    /**
+     * Creates a String that represents an arrival time in the current locale.
+     * @param remainingDuractionInSeconds
+     * @return
+     */
+    public String formatArrivalTime(long remainingDuractionInSeconds){
+        Date arrivalTime = new Date(System.currentTimeMillis() + remainingDuractionInSeconds*1000);
+        String arrivalTimeString = SimpleDateFormat.getTimeInstance().format(arrivalTime);
+        return arrivalTimeString;
     }
 }

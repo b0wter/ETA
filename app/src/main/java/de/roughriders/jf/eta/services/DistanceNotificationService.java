@@ -505,6 +505,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private String fillSmsTemplate(String text){
         text = text.replace("%%DESTINATION%%", destination);
         text = text.replace("%%DURATION%%", converter.formatDuration(remainingDuractionInSeconds));
+        text = text.replace("%%ARRIVAL%%", converter.formatArrivalTime(remainingDuractionInSeconds));
         return text;
     }
 
@@ -538,11 +539,14 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Date date = new Date(lastupdateCheckTicks);
         String lastCheck = SimpleDateFormat.getTimeInstance().format(date);
 
+        Date arrivalTime = new Date(System.currentTimeMillis() + remainingDuractionInSeconds*1000);
+        String arrivalTimeString = SimpleDateFormat.getTimeInstance().format(arrivalTime);
+
         String content = getString(R.string.distancenotificationservice_is_running_notification_message);
         String longContent = getString(R.string.distancenotificationservice_is_running_notification_message_details);
 
-        content = content.replace("%%DISTANCE%%", distance).replace("%%DURATION%%", duration).replace("%%LASTCHECK%%", lastCheck);
-        longContent = longContent.replace("%%DISTANCE%%", distance).replace("%%DURATION%%", duration).replace("%%LASTCHECK%%", lastCheck);
+        content = content.replace("%%DISTANCE%%", distance).replace("%%DURATION%%", duration).replace("%%LASTCHECK%%", lastCheck).replace("%%ARRIVAL%%", arrivalTimeString);
+        longContent = longContent.replace("%%DISTANCE%%", distance).replace("%%DURATION%%", duration).replace("%%LASTCHECK%%", lastCheck).replace("%%ARRIVAL%%", arrivalTimeString);
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         notificationBuilder.setContentText(content);
