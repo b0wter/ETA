@@ -500,7 +500,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
                     if(autocompletePredictions.getCount() == 0) {
                         predictionsCardView.setVisibility(View.GONE);
-                        predictionsEmptyCardView.setVisibility(View.VISIBLE);
+                        if(destinationSearchBox.length() != 0)
+                            predictionsEmptyCardView.setVisibility(View.VISIBLE);
                     }
                     else {
                         for (int i = 0; i < autocompletePredictions.getCount(); i++) {
