@@ -58,4 +58,7 @@
     <string name="hour">hour</string>
     <string name="meters">meters</string>
     <string name="km">km</string>
+    <string name="no_search_results_found">No search results found.</string>
+    <string name="search_results">Search results</string>
+    <string name="no_recent_destinations">No recent destinations</string>
 </resources>
