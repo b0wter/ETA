@@ -34,4 +34,7 @@
     <string name="hour">Stunde</string>
     <string name="meters">Meter</string>
     <string name="km">Km</string>
+    <string name="no_recent_destinations">Keine kürzlichen Ziele.</string>
+    <string name="no_search_results_found">Keine Suchergebnisse gefunden.</string>
+    <string name="search_results">Suchergebnisse</string>
 </resources>
