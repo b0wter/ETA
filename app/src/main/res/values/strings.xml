@@ -11,8 +11,6 @@
     <string name="no_recent_trips">No recent trips</string>
 
     <string name="title_activity_trip">TripActivity</string>
-    <string name="dummy_button" translatable="false">Dummy Button</string>
-    <string name="dummy_content" translatable="false">DUMMY\nCONTENT</string>
     <string name="colon" translatable="false">:</string>
     <string name="remaining_time">Remaining time</string>
 
@@ -32,9 +30,9 @@
 
     <!-- Strings for sms -->
     <string name="arrivalSms">I have arrived at %%DESTINATION%%.</string>
-    <string name="startTripSms">I am now on my way to %%DESTINATION%%. I will probably arrive in %%DURATION%%.</string>
-    <string name="duringTripSms">I am still on my way to %%DESTINATION%%. I\'ll be there in about %%DURATION%%.</string>
-    <string name="arrivalTimeChangedSms">My arrival time has changed. I\'ll be there in about %%DURATION%%.</string>
+    <string name="startTripSms">I am now on my way to %%DESTINATION%%. I will probably arrive in %%DURATION%%, at %%ARRIVAL%%.</string>
+    <string name="duringTripSms">I am still on my way to %%DESTINATION%%. I\'ll be there in about %%DURATION%%, at %%ARRIVAL%%.</string>
+    <string name="arrivalTimeChangedSms">My arrival time has changed. I\'ll be there in about %%DURATION%%, at %%ARRIVAL%%.</string>
 
     <!-- Example settings for Notifications -->
     <string name="pref_header_notifications" translatable="false">Notifications</string>

@@ -3,13 +3,13 @@
     <string name="action_settings">Einstellungen</string>
     <string name="activate_gps_hint">Bitte aktivieren Sie die Ortungsdienste. Ohne diese kann die App nicht korrekt arbeiten und keine Ankunftszeiten verschicken.</string>
     <string name="arrivalSms">Ich bin angekommen, meine aktuelle Position ist %%DESTINATION%%.</string>
-    <string name="arrivalTimeChangedSms">Meine Ankunftszeit hat sich geändert. Ich werde in %%DURATION%% da sein.</string>
+    <string name="arrivalTimeChangedSms">Meine Ankunftszeit hat sich geändert. Ich werde in %%DURATION%% da sein, um %%ARRIVAL%%.</string>
     <string name="contact">Kontakt</string>
     <string name="destination">Ziel</string>
     <string name="distancenotificationservice_is_initializing_notification_message">Initialisiere den Trip.</string>
     <string name="distancenotificationservice_is_running_notification_message">Die Fahrzeit beträgt %%DURATION%%, letztes Update um %%LASTCHECK%%.</string>
     <string name="distancenotificationservice_is_running_notification_message_details">Verbleibende Distanz: %%DISTANCE%%, Dauer: %%DURATION%%. Letztes Update um %%LASTCHECK%% Uhr.</string>
-    <string name="duringTripSms">Ich bin immer noch unterwegs Richtung %%DESTINATION%%. Ich werde in zirka %%DURATION%% da sein.</string>
+    <string name="duringTripSms">Ich bin immer noch unterwegs Richtung %%DESTINATION%%. Ich werde in zirka %%DURATION%% da sein, um %%ARRIVAL%%.</string>
     <string name="exit_hint">Wenn Sie jetzt zurückgehen wird die App Ihre Position nicht weiter verfolgen und keine Statusupdates senden. Wollen Sie wirklich zurück?</string>
     <string name="no_recent_trips">Keine kürzliche Fahrten.</string>
     <string name="recent_destinations">Kürzliche Ziele</string>
@@ -20,7 +20,7 @@
     <string name="send_initial_notification">Sende initiale SMS.</string>
     <string name="send_periodic_notifications">Sende kontinuierliche Updates.</string>
     <string name="smsPermissionNotGranted">Die App benötigt Ihre Erlaubnis SMS zu versenden um Ihren Kontakt über Ihre Ankunftszeit zu informieren.</string>
-    <string name="startTripSms">Ich bin jetzt auf dem Weg zu %%DESTINATION%%. Ich werde vermutlich in %%DURATION%% da sein.</string>
+    <string name="startTripSms">Ich bin jetzt auf dem Weg zu %%DESTINATION%%. Ich werde vermutlich in %%DURATION%% da sein, um %%ARRIVAL%%.</string>
     <string name="stop">stop</string>
     <string name="stopCapital">Stop</string>
     <string name="title_activity_trip">Fahrt</string>
