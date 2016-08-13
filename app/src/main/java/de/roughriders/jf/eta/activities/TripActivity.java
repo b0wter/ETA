@@ -41,7 +41,6 @@ public class TripActivity extends AppCompatActivity {
     private BroadcastReceiver serviceStoppedBroadcastReceiver;
 
     private TextView destinationTextView;
-    private TextView remainingTimeTextView;
     private TextView nameTextView;
     private ArcProgress progressBar;
 
@@ -91,7 +90,6 @@ public class TripActivity extends AppCompatActivity {
     private void initControls(){
         Log.d(TAG, "initControls");
         destinationTextView = (TextView)findViewById(R.id.trip_activity_destination_textview);
-        remainingTimeTextView = (TextView)findViewById(R.id.trip_activity_minutes_remaining);
         nameTextView = (TextView)findViewById(R.id.trip_activity_name_textview);
         progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
     }
@@ -99,13 +97,12 @@ public class TripActivity extends AppCompatActivity {
     private void setIntentData(){
         Bundle extras = getIntent().getExtras();
         destination = extras.getString(DESTINATION_EXTRA);
-        destinationTextView.setText(destination);
+        destinationTextView.setText(destination.replace(",", ",\r\n"));
         phoneNumber = extras.getString(PHONE_NUMBER_EXTRA);
         if(extras.containsKey(NAME_EXTRA))
             name = extras.getString(NAME_EXTRA);
         if (name != null || name.isEmpty())
-            name = phoneNumber;
-        nameTextView.setText(name);
+            nameTextView.setText(name);
         progressBar.setMax(Integer.MAX_VALUE);
     }
 
@@ -213,9 +210,6 @@ public class TripActivity extends AppCompatActivity {
         progressBar.setProgress(Math.min(remainingTimeInSeconds, progressBar.getMax()));
 
         int minutes = remainingTimeInSeconds / 60;
-        if(remainingTimeTextView != null)
-            remainingTimeTextView.setText(minutes + "");
-        else
-            Log.e(TAG, "For whatever reason the remainingTimeTextView is a null reference! Is the view present in the landscape and regular layout?");
+        progressBar.setBottomText(minutes + "");
     }
 }

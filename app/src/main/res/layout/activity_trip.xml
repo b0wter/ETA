@@ -16,55 +16,12 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <LinearLayout
-            android:id="@+id/trip_activity_destination_layout"
-            android:orientation="vertical"
-            android:layout_alignParentTop="true"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:layout_width="wrap_content"
-                android:textColor="@color/colorAccent"
-                android:layout_height="wrap_content"
-                android:text="@string/destination"
-                />
-
-            <TextView
-                android:textColor="@android:color/white"
-                android:layout_marginTop="-10dp"
-                android:id="@+id/trip_activity_destination_textview"
-                android:textSize="34sp"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textColor="@color/colorAccent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/contact"
-                />
-
-            <TextView
-                android:textColor="@android:color/white"
-                android:layout_marginTop="-10dp"
-                android:id="@+id/trip_activity_name_textview"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textSize="34sp"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
         <Button
             android:onClick="onSendUpdateSmsClick"
             android:id="@+id/trip_activity_send_notification_button"
-            android:layout_width="match_parent"
+            android:layout_centerHorizontal="true"
+            android:padding="15dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/activity_vertical_margin"
@@ -73,12 +30,12 @@
             android:textColor="@android:color/primary_text_light" />
 
         <RelativeLayout
-            android:layout_below="@id/trip_activity_destination_layout"
             android:layout_above="@id/trip_activity_send_notification_button"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <android.support.percent.PercentFrameLayout
+                android:id="@+id/trip_activity_percent_frame_layout"
                 android:layout_centerInParent="true"
                 android:paddingBottom="10dp"
                 android:paddingTop="10dp"
@@ -90,45 +47,57 @@
                     android:layout_gravity="center"
                     app:layout_aspectRatio="100%"
                     app:layout_widthPercent="100%"
-                    app:arc_bottom_text="@string/remainingMinutesText"
+                    app:arc_bottom_text="34 min"
                     app:arc_stroke_width="10dp"
-                    app:arc_bottom_text_size="32sp"
-                    app:arc_unfinished_color="@android:color/white"
+                    app:arc_bottom_text_size="42dp"
+                    app:arc_unfinished_color="@color/colorPrimaryDarkDark"
                     app:arc_finished_color="@color/colorAccent"
-                    app:arc_text_color="@android:color/white"
+                    app:arc_text_color="@color/colorAccent"
                     app:arc_suffix_text=""
                     app:arc_suffix_text_size="0dp"
                     app:arc_progress="0"
                     app:arc_text_size="0dp"
-                    />
+                    android:layout_width="0dp"
+                    android:layout_height="0dp" />
 
             </android.support.percent.PercentFrameLayout>
 
-            <RelativeLayout
+            <LinearLayout
                 android:layout_centerInParent="true"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
                 <TextView
-                    android:layout_centerInParent="true"
-                    android:id="@+id/trip_activity_minutes_remaining"
-                    android:textAppearance="@style/TextAppearance.AppCompat.Headline"
-                    android:textColor="@android:color/white"
+                    android:text="test"
+                    android:layout_marginBottom="15dp"
+                    android:id="@+id/trip_activity_name_textview"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                    android:textColor="@color/colorAccent"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
+                <ImageView
+                    android:layout_gravity="center"
+                    android:src="@drawable/place"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp" />
+
                 <TextView
-                    android:layout_toRightOf="@+id/trip_activity_minutes_remaining"
-                    android:layout_alignParentTop="true"
-                    android:text="@string/minutes"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="15dp"
+                    android:text="test"
+                    android:maxLines="3"
+                    android:gravity="center"
+                    android:layout_gravity="center"
+                    android:id="@+id/trip_activity_destination_textview"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:textColor="@android:color/white"
-                    android:layout_width="200dp"
+                    android:textColor="@color/colorAccent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-            </RelativeLayout>
+            </LinearLayout>
 
         </RelativeLayout>
 
