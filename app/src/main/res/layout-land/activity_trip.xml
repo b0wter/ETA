@@ -75,6 +75,7 @@
     </LinearLayout>
 
     <ImageButton
+        android:onClick="onSendUpdateSmsClick"
         android:padding="20dp"
         android:src="@drawable/mail"
         android:scaleType="fitCenter"
