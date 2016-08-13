@@ -562,7 +562,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void onDestinationSelected(RecentDestination destination){
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
-        destinationSearchBox.setText(destination.primaryText + " " + destination.secondaryText);
+        destinationSearchBox.setText(destination.primaryText + ", " + destination.secondaryText);
         currentDestination = destination;
         recentDestinationsAdapter.addItem(destination);
         recentDestinationsCardView.setVisibility(View.VISIBLE);
@@ -724,8 +724,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         else
             currentContact = new Contact("", targetPhoneBox.getText().toString());
 
-        if(currentDestination != null)
-            currentDestination.primaryText = destinationSearchBox.getText().toString();
+        if(currentDestination != null) {
+            String enteredText = destinationSearchBox.getText().toString().replace(",", "").replace(" ", "");
+            String condensedText = (currentDestination.primaryText + currentDestination.secondaryText).replace(",", "").replace(" ","");
+            if(!condensedText.contains(enteredText)) {
+                if(enteredText.contains(",")){
+                    String firstPart = enteredText.substring(0, enteredText.indexOf(","));
+                    String secondPart = enteredText.substring(enteredText.indexOf(",")+1);
+                    currentDestination.primaryText = firstPart;
+                    currentDestination.secondaryText = secondPart;
+                }
+                else
+                    currentDestination.primaryText = destinationSearchBox.getText().toString();
+            }
+        }
         else
             currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
     }
