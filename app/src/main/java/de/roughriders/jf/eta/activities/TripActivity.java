@@ -29,6 +29,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.helpers.Converter;
 import de.roughriders.jf.eta.helpers.Logger;
 import de.roughriders.jf.eta.services.DistanceNotificationService;
 
@@ -44,6 +45,8 @@ public class TripActivity extends AppCompatActivity {
     private TextView nameTextView;
     private ArcProgress progressBar;
 
+    private Converter converter;
+
     public static String DESTINATION_EXTRA = "destinationExtra";
     public static String PHONE_NUMBER_EXTRA = "phoneExtra";
     public static String NAME_EXTRA = "nameExtra";
@@ -56,6 +59,7 @@ public class TripActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trip);
+        converter = new Converter(this);
         initControls();
         setIntentData();
         registerBroadcastReceivers();
@@ -209,7 +213,7 @@ public class TripActivity extends AppCompatActivity {
             progressBar.setMax(remainingTimeInSeconds);
         progressBar.setProgress(Math.min(remainingTimeInSeconds, progressBar.getMax()));
 
-        int minutes = remainingTimeInSeconds / 60;
-        progressBar.setBottomText(minutes + "");
+        String remainingTime = converter.formatDuration(remainingTimeInSeconds);
+        progressBar.setBottomText(remainingTime);
     }
 }

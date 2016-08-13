@@ -20,12 +20,15 @@
             android:onClick="onSendUpdateSmsClick"
             android:id="@+id/trip_activity_send_notification_button"
             android:layout_centerHorizontal="true"
-            android:padding="15dp"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:paddingLeft="30dp"
+            android:paddingRight="30dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/activity_vertical_margin"
-            android:background="@color/colorAccent"
+            android:background="@drawable/button_bg_rounded"
             android:text="@string/send_notification_now"
             android:textColor="@android:color/primary_text_light" />
 
