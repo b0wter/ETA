@@ -214,7 +214,7 @@ public class TripActivity extends AppCompatActivity {
             progressBar.setMax(remainingTimeInSeconds);
         progressBar.setProgress(Math.min(remainingTimeInSeconds, progressBar.getMax()));
 
-        String remainingTime = converter.formatDuration(remainingTimeInSeconds);
+        String remainingTime = converter.formatDurationWithAbbreviatedUnits(remainingTimeInSeconds).toUpperCase();
         progressBar.setBottomText(remainingTime);
     }
 }

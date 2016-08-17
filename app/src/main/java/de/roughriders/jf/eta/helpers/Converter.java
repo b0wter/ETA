@@ -2,8 +2,10 @@ package de.roughriders.jf.eta.helpers;
 
 import android.content.Context;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import de.roughriders.jf.eta.R;
 
@@ -17,6 +19,7 @@ public class Converter {
     private String meters, km;
 
     public Converter(Context context){
+        this.context = context;
         hour = context.getString(R.string.hour);
         hours = context.getString(R.string.hours);
         minute = context.getString(R.string.minute);
@@ -52,18 +55,34 @@ public class Converter {
             return String.valueOf(duration) + " " + (duration == 1 ? minute : minutes);
         }
         else {
-            return String.format("%.2f", (float) (durationInSeconds) / 60 / 60) + " " + hours;
+            return String.format(Locale.getDefault(), "%.1f", (float) (durationInSeconds) / 60 / 60) + " " + hours;
+        }
+    }
+
+    public String formatDurationWithAbbreviatedUnits(long durationInSeconds){
+        if(durationInSeconds < 120){
+            float minutes = durationInSeconds / 60;
+            return String.format(Locale.getDefault(), "%.1f", minutes) + " " + context.getString(R.string.min_abbreviation);
+        }
+        else if(durationInSeconds <= 90*60){
+            int minutes = (int)(durationInSeconds/60);
+            return String.valueOf(minutes) + " " + context.getString(R.string.min_abbreviation);
+        }
+        else{
+            float hours = (durationInSeconds/60/60);
+            return String.format(Locale.getDefault(), "%.1f", hours) + " " + String.valueOf(minutes);
         }
     }
 
     /**
      * Creates a String that represents an arrival time in the current locale.
-     * @param remainingDuractionInSeconds
+     * @param remainingDurationInSeconds
      * @return
      */
-    public String formatArrivalTime(long remainingDuractionInSeconds){
-        Date arrivalTime = new Date(System.currentTimeMillis() + remainingDuractionInSeconds*1000);
-        String arrivalTimeString = SimpleDateFormat.getTimeInstance().format(arrivalTime);
+    public String formatArrivalTime(long remainingDurationInSeconds){
+        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        Date arrivalTime = new Date(System.currentTimeMillis() + remainingDurationInSeconds*1000);
+        String arrivalTimeString = format.format(arrivalTime);
         return arrivalTimeString;
     }
 }

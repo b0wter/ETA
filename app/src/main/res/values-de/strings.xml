@@ -39,4 +39,6 @@
     <string name="search_results">Suchergebnisse</string>
     <string name="gps_needed_for_autocomplete">Die Location-Dienste müssen aktiviert sein um die Autovervollständigung zu nutzen.</string>
     <string name="sms_sent_toast">Nachricht wurde versendet.</string>
+    <string name="min_abbreviation">min</string>
+    <string name="hour_abbreviation">h</string>
 </resources>
