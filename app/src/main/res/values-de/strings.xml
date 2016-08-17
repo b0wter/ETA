@@ -38,4 +38,5 @@
     <string name="no_search_results_found">Keine Suchergebnisse gefunden.</string>
     <string name="search_results">Suchergebnisse</string>
     <string name="gps_needed_for_autocomplete">Die Location-Dienste müssen aktiviert sein um die Autovervollständigung zu nutzen.</string>
+    <string name="sms_sent_toast">Nachricht wurde versendet.</string>
 </resources>

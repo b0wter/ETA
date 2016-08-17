@@ -176,7 +176,8 @@ public class TripActivity extends AppCompatActivity {
 
         // temporarily disable the button
         //
-        final Button smsButton = (Button)findViewById(R.id.trip_activity_send_notification_button);
+        final View smsButton = findViewById(R.id.trip_activity_send_notification_button);
+    Toast.makeText(this, getString(R.string.sms_sent_toast), Toast.LENGTH_SHORT).show();
         smsButton.setEnabled(false);
         smsButton.postDelayed(new Runnable() {
             @Override
