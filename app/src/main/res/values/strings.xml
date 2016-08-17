@@ -61,4 +61,6 @@
     <string name="no_recent_destinations">No recent destinations</string>
     <string name="gps_needed_for_autocomplete">Location services are required for the autocompletion of places.</string>
     <string name="sms_sent_toast">Message has been sent.</string>
+    <string name="min_abbreviation">min</string>
+    <string name="hour_abbreviation">h</string>
 </resources>

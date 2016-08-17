@@ -570,7 +570,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void onReachedDestination(){
-        //TODO: send arrival sms
         // work is done, exit
         sendArrivalSms();
         stop(true);
@@ -604,7 +603,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         this.lastUpdateCheckTicks = System.currentTimeMillis();
         updateNotification();
         TripSnapshot newSnapshot = new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDurationInSeconds, position, destination);
-        //tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDurationInSeconds, position, destination, trip.id));
         tripSnapshots.add(newSnapshot);
         sendUpdateBroadcast(durationInSeconds, distanceInMeters);
     }
