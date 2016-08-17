@@ -2,7 +2,6 @@
 <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/sliding_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -103,6 +102,16 @@
                             android:paddingLeft="10dp"
                             android:paddingRight="10dp"
                             android:inputType="phone" />
+
+                        <ImageButton
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:layout_gravity="right|center_vertical"
+                            android:layout_marginRight="0dp"
+                            android:background="@android:color/transparent"
+                            android:onClick="clearContactEditText_onClick"
+                            android:padding="8dp"
+                            android:src="@drawable/ic_clear_black_24dp" />
 
                         <ImageButton
                             android:id="@+id/selectContactButton"

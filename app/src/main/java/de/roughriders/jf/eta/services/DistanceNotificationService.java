@@ -85,8 +85,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private Converter converter;
     private long currentUpdateInterval;
     private long remainingDistanceInMeters;
-    private long remainingDuractionInSeconds;
-    private long lastupdateCheckTicks = -1;
+    private long remainingDurationInSeconds;
+    private long lastUpdateCheckTicks = -1;
     private boolean isFirstRequest = true;
     private boolean isInitialLocationFix = true;
     private BroadcastReceiver updateRequestBroadcastReceiver;
@@ -227,7 +227,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         updateRequestBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                sendUpdateBroadcast(remainingDuractionInSeconds, remainingDistanceInMeters);
+                sendUpdateBroadcast(remainingDurationInSeconds, remainingDistanceInMeters);
             }
         };
         registerReceiver(updateRequestBroadcastReceiver, filter);
@@ -408,7 +408,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      * Does not set an interval that is larger than it previously was.
      */
     private void updateLocationListener(){
-        long neededInterval = computeUpdateInterval(remainingDuractionInSeconds);
+        long neededInterval = computeUpdateInterval(remainingDurationInSeconds);
         Logger.getInstance().d(TAG, "Required update interval: " + neededInterval + "; current interval: " + currentUpdateInterval);
 
         if(isInitialLocationFix){
@@ -431,7 +431,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      */
     private boolean hasReachedDestination(){
         boolean distanceCheck = remainingDistanceInMeters < TARGET_DESTINATION_RADIUS_IN_METERS;
-        boolean durationCheck = remainingDuractionInSeconds < TARGET_DURATION_LOWER_LIMIT_IN_SECONDS;
+        boolean durationCheck = remainingDurationInSeconds < TARGET_DURATION_LOWER_LIMIT_IN_SECONDS;
         return distanceCheck || durationCheck;
     }
 
@@ -449,7 +449,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      * Sets the location listener again in case it failed.
      */
     private void setRetryLocationListener(){
-        long defaultUpdateInterval = computeUpdateInterval(remainingDuractionInSeconds);
+        long defaultUpdateInterval = computeUpdateInterval(remainingDurationInSeconds);
         long interval = Math.min(defaultUpdateInterval, MAX_API_RETRY_INTERVAL_IN_SECONDS);
         Logger.getInstance().i(TAG, "Scheduling a new LocationListener with an interval of " + String.valueOf(interval) + " seconds.");
         setNewLocationListener(interval);
@@ -499,13 +499,18 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.getInstance().d(TAG, "sendSms");
         text = fillSmsTemplate(text);
         SmsManager sms = SmsManager.getDefault();
-        sms.sendTextMessage(phoneNumber, null, text, null, null);
+        if(text.length() <= 160)
+            sms.sendTextMessage(phoneNumber, null, text, null, null);
+        else{
+            ArrayList<String> parts = sms.divideMessage(text);
+            sms.sendMultipartTextMessage(phoneNumber, null, parts, null, null);
+        }
     }
 
     private String fillSmsTemplate(String text){
         text = text.replace("%%DESTINATION%%", destination);
-        text = text.replace("%%DURATION%%", converter.formatDuration(remainingDuractionInSeconds));
-        text = text.replace("%%ARRIVAL%%", converter.formatArrivalTime(remainingDuractionInSeconds));
+        text = text.replace("%%DURATION%%", converter.formatDuration(remainingDurationInSeconds));
+        text = text.replace("%%ARRIVAL%%", converter.formatArrivalTime(remainingDurationInSeconds));
         return text;
     }
 
@@ -534,12 +539,12 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
 
     private void updateNotification(){
         String distance = converter.formatDistance(remainingDistanceInMeters);
-        String duration = converter.formatDuration(remainingDuractionInSeconds);
+        String duration = converter.formatDuration(remainingDurationInSeconds);
 
-        Date date = new Date(lastupdateCheckTicks);
+        Date date = new Date(lastUpdateCheckTicks);
         String lastCheck = SimpleDateFormat.getTimeInstance().format(date);
 
-        Date arrivalTime = new Date(System.currentTimeMillis() + remainingDuractionInSeconds*1000);
+        Date arrivalTime = new Date(System.currentTimeMillis() + remainingDurationInSeconds *1000);
         String arrivalTimeString = SimpleDateFormat.getTimeInstance().format(arrivalTime);
 
         String content = getString(R.string.distancenotificationservice_is_running_notification_message);
@@ -594,12 +599,12 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void updateRemainingDistanceAndTime(long durationInSeconds, long distanceInMeters, String position, String destination){
-        this.remainingDuractionInSeconds = durationInSeconds;
+        this.remainingDurationInSeconds = durationInSeconds;
         this.remainingDistanceInMeters = distanceInMeters;
-        this.lastupdateCheckTicks = System.currentTimeMillis();
+        this.lastUpdateCheckTicks = System.currentTimeMillis();
         updateNotification();
-        TripSnapshot newSnapshot = new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination);
-        //tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDuractionInSeconds, position, destination, trip.id));
+        TripSnapshot newSnapshot = new TripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDurationInSeconds, position, destination);
+        //tripSnapshots.add(tripSnapshotDataSource.createTripSnapshot(System.currentTimeMillis(), remainingDistanceInMeters, remainingDurationInSeconds, position, destination, trip.id));
         tripSnapshots.add(newSnapshot);
         sendUpdateBroadcast(durationInSeconds, distanceInMeters);
     }

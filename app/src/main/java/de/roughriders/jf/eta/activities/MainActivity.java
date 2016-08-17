@@ -574,6 +574,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         destinationSearchBox.setText("");
     }
 
+    public void clearContactEditText_onClick(View view){
+        targetPhoneBox.setText("");
+    }
+
     public void startButton_Clicked(View view) {
         updateFromUi();
         if(destinationSearchBox.getText().toString().isEmpty() || targetPhoneBox.getText().toString().isEmpty()) {
