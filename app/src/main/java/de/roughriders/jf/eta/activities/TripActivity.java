@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
@@ -20,6 +21,8 @@ import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,12 +49,14 @@ public class TripActivity extends AppCompatActivity {
     private TextView destinationTextView;
     private TextView nameTextView;
     private ArcProgress progressBar;
+    private ImageView contactImageView;
 
     private Converter converter;
 
     public static String DESTINATION_EXTRA = "destinationExtra";
     public static String PHONE_NUMBER_EXTRA = "phoneExtra";
     public static String NAME_EXTRA = "nameExtra";
+    public static String PHOTO_EXTRA = "photoExtra";
     private static final String TAG = "TripActivity";
     public static final String SERVICE_BROADCAST_ACTION = "DISTANCE_NOTIFICATION_SERVICE_UPDATE";
     public static final String SERVICE_UPDATE_TIME_KEY = "DISTANCE_NOTIFICATION_SERVICE_REMAINING_TIME";
@@ -98,6 +103,7 @@ public class TripActivity extends AppCompatActivity {
         destinationTextView = (TextView)findViewById(R.id.trip_activity_destination_textview);
         nameTextView = (TextView)findViewById(R.id.trip_activity_name_textview);
         progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
+        contactImageView = (ImageView)findViewById(R.id.tripActivity_contactImageView);
     }
 
     private void setIntentData(){
@@ -109,6 +115,13 @@ public class TripActivity extends AppCompatActivity {
             name = extras.getString(NAME_EXTRA);
         if (name != null || name.isEmpty())
             nameTextView.setText(name);
+        if(extras.containsKey(PHOTO_EXTRA)) {
+            contactImageView.setImageURI(Uri.parse(extras.getString(PHOTO_EXTRA)));
+            contactImageView.bringToFront();
+            ((RelativeLayout)findViewById(R.id.trip_activity_main_container)).bringChildToFront(contactImageView);
+            (contactImageView.getParent()).requestLayout();
+            ((View)contactImageView.getParent()).invalidate();
+        }
         progressBar.setMax(Integer.MAX_VALUE);
     }
 

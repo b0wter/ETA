@@ -2,11 +2,15 @@ package de.roughriders.jf.eta.activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.databinding.tool.util.L;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
@@ -75,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private Contact currentContact;
     private RecentDestination currentDestination;
+    private Uri contactPhotoUri = null;
 
     private RecyclerView predictionsView;
     private CardView predictionsEmptyCardView;
@@ -399,10 +404,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(resultCode == Activity.RESULT_OK)
         {
             Uri uri = intent.getData();
-            String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME };
+            String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.Contacts.PHOTO_URI };
 
-            Cursor cursor = getContentResolver().query(uri, projection,
-                    null, null, null);
+            Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+            if(cursor == null)
+                return;
             cursor.moveToFirst();
 
             int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
@@ -411,12 +417,35 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
             String name = cursor.getString(nameColumnIndex);
 
+            try {
+                contactPhotoUri = Uri.parse(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)));
+                //contactPhotoUri = Uri.withAppendedPath(intent.getData(), ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
+                //contactPhotoUri = getFacebookPhoto(number);
+            }catch (NullPointerException ex){
+                // doesn't matter, no picture available
+            }
+
+            cursor.close();
             currentContact = new Contact(name, number);
 
             Log.i(TAG, "Contact selected: name: " + name + " - phone: " + number);
 
             updateUi();
         }
+    }
+
+    public Uri getFacebookPhoto(String phoneNumber) {
+        Uri phoneUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+        Uri photoUri = null;
+        ContentResolver cr = this.getContentResolver();
+        Cursor contact = cr.query(phoneUri,
+                new String[] { ContactsContract.Contacts._ID }, null, null, null);
+
+        if (contact.moveToFirst()) {
+            long userId = contact.getLong(contact.getColumnIndex(ContactsContract.Contacts._ID));
+            photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
+        }
+        return photoUri;
     }
 
     private void processAddressIntent(int resultCode, Intent intent){
@@ -426,6 +455,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             String[] projection = { ContactsContract.CommonDataKinds.StructuredPostal.CITY, ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, ContactsContract.CommonDataKinds.StructuredPostal.STREET};
 
             Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+            if(cursor == null)
+                return;
             cursor.moveToFirst();
 
             int cityColumnIndex = cursor.getColumnIndex(projection[0]);
@@ -437,6 +468,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             String city = cursor.getString(cityColumnIndex);
             String zip = cursor.getString(zipColumnIndex);
             String street = cursor.getString(streetColumnIndex);
+            cursor.close();
 
             String primary = "", secondary = "";
             if(city != null && zip != null && street != null){
@@ -447,7 +479,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 primary = street;
                 secondary = city;
             }
-            else if(street != null && city == null){
+            else if(street != null){ // in this case city has to be null
                 // try to split
                 String[] parts = street.split(",");
                 if(parts.length == 3){
@@ -491,8 +523,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult result) {
-        Toast.makeText(this, "Connection to the Google API Client could not be established. Are you online?", Toast.LENGTH_SHORT).show();
+    public void onConnectionFailed(@NonNull ConnectionResult result) {
+        Toast.makeText(this, R.string.mainActivity_apiClientConnectionFailure, Toast.LENGTH_SHORT).show();
+        Logger.getInstance().w(TAG, "Google Api Client could not connect, reason: " + result.getErrorMessage());
     }
 
     private void sendAutocompleteRequest(String query){
@@ -508,7 +541,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.i(TAG, "Received " + autocompletePredictions.getCount() + " predictions.");
                     Log.i(TAG, statusMessage);
 
-                    findViewById(R.id.sliding_layout_search_result_card).setVisibility(View.VISIBLE);
+                    View view = findViewById(R.id.sliding_layout_search_result_card);
+                    if(view != null)
+                        view.setVisibility(View.VISIBLE);
+                    else
+                        Logger.getInstance().w(TAG, "A referenced view could not be found: sliding_layout_search_result_card");
                     predictionsAdapter.clear();
 
                     if(autocompletePredictions.getCount() == 0) {
@@ -615,8 +652,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private boolean isGPSEnabled(){
-        String locationProviders = Settings.Secure.getString(getContentResolver(), Settings.Secure.LOCATION_PROVIDERS_ALLOWED);
-        return !(locationProviders == null || locationProviders.equals(""));
+        try {
+            int locationMode = Settings.Secure.getInt(getContentResolver(), Settings.Secure.LOCATION_MODE);
+            switch(locationMode){
+                case Settings.Secure.LOCATION_MODE_HIGH_ACCURACY:
+                case Settings.Secure.LOCATION_MODE_SENSORS_ONLY:
+                case Settings.Secure.LOCATION_MODE_BATTERY_SAVING:
+                    return true;
+                case Settings.Secure.LOCATION_MODE_OFF:
+                    return false;
+                default:
+                    return false;
+            }
+        }
+        catch(Settings.SettingNotFoundException ex){
+            // we have no clue about the gps status so just give it a try,...
+            return true;
+        }
     }
 
     private void saveCurrentTrip() {
@@ -644,6 +696,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Intent intent = new Intent(this, TripActivity.class);
         intent.putExtra(TripActivity.DESTINATION_EXTRA, destinationSearchBox.getText().toString());
         intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneBox.getText().toString());
+        if(contactPhotoUri != null)
+            intent.putExtra(TripActivity.PHOTO_EXTRA, contactPhotoUri.toString());
         if(currentContact != null)
             intent.putExtra(TripActivity.NAME_EXTRA, currentContact.name);
         startActivity(intent);
