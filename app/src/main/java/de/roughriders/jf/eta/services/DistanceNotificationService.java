@@ -41,6 +41,7 @@ import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
 import de.roughriders.jf.eta.helpers.Logger;
+import de.roughriders.jf.eta.models.IntervalManager;
 import de.roughriders.jf.eta.models.TripSnapshot;
 
 /**
@@ -91,10 +92,12 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private boolean isInitialLocationFix = true;
     private BroadcastReceiver updateRequestBroadcastReceiver;
     private BroadcastReceiver sendSmsBroadcastReceiver;
+    private IntervalManager intervalManager;
 
     public DistanceNotificationService(){
         Log.d(TAG, "Instantiating new DistanceNotificationService");
         tripSnapshots = new ArrayList<>();
+        intervalManager = new IntervalManager();
     }
 
     @Nullable
@@ -292,8 +295,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             Logger.getInstance().d(TAG, "Trying to send DistanceMatrixApi-request.");
             DistanceMatrix result = request.await();
             Logger.getInstance().d(TAG, "Received result from DistanceMatrixApi");
-            //DistanceMatrixElement element = result.rows[0].elements[0];
-            //updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters);
             onResult(result);
         } catch(Exception ex){
             Logger.getInstance().e(TAG, "Unable to send DistanceMatrixApi-request, error:");
@@ -380,24 +381,12 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.getInstance().i(TAG, "reference.estimatedArrivalTime: " + new Date(reference.getEstimatedArrivalTime()).toString() + "; raw: " + reference.getEstimatedArrivalTime());
         Logger.getInstance().i(TAG, "snapshot.estimatedArrivalTime: " + new Date(snapshot.getEstimatedArrivalTime()).toString() + "; raw: " + snapshot.getEstimatedArrivalTime());
 
-        long arrivalTimeDifference = (long)(Math.abs(reference.getEstimatedArrivalTime() - snapshot.getEstimatedArrivalTime())/1000);
-        long remainingTime = snapshot.getRemainingDurationInSeconds(); //TODO: do you really want to use the remaining time?
+        long arrivalTimeDifference = (Math.abs(reference.getEstimatedArrivalTime() - snapshot.getEstimatedArrivalTime())/1000);
+        long remainingTime = snapshot.getRemainingDurationInSeconds();
 
         Logger.getInstance().i(TAG, "snapshot.remainingDurationInSeconds: " + snapshot.getRemainingDurationInSeconds());
 
-        long maxDifference;
-        if(remainingTime < 5*60)
-            maxDifference = 90;
-        else if(remainingTime < 10*60)
-            maxDifference = 150;
-        else if(remainingTime < 30*60)
-            maxDifference = 300;
-        else if(remainingTime < 60*60)
-            maxDifference = 450;
-        else if(remainingTime < 120*60)
-            maxDifference = 15*60;
-        else
-            maxDifference = 30*60;
+        long maxDifference = intervalManager.getIntervalForRemainingTime(remainingTime).getMaxDelay();
 
         Logger.getInstance().i(TAG, "Comparing arrival times: arrivalTimeDifference=" + arrivalTimeDifference + ", maxDifference=" + maxDifference);
         return arrivalTimeDifference < maxDifference;
@@ -583,18 +572,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
      * @return Update interval in seconds.
      */
     private long computeUpdateInterval(long secondsRemaining){
-        if(secondsRemaining < 5*60)
-            return 30;
-        else if(secondsRemaining < 10*60)
-            return 45;
-        else if(secondsRemaining < 30*60)
-            return 60;
-        else if(secondsRemaining < 60*60)
-            return 150;
-        else if(secondsRemaining < 120*60)
-            return 300;
-        else
-            return 600;
+        return intervalManager.getIntervalForRemainingTime(secondsRemaining).getLocationUpdates();
     }
 
     private void updateRemainingDistanceAndTime(long durationInSeconds, long distanceInMeters, String position, String destination){
