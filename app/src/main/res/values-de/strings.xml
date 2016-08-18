@@ -42,4 +42,6 @@
     <string name="min_abbreviation">min</string>
     <string name="hour_abbreviation">h</string>
     <string name="almostThereSms">Ich bin fast da. Meine Ankunftszeit ist %%ARRIVAL%%, das sind noch %%DURATION%%.</string>
+    <string name="tripActivityFinishButtonMessage">Wollen Sie die Fahrt beenden und Ihren Kontakt informieren, dass Sie angekommen sind?</string>
+    <string name="userFinishedTripSms">Ich bin am Ziel angekommen.</string>
 </resources>
