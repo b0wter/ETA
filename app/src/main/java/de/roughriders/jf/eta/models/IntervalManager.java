@@ -19,8 +19,11 @@ public class IntervalManager {
 
     private void initializeIntervals(){
         intervals = new ArrayList<>();
-        // [0, 3[
-        Interval i = new Interval(0, 179, 15, 90);
+        // [0, 1.5[
+        Interval i = new Interval(0, 89, 10, 60);
+        intervals.add(i);
+        // [1.5, 3[
+        i = new Interval(90, 179, 20, 90);
         intervals.add(i);
         // [3, 5[
         i = new Interval(180, 299, 30, 90);
