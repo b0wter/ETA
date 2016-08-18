@@ -70,10 +70,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private EditText targetPhoneBox;
     private Button startButton;
     private boolean ignoreNextAddressBoxChange = false;
+    private boolean hasAskedForContactsPermission = false;
 
     private final int PICK_CONTACT = 0;
     private final int PICK_ADDRESS = 1;
     private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
+    private final int REQUEST_CONTACTS_PERMISSION_KEY = 2;
     private final int SEARCH_RADIUS = 250;
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
 
@@ -104,16 +106,29 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
-        setSupportActionBar(toolbar);
-        targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
-        startButton = (Button)findViewById(R.id.startButton);
+        initControls();
         initDestinationEditText();
         initSlidingPanel();
         connectToApiClient();
         initPredictionsView();
         initRecentDestinationsView();
         initRecentTripsView();
+    }
+
+    private void initControls(){
+        Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
+        setSupportActionBar(toolbar);
+        targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
+        startButton = (Button)findViewById(R.id.startButton);
+
+        targetPhoneBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if(hasFocus && !hasAskedForContactsPermission){
+                    showContactsPermissionExplanationAndAsk();
+                }
+            }
+        });
     }
 
     @Override
@@ -147,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void showLocationPermissionExplanationAndAsk(){
         new AlertDialog.Builder(this)
                 .setTitle("ETA")
-                .setMessage("The app needs to access your location in order to compute the time it takes to reach your destination. The app is useless if you do not grant this permission.")
+                .setMessage(getString(R.string.locationPermissionExplanation))
                 .setCancelable(false)
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                     @Override
@@ -180,7 +195,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     //TODO: needs an additional hint!
                 }
             }
+            case REQUEST_CONTACTS_PERMISSION_KEY:{
+                // doesnt matter if the permission was granted
+            }
         }
+    }
+
+    private void showContactsPermissionExplanationAndAsk(){
+        new AlertDialog.Builder(this)
+                .setTitle("ETA")
+                .setMessage(getString(R.string.contactPermissionExplanation))
+                .setCancelable(false)
+                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        askForContactsPermission();
+                    }
+                }).show();
+    }
+
+    private void askForContactsPermission(){
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS_PERMISSION_KEY);
     }
 
     private void startTripActivityIfServiceRunning(){

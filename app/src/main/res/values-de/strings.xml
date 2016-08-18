@@ -19,7 +19,7 @@
     <string name="send_arrival_notification">Sende Ankunfts-SMS.</string>
     <string name="send_initial_notification">Sende initiale SMS.</string>
     <string name="send_periodic_notifications">Sende kontinuierliche Updates.</string>
-    <string name="smsPermissionNotGranted">Die App benötigt Ihre Erlaubnis SMS zu versenden um Ihren Kontakt über Ihre Ankunftszeit zu informieren.</string>
+    <string name="smsPermissionNotGranted">Die App benötigt Ihre Erlaubnis SMS zu versenden um Ihren Kontakt über Ihre Ankunftszeit zu informieren. Ohne diese Erlaubnis ist die App funktionslos.</string>
     <string name="startTripSms">Ich bin jetzt auf dem Weg zu %%DESTINATION%%. Ich werde vermutlich in %%DURATION%% da sein, um %%ARRIVAL%%. Gesendet von ETA: https://goo.gl/bPqq17</string>
     <string name="stop">stop</string>
     <string name="stopCapital">Stop</string>
@@ -45,4 +45,6 @@
     <string name="tripActivityFinishButtonMessage">Wollen Sie die Fahrt beenden und Ihren Kontakt informieren, dass Sie angekommen sind?</string>
     <string name="userFinishedTripSms">Ich bin am Ziel angekommen.</string>
     <string name="mainActivity_apiClientConnectionFailure">Konnte keine Verbindung mit der Google Api herstellen, sind Sie online?</string>
+    <string name="locationPermissionExplanation">Die App benötogt Zugriff auf Ihre Position um bestimmen zu können wie lange Sie noch unterwegs sind.</string>
+    <string name="contactPermissionExplanation">Die App hat einige zusätzliche Features, beispielsweise Kontaktbilder, für die Zugriff auf das Adressbuch benötigt wird.</string>
 </resources>
