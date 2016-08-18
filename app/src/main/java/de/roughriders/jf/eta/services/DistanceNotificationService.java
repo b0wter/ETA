@@ -63,6 +63,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String SERVICE_STOPPED_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED";
     public static final String SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED_SUCCESS";
     public static final String REQUEST_SEND_SMS_UPDATE = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_SEND_SMS";
+    public static final String REQUEST_DESTINATION_NAME = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_DESTINATION_NAME";
+    public static final String DESTINATION_NAME_REQUEST_NAME_EXTRA = "destinationNameRequestNameExtra";
     public static boolean IsServiceRunning = false;
 
     private static final int NOTIFICATION_ID = 1;
@@ -311,6 +313,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.getInstance().i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
         updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
+
+        // replace the given destination with the destination given by the api since that is where we are actually going
+        if(!destination.equalsIgnoreCase(result.destinationAddresses[0])) {
+            destination = result.destinationAddresses[0];
+            sendDestinationNameBroadcast(destination);
+        }
+
         Logger.getInstance().i(TAG, "Current location: " + result.originAddresses[0] + "; destination: " + result.destinationAddresses[0]);
 
         sendTripStartSmsIfNeeded();
@@ -594,6 +603,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Intent intent = new Intent(TripActivity.SERVICE_BROADCAST_ACTION);
         intent.putExtra(TripActivity.SERVICE_UPDATE_TIME_KEY, durationInSeconds);
         intent.putExtra(TripActivity.SERVICE_UPDATE_DISTANCE_KEY, distanceInMeters);
+        sendBroadcast(intent);
+    }
+
+    private void sendDestinationNameBroadcast(String destination){
+        Logger.getInstance().d(TAG, "Sending broadcast: " + REQUEST_DESTINATION_NAME);
+        Intent intent = new Intent(REQUEST_DESTINATION_NAME);
+        intent.putExtra(DESTINATION_NAME_REQUEST_NAME_EXTRA, destination);
         sendBroadcast(intent);
     }
 

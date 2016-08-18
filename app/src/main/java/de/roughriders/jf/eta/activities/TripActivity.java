@@ -40,6 +40,7 @@ public class TripActivity extends AppCompatActivity {
     private String name;
     private BroadcastReceiver serviceUpdateBroadcastReceiver;
     private BroadcastReceiver serviceStoppedBroadcastReceiver;
+    private BroadcastReceiver serviceDestinationNameBroadcastReceiver;
 
     private TextView destinationTextView;
     private TextView nameTextView;
@@ -113,6 +114,7 @@ public class TripActivity extends AppCompatActivity {
     private void registerBroadcastReceivers(){
         registerServiceBroadCastReceiver();
         registerServiceStoppedBroadCastReceiver();
+        registerServiceDestinationNameBroadcastReceiver();
     }
 
     private void registerServiceBroadCastReceiver(){
@@ -156,6 +158,22 @@ public class TripActivity extends AppCompatActivity {
         registerReceiver(serviceStoppedBroadcastReceiver, filter);
     }
 
+    private void registerServiceDestinationNameBroadcastReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DistanceNotificationService.REQUEST_DESTINATION_NAME);
+        serviceDestinationNameBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.i(TAG, "Received a new destination name from the service.");
+                Bundle extras = intent.getExtras();
+                String destination = extras.getString(DistanceNotificationService.DESTINATION_NAME_REQUEST_NAME_EXTRA);
+                destinationTextView.setText(destination.replace(",", "\r\n"));
+                TripActivity.this.destination = destination;
+            }
+        };
+        registerReceiver(serviceDestinationNameBroadcastReceiver, filter);
+    }
+
     private void unregisterBroadCastReceivers(){
         if(serviceUpdateBroadcastReceiver != null) {
             unregisterReceiver(serviceUpdateBroadcastReceiver);
@@ -165,6 +183,11 @@ public class TripActivity extends AppCompatActivity {
         if(serviceStoppedBroadcastReceiver != null) {
             unregisterReceiver(serviceStoppedBroadcastReceiver);
             serviceStoppedBroadcastReceiver = null;
+        }
+
+        if(serviceDestinationNameBroadcastReceiver != null){
+            unregisterReceiver(serviceDestinationNameBroadcastReceiver);
+            serviceDestinationNameBroadcastReceiver = null;
         }
     }
 
