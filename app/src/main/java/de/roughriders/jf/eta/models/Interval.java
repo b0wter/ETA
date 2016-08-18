@@ -36,9 +36,13 @@ public class Interval {
         this.maxDelay = maxDelay;
     }
 
+    // lower limit of this interval's remaining duration
     private int min;
+    // upper limit of this interval's remaining duration
     private int max;
+    // interval for location updates
     private int locationUpdates;
+    // maximum time difference for sending a delay sms
     private int maxDelay;
 
     public Interval(int min, int max, int locationUpdates, int maxDelay){
