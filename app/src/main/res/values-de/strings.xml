@@ -41,4 +41,5 @@
     <string name="sms_sent_toast">Nachricht wurde versendet.</string>
     <string name="min_abbreviation">min</string>
     <string name="hour_abbreviation">h</string>
+    <string name="almostThereSms">Ich bin fast da. Meine Ankunftszeit ist %%ARRIVAL%%, das sind noch %%DURATION%%.</string>
 </resources>

@@ -63,4 +63,5 @@
     <string name="sms_sent_toast">Message has been sent.</string>
     <string name="min_abbreviation">min</string>
     <string name="hour_abbreviation">h</string>
+    <string name="almostThereSms">I am almost at the destination. My remaining time is %%DURATION%%, I\'ll be arriving at aroung %%ARRIVAL%%.</string>
 </resources>

@@ -69,7 +69,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
     private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 75; // "size" of the target. used to check if the user is at his destination
     private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 20;         // maximum duration to decide whether the user has reached his destination or not
-    private static final long ALMOST_THERE_DURATION_IN_SECONDS = 5*60;
+    private static final long ALMOST_THERE_DURATION_IN_SECONDS = 3*60;
 
     private boolean almostThereMessageSent = false;
     private boolean sendInitialMessage;
@@ -351,6 +351,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private void sendAlmostThereSmsIfNeeded(){
         Logger.getInstance().d(TAG, "sendAlmostThereSmsIfNeeded");
         if(tripSnapshots.size()>0){
+            Logger.getInstance().d(TAG, "remaining distance: " + tripSnapshots.get(tripSnapshots.size()-1).getRemainingDurationInSeconds() + "; almost there distance: " + ALMOST_THERE_DURATION_IN_SECONDS);
             if(tripSnapshots.get(tripSnapshots.size()-1).getRemainingDurationInSeconds() < ALMOST_THERE_DURATION_IN_SECONDS)
                 if(!almostThereMessageSent) {
                     sendAlmostThereSms();
@@ -469,10 +470,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     }
 
     private void sendAlmostThereSms(){
+        Logger.getInstance().d(TAG, "sendAlmostThereMessage sent? " + String.valueOf(sendAlmostThereMessage));
         if(!sendAlmostThereMessage)
             return;
 
         Logger.getInstance().d(TAG, "sendAlmostThereSms");
+        String text = getString(R.string.almostThereSms);
+        sendSms(text);
     }
 
     private void sendArrivalSms(){
