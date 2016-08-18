@@ -66,4 +66,5 @@
     <string name="almostThereSms">I am almost at the destination. My remaining time is %%DURATION%%, I\'ll be arriving at aroung %%ARRIVAL%%.</string>
     <string name="tripActivityFinishButtonMessage">Do you want to finish this trip and inform your contact that you have arrived?</string>
     <string name="userFinishedTripSms">I have arrived at the destination.</string>
+    <string name="mainActivity_apiClientConnectionFailure">The Google API Client could connect to the remote party. Are you online?</string>
 </resources>
