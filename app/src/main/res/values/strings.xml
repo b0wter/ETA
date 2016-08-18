@@ -67,4 +67,6 @@
     <string name="tripActivityFinishButtonMessage">Do you want to finish this trip and inform your contact that you have arrived?</string>
     <string name="userFinishedTripSms">I have arrived at the destination.</string>
     <string name="mainActivity_apiClientConnectionFailure">The Google API Client could connect to the remote party. Are you online?</string>
+    <string name="locationPermissionExplanation">The app needs to access your location in order to compute the time it takes to reach your destination. The app is useless if you do not grant this permission.</string>
+    <string name="contactPermissionExplanation">The app allows for some additional features if you allow it to access your contacts. An example are the pictures of contacts that will be displayed.</string>
 </resources>
