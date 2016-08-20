@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.databinding.tool.util.L;
@@ -13,6 +14,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -78,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int REQUEST_CONTACTS_PERMISSION_KEY = 2;
     private final int SEARCH_RADIUS = 250;
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
+    private final String ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY = "askedForContactsPermission";
 
     private Contact currentContact;
     private RecentDestination currentDestination;
@@ -196,22 +199,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
             case REQUEST_CONTACTS_PERMISSION_KEY:{
-                // doesnt matter if the permission was granted
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putBoolean(ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY, true);
+                editor.commit();
             }
         }
     }
 
     private void showContactsPermissionExplanationAndAsk(){
-        new AlertDialog.Builder(this)
-                .setTitle("ETA")
-                .setMessage(getString(R.string.contactPermissionExplanation))
-                .setCancelable(false)
-                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        askForContactsPermission();
-                    }
-                }).show();
+        if(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getBoolean(ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY, false) == false) {
+            new AlertDialog.Builder(this)
+                    .setTitle("ETA")
+                    .setMessage(getString(R.string.contactPermissionExplanation))
+                    .setCancelable(false)
+                    .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            askForContactsPermission();
+                        }
+                    }).show();
+        }
+        hasAskedForContactsPermission = true;
     }
 
     private void askForContactsPermission(){
