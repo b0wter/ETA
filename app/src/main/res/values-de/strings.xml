@@ -72,4 +72,5 @@
     <string name="send_feedback_explanation">Sende ein Email an den Entwickler.</string>
     <string name="send_feedback">Sende Email</string>
     <string name="not_all_information_entered_on_trip_start">Sie müssen eine Telefonnummer und eine Adresse eingeben um fortzufahren.</string>
+    <string name="start">Start</string>
 </resources>

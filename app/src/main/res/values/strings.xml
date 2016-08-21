@@ -147,4 +147,5 @@
     <string name="send_feedback_explanation">Send an email to the developer.</string>
     <string name="send_feedback">Send Email</string>
     <string name="not_all_information_entered_on_trip_start">You have to enter a phone number and a destination to start a trip.</string>
+    <string name="start">Start</string>
 </resources>
