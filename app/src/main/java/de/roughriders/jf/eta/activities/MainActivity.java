@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             recentTripsCardView.setVisibility(View.GONE);
             noRecentTripsCardView.setVisibility(View.VISIBLE);
         }
-        
+
         recentDestinationsAdapter.updateFromSharedPreferences(this);
         if(recentDestinationsAdapter.size() > 0){
             recentDestinationsCardView.setVisibility(View.VISIBLE);
