@@ -58,6 +58,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:backgroundTint="@android:color/transparent"
                             android:hint="@string/destination"
                             android:paddingLeft="10dp"
@@ -102,6 +103,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
+                            android:layout_gravity="center_vertical"
                             android:backgroundTint="@android:color/transparent"
                             android:hint="@string/phone"
                             android:inputType="phone"
@@ -237,7 +239,7 @@
             android:layout_marginTop="@dimen/activity_vertical_margin"
             android:background="@color/colorAccent"
             android:onClick="startButton_Clicked"
-            android:text="Start"
+            android:text="@string/start"
             android:textColor="@android:color/primary_text_light" />
 
     </RelativeLayout>
