@@ -101,6 +101,13 @@ public class RecentDestination {
 
     @Override
     public String toString(){
-        return primaryText + SERIALIZATION_FIELD_DELIMITER + secondaryText;
+        if(!primaryText.isEmpty() && !secondaryText.isEmpty())
+            return primaryText + SERIALIZATION_FIELD_DELIMITER + secondaryText;
+        else if(!primaryText.isEmpty())
+            return primaryText;
+        else if(!secondaryText.isEmpty())
+            return secondaryText;
+        else
+            return "<unknown>";
     }
 }

@@ -738,7 +738,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     public void startButton_Clicked(View view) {
         updateFromUi();
         if(destinationSearchBox.getText().toString().isEmpty() || targetPhoneBox.getText().toString().isEmpty()) {
-            Toast.makeText(this, "You have to enter a phone number and a destination to start a trip.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, getString(R.string.not_all_information_entered_on_trip_start) , Toast.LENGTH_SHORT).show();
             return;
         }
 
