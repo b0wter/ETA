@@ -23,9 +23,11 @@ import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.helpers.ISettingsChangeRequiresReload;
 import de.roughriders.jf.eta.models.RecentDestination;
 import de.roughriders.jf.eta.models.RecentTrip;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,6 +42,17 @@ import java.util.List;
  * API Guide</a> for more information on developing a Settings UI.
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
+
+    List<ISettingsChangeRequiresReload> callbacks = new ArrayList<>();
+
+    public void addSettingsChangedCallback(ISettingsChangeRequiresReload callback){
+        callbacks.add(callback);
+    }
+
+    public void removeSettingsChangedCallback(ISettingsChangeRequiresReload callback){
+        callbacks.remove(callback);
+    }
+
     /**
      * A preference value change listener that updates the preference's summary
      * to reflect its new value.

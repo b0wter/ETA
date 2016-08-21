@@ -36,6 +36,17 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
         }
     }
 
+    public void updateFromSharedPreferences(Context context){
+        trips.clear();
+        trips = RecentTrip.getFromSharedPreferences(context);
+        notifyDataSetChanged();
+    }
+
+    public void clearAll(){
+        trips.clear();
+        notifyDataSetChanged();
+    }
+
     private boolean alreadyContainsTrip(RecentTrip trip){
         for(RecentTrip t : trips){
             if(     trip.contact.name.equals(t.contact.name) &&

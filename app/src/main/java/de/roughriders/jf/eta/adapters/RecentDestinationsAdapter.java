@@ -34,6 +34,17 @@ public class RecentDestinationsAdapter extends RecyclerView.Adapter<RecentDestin
         }
     }
 
+    public void updateFromSharedPreferences(Context context){
+        recentDestinations.clear();
+        recentDestinations = RecentDestination.getFromSharedPreferences(context);
+        notifyDataSetChanged();
+    }
+
+    public void clearAll(){
+        recentDestinations.clear();
+        notifyDataSetChanged();
+    }
+
     private boolean alreadyContainsDestination(RecentDestination destination){
         for(RecentDestination item : recentDestinations){
             if(item.primaryText.equals(destination.primaryText) && item.secondaryText.equals(destination.secondaryText))

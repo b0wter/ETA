@@ -59,13 +59,15 @@ import de.roughriders.jf.eta.adapters.PredictionsAdapter;
 import de.roughriders.jf.eta.adapters.RecentDestinationsAdapter;
 import de.roughriders.jf.eta.adapters.RecentTripsAdapter;
 import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
+import de.roughriders.jf.eta.helpers.ISettingsChangeRequiresReload;
 import de.roughriders.jf.eta.helpers.Logger;
+import de.roughriders.jf.eta.helpers.NotImplementedException;
 import de.roughriders.jf.eta.models.Contact;
 import de.roughriders.jf.eta.models.RecentDestination;
 import de.roughriders.jf.eta.models.RecentTrip;
 import de.roughriders.jf.eta.services.DistanceNotificationService;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, ISettingsChangeRequiresReload {
 
     private SlidingUpPanelLayout slidingPanel;
     private static String TAG = "MainActivity";
@@ -151,11 +153,46 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
         askOrCheckForLocationPermission();
         startTripActivityIfServiceRunning();
-        refreshRecyclerAdapters();
+        reloadAdapterData();
     }
 
-    private void refreshRecyclerAdapters(){
-        recentDestinationsAdapter.
+    private void reloadAdapterData(){
+        recentTripsAdapter.updateFromSharedPreferences(this);
+        if(recentTripsAdapter.size() > 0){
+            recentTripsCardView.setVisibility(View.VISIBLE);
+            noRecentTripsCardView.setVisibility(View.GONE);
+        }
+        else{
+            recentTripsCardView.setVisibility(View.GONE);
+            noRecentTripsCardView.setVisibility(View.VISIBLE);
+        }
+        
+        recentDestinationsAdapter.updateFromSharedPreferences(this);
+        if(recentDestinationsAdapter.size() > 0){
+            recentDestinationsCardView.setVisibility(View.VISIBLE);
+            recentDestinationsEmptyCardView.setVisibility(View.GONE);
+        }
+        else{
+            recentDestinationsCardView.setVisibility(View.GONE);
+            recentDestinationsEmptyCardView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void onRequiresReload(String entityName, boolean clearedAll){
+        if(!clearedAll){
+            Logger.getInstance().e(TAG, "onRequiresReload was called with 'clearedAll' = false. This option is not yet supported.");
+            return;
+        }
+
+        if(entityName.equals("RecentDestinations")){
+            recentDestinationsAdapter.clearAll();
+        }
+        else if(entityName.equals("RecentTrips")){
+            recentTripsAdapter.clearAll();
+        }
+        else{
+            Logger.getInstance().w(TAG, "An update has been requestes for an unknown entity: " + entityName);
+        }
     }
 
     private void showLocationServiceAutocompleteHint() {
