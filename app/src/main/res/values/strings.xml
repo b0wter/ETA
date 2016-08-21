@@ -141,9 +141,10 @@
     <string name="preferences_default_send_almost_there_sms_summary">Default setting for sending sms update when the destination is almost reached.</string>
     <string name="preferences_default_send_trip_finished_sms_key">Send SMS on arrival</string>
     <string name="preferences_default_send_trip_finished_sms_summary">Default setting for sending sms when the destination is arrived.</string>
-    <string name="show_keep_display_on_hint">The app will keep the display active until toggle of manually.</string>
+    <string name="show_keep_display_on_hint">The app will keep the display active until toggled of manually.</string>
     <string name="show_keep_display_off_hint">The app will no longer keep the display active.</string>
     <string name="feedback">Feedback</string>
     <string name="send_feedback_explanation">Send an email to the developer.</string>
     <string name="send_feedback">Send Email</string>
+    <string name="not_all_information_entered_on_trip_start">You have to enter a phone number and a destination to start a trip.</string>
 </resources>

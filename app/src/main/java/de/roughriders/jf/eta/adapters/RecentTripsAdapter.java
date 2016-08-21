@@ -84,8 +84,14 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         RecentTrip trip = trips.get(position);
-        holder.primaryText.setText(trip.contact.name);
+        if(!trip.contact.name.isEmpty())
+            holder.primaryText.setText(trip.contact.name);
+        else
+            holder.primaryText.setText(trip.contact.phone);
+
         holder.secondaryText.setText(trip.destination.primaryText);
+        if(!trip.destination.secondaryText.isEmpty())
+            holder.secondaryText.append(", " + trip.destination.secondaryText);
     }
 
     @Override
