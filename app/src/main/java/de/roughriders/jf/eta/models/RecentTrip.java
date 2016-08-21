@@ -66,6 +66,13 @@ public class RecentTrip {
         editor.apply();
     }
 
+    public static void clearFromSharedPreferences(Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if(prefs.contains(SHARED_PREFERENCES_KEY)){
+            prefs.edit().remove(SHARED_PREFERENCES_KEY).apply();
+        }
+    }
+
     @Override
     public String toString(){
         if(date == null)

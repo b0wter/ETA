@@ -1,6 +1,7 @@
 package de.roughriders.jf.eta.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -14,6 +15,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.provider.ContactsContract;
 import android.provider.Settings;
@@ -71,6 +73,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private EditText destinationSearchBox;
     private EditText targetPhoneBox;
     private Button startButton;
+    private CheckBox sendStartSmsCheckbox;
+    private CheckBox sendContinouosSmsCheckbox;
+    private CheckBox sendAlmostThereSmsCheckbox;
+    private CheckBox sendArrivalSmsCheckbox;
     private boolean ignoreNextAddressBoxChange = false;
     private boolean hasAskedForContactsPermission = false;
 
@@ -116,6 +122,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         initPredictionsView();
         initRecentDestinationsView();
         initRecentTripsView();
+        setSettingsData();
     }
 
     private void initControls(){
@@ -132,6 +139,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
         });
+
+        sendStartSmsCheckbox = ((CheckBox) findViewById(R.id.main_activity_initial_message));
+        sendContinouosSmsCheckbox = ((CheckBox) findViewById(R.id.main_activity_continuous_updates));
+        sendAlmostThereSmsCheckbox = ((CheckBox) findViewById(R.id.main_activity_almost_there_message));
+        sendArrivalSmsCheckbox = ((CheckBox) findViewById(R.id.main_activity_arrival_message));
     }
 
     @Override
@@ -139,6 +151,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         super.onStart();
         askOrCheckForLocationPermission();
         startTripActivityIfServiceRunning();
+        refreshRecyclerAdapters();
+    }
+
+    private void refreshRecyclerAdapters(){
+        recentDestinationsAdapter.
     }
 
     private void showLocationServiceAutocompleteHint() {
@@ -309,6 +326,27 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setDestinationEditTextChangeListener();
     }
 
+    @SuppressLint("CommitPrefEdits")
+    private void setSettingsData(){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        Logger.writeToLogFile = prefs.getBoolean("enable_logging", false);
+
+        if(!prefs.contains("default_send_almost_there_sms")){
+            prefs.edit().putBoolean("default_send_almost_there_sms", false).commit();
+        }
+
+        try {
+            sendStartSmsCheckbox.setChecked(prefs.getBoolean("default_start_sms", true));
+            sendContinouosSmsCheckbox.setChecked(prefs.getBoolean("default_send_continuous_sms", true));
+            sendAlmostThereSmsCheckbox.setChecked(prefs.getBoolean("default_send_almost_there_sms", true));
+            sendArrivalSmsCheckbox.setChecked(prefs.getBoolean("default_send_trip_finished_sms", true));
+        }
+        catch(NullPointerException ex){
+            Log.d(TAG, "At least one of the checkboxes could not be found.");
+        }
+    }
+
     private void setDestinationEditTextChangeListener(){
         destinationSearchBox.addTextChangedListener(new TextWatcher() {
             @Override
@@ -342,7 +380,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             public void onFocusChange(View view, boolean b) {
                if(b == true) {
                    slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
-                   showLocationServiceAutocompleteHint();
+                   if(!isGPSEnabled())
+                       showLocationServiceAutocompleteHint();
                }
                else slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
             }
@@ -373,13 +412,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        /*
         if (id == R.id.action_settings) {
             Intent intent = new Intent(this, SettingsActivity.class);
+            intent.putExtra(PreferenceActivity.EXTRA_NO_HEADERS, true);
+            intent.putExtra(PreferenceActivity.EXTRA_SHOW_FRAGMENT, SettingsActivity.GeneralPreferenceFragment.class.getName());
             startActivity(intent);
             return true;
         }
-        */
         return super.onOptionsItemSelected(item);
     }
 

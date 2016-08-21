@@ -5,8 +5,8 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.SEND_SMS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.READ_CONTACTS"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
         android:allowBackup="true"
@@ -16,9 +16,9 @@
         android:theme="@style/AppTheme">
 
         <!-- API Key for release -->
-            <meta-data
+        <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is"/>
+            android:value="AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is" />
 
         <!-- API Key for debugging (laptop) -->
         <!--
@@ -26,6 +26,7 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw" />
         -->
+
 
         <!-- API Key for debugging (desktop) -->
         <!--
@@ -44,14 +45,21 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".activities.TripActivity"
             android:theme="@style/FullscreenActivityTheme" />
-
+        <activity
+            android:name=".activities.SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:parentActivityName=".activities.MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="de.roughriders.jf.eta.activities.MainActivity" />
+        </activity>
     </application>
 
 </manifest>

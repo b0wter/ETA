@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.prefs.PreferencesFactory;
 
 /**
  * Model to store and retrieve a recent destination to the SharedPreferences
@@ -78,6 +79,13 @@ public class RecentDestination {
         editor.putStringSet(SHARED_PREFERENCES_KEY, set);
         editor.apply();
         Log.i(TAG, "Recent destinations have been saved to the SharedPreferences");
+    }
+
+    public static void clearFromSharedPreferences(Context context){
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        if(prefs.contains(SHARED_PREFERENCES_KEY)){
+            prefs.edit().remove(SHARED_PREFERENCES_KEY).apply();
+        }
     }
 
     public String toNiceString(){

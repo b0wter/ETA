@@ -11,6 +11,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -20,7 +21,9 @@ import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -50,7 +53,9 @@ public class TripActivity extends AppCompatActivity {
     private TextView nameTextView;
     private ArcProgress progressBar;
     private ImageView contactImageView;
+    private ImageButton toggleKeepScreenOnButton;
 
+    private boolean keepScreenOn = false;
     private Converter converter;
 
     public static String DESTINATION_EXTRA = "destinationExtra";
@@ -70,6 +75,7 @@ public class TripActivity extends AppCompatActivity {
         initControls();
         setIntentData();
         registerBroadcastReceivers();
+        setDisplayStatus();
     }
 
     @Override
@@ -104,6 +110,7 @@ public class TripActivity extends AppCompatActivity {
         nameTextView = (TextView)findViewById(R.id.trip_activity_name_textview);
         progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
         contactImageView = (ImageView)findViewById(R.id.tripActivity_contactImageView);
+        toggleKeepScreenOnButton = (ImageButton)findViewById(R.id.trip_activity_toggle_display_sleep);
     }
 
     private void setIntentData(){
@@ -205,6 +212,14 @@ public class TripActivity extends AppCompatActivity {
         }
     }
 
+    private void setDisplayStatus(){
+        keepScreenOn = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("keep_screen_on", false);
+        if(keepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            toggleKeepScreenOnButton.setImageDrawable(getDrawable(R.drawable.display_on));
+        }
+    }
+
     public void onSendUpdateSmsClick(View view){
         Log.d(TAG, "Trying to send an update sms.");
         Intent intent = new Intent(DistanceNotificationService.REQUEST_SEND_SMS_UPDATE);
@@ -238,6 +253,20 @@ public class TripActivity extends AppCompatActivity {
                         SmsManager.getDefault().sendTextMessage(phoneNumber, null, getString(R.string.userFinishedTripSms), null, null);
                     }
                 }).show();
+    }
+
+    public void onToggleScreenOn(View view){
+        keepScreenOn = !keepScreenOn;
+        if(keepScreenOn) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            toggleKeepScreenOnButton.setImageDrawable(getDrawable(R.drawable.display_on));
+            Toast.makeText(this, getString(R.string.show_keep_display_on_hint), Toast.LENGTH_LONG).show();
+        }
+        else {
+            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+            toggleKeepScreenOnButton.setImageDrawable(getDrawable(R.drawable.display_off));
+            Toast.makeText(this, getString(R.string.show_keep_display_off_hint), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override

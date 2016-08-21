@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -154,6 +155,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                 .addOnConnectionFailedListener(this)
                 .build();
         apiClient.connect();
+
+        Logger.writeToLogFile = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("enable_logging", false);
     }
 
     private void start(String phone, String destination){

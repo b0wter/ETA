@@ -1,0 +1,86 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/preferences_general_settings_header"/>
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="keep_screen_on"
+        android:title="@string/keep_screen_on" />
+
+    <Preference
+        android:summary="@string/delete_recent_destinations_summary"
+        android:title="@string/delete_recent_destinations"
+        android:key="@string/delete_recent_destinations_button"
+        />
+
+    <Preference
+        android:summary="@string/delete_recent_trips_summary"
+        android:title="@string/delete_recent_trips"
+        android:key="@string/delete_recent_trips_key"
+        />
+
+    <PreferenceCategory
+        android:title="@string/preferences_sms_settings"/>
+    <CheckBoxPreference
+        android:title="@string/preferences_default_send_start_sms_key"
+        android:summary="@string/preferences_default_send_start_sms_summary"
+        android:key="default_send_start_sms"
+        android:defaultValue="true"
+        />
+    <CheckBoxPreference
+        android:title="@string/preferences_default_send_continuous_sms_key"
+        android:summary="@string/preferences_default_send_continuous_sms_summary"
+        android:key="default_send_continuous_sms"
+        android:defaultValue="true"
+        />
+    <CheckBoxPreference
+        android:title="@string/preferences_default_send_almost_there_sms_key"
+        android:summary="@string/preferences_default_send_almost_there_sms_summary"
+        android:key="default_send_almost_there_sms"
+        android:defaultValue="true"
+        />
+    <CheckBoxPreference
+        android:title="@string/preferences_default_send_trip_finished_sms_key"
+        android:summary="@string/preferences_default_send_trip_finished_sms_summary"
+        android:key="default_send_trip_finished_sms"
+        android:defaultValue="true"
+        />
+
+    <PreferenceCategory
+        android:title="@string/preferences_debugging_header"/>
+    <SwitchPreference
+        android:defaultValue="false"
+        android:key="enable_logging"
+        android:title="@string/preferences_enable_logging"
+        android:summary="@string/preferences_enable_logging_summary"
+        />
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <!--
+    <EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_display_name"
+        android:inputType="textCapWords"
+        android:key="example_text"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_display_name" />
+        -->
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <!--
+    <ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/pref_example_list_titles"
+        android:entryValues="@array/pref_example_list_values"
+        android:key="example_list"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_add_friends_to_messages" />
+        -->
+
+</PreferenceScreen>
