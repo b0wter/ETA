@@ -68,4 +68,6 @@
     <string name="preferences_default_send_trip_finished_sms_summary">Standardeinstellung für das Senden einer SMS wenn das Ziel erreicht wurde.</string>
     <string name="show_keep_display_on_hint">Die App wird den Bildschirm aktiviert lassen, bis er manuell ausgeschaltet wird.</string>
     <string name="show_keep_display_off_hint">Die App wird den Bildschirm nicht mehr aktiviert lassen.</string>
+    <string name="feedback">Feedback</string>
+    <string name="send_feedback_explanation">Sende ein Email an den Entwickler.</string>
 </resources>

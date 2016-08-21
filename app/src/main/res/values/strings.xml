@@ -143,4 +143,6 @@
     <string name="preferences_default_send_trip_finished_sms_summary">Default setting for sending sms when the destination is arrived.</string>
     <string name="show_keep_display_on_hint">The app will keep the display active until toggle of manually.</string>
     <string name="show_keep_display_off_hint">The app will no longer keep the display active.</string>
+    <string name="feedback">Feedback</string>
+    <string name="send_feedback_explanation">Send an email to the developer.</string>
 </resources>
