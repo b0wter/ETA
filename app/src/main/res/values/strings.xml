@@ -145,4 +145,5 @@
     <string name="show_keep_display_off_hint">The app will no longer keep the display active.</string>
     <string name="feedback">Feedback</string>
     <string name="send_feedback_explanation">Send an email to the developer.</string>
+    <string name="send_feedback">Send Email</string>
 </resources>
