@@ -47,6 +47,13 @@
         />
 
     <PreferenceCategory
+        android:title="@string/feedback"/>
+    <Preference
+        android:summary="@string/send_feedback_explanation"
+        android:title="@string/feedback"
+        android:key="send_feedback"/>
+
+    <PreferenceCategory
         android:title="@string/preferences_debugging_header"/>
     <SwitchPreference
         android:defaultValue="false"
@@ -54,16 +61,6 @@
         android:title="@string/preferences_enable_logging"
         android:summary="@string/preferences_enable_logging_summary"
         />
-
-    <!--
-    <PreferenceCategory
-        android:title="@string/feedback"/>
-    <Preference
-        android:summary="@string/send_feedback_explanation"
-        android:title="@string/feedback"
-        android:key="send_feedback"/>
-        -->
-
 
     <!-- NOTE: EditTextPreference accepts EditText attributes. -->
     <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->

@@ -259,20 +259,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 }
             });
 
-            /*
             button = findPreference("send_feedback");
             button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
-                    Intent intent = new Intent(Intent.ACTION_SEND);
-                    intent.setType("text/plain");
-                    intent.putExtra(Intent.EXTRA_EMAIL, "b0wter@gmx.de");
+                    Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "b0wter@gmx.de", null));
                     intent.putExtra(Intent.EXTRA_SUBJECT, "Feedback - ETA Notifier");
-                    startActivity(Intent.createChooser(intent, "Send Email"));
+                    startActivity(Intent.createChooser(intent, getString(R.string.send_feedback)));
                     return true;
                 }
             });
-            */
         }
     }
 }
