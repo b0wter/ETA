@@ -79,7 +79,7 @@
                             android:layout_width="48dp"
                             android:layout_height="48dp"
                             android:background="@android:color/transparent"
-                            android:onClick="selectContactButton_Clicked"
+                            android:onClick="selectContactForAddressButton"
                             android:padding="4dp"
                             android:src="@drawable/ic_contacts_black_24dp" />
 
