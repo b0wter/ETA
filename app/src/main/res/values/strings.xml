@@ -148,4 +148,5 @@
     <string name="send_feedback">Send Email</string>
     <string name="not_all_information_entered_on_trip_start">You have to enter a phone number and a destination to start a trip.</string>
     <string name="start">Start</string>
+    <string name="internet_not_available_toast">You need an active internet connection to use this app.</string>
 </resources>
