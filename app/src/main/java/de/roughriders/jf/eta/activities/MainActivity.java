@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentUris;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,6 +14,8 @@ import android.database.Cursor;
 import android.databinding.tool.util.L;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceActivity;
@@ -746,6 +749,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             return;
         }
 
+        if(!isInternetAvailable()){
+            Toast.makeText(this, R.string.internet_not_available_toast, Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if(wasSmsPermissionGranted())
             saveCurrentTrip();
         else {
@@ -754,6 +762,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
 
         startTrip();
+    }
+
+    private boolean isInternetAvailable(){
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo info = cm.getActiveNetworkInfo();
+        return info != null && info.isConnected();
     }
 
     private void showGPSHint(){

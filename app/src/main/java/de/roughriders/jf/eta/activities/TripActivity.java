@@ -92,6 +92,15 @@ public class TripActivity extends AppCompatActivity {
     public void onStart(){
         super.onStart();
         tryUpdatingFromService();
+        setToggleDisplayTimeoutButtonState();
+    }
+
+    private void setToggleDisplayTimeoutButtonState(){
+        int flags = getWindow().getAttributes().flags;
+        if((flags & WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) != 0)
+            toggleKeepScreenOnButton.setImageDrawable(getDrawable(R.drawable.display_on));
+        else
+            toggleKeepScreenOnButton.setImageDrawable(getDrawable(R.drawable.display_off));
     }
 
     private void tryUpdatingFromService(){
