@@ -1,18 +1,26 @@
 package de.roughriders.jf.eta.activities;
 
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
+import android.media.audiofx.BassBoost;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
+import android.preference.SwitchPreference;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
@@ -21,6 +29,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
+import android.widget.Switch;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.helpers.ISettingsChangeRequiresReload;
@@ -43,7 +52,10 @@ import java.util.List;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
+    static List<IPermissionRequestResultCallback> requestResultCallbacks = new ArrayList<>();
+
     List<ISettingsChangeRequiresReload> callbacks = new ArrayList<>();
+    private static int REQUEST_WRITE_EXTERNAK_STORAGE = 1;
 
     public void addSettingsChangedCallback(ISettingsChangeRequiresReload callback){
         callbacks.add(callback);
@@ -52,6 +64,24 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     public void removeSettingsChangedCallback(ISettingsChangeRequiresReload callback){
         callbacks.remove(callback);
     }
+
+    static void addPermissionResultCallback(IPermissionRequestResultCallback callback){
+        requestResultCallbacks.add(callback);
+    }
+
+    static void removePermissionResultCallback(IPermissionRequestResultCallback callback){
+        requestResultCallbacks.remove(callback);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if(grantResults.length > 0) {
+            for (IPermissionRequestResultCallback callback : requestResultCallbacks) {
+                callback.onPermissionRequestResultAvailable(permissions[0], grantResults[0]);
+            }
+        }
+    }
+
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -202,12 +232,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName);
     }
 
+    public interface IPermissionRequestResultCallback{
+        public void onPermissionRequestResultAvailable(String permission, int grantResult);
+    }
+
     /**
      * This fragment shows general preferences only. It is used when the
      * activity is showing a two-pane settings UI.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class GeneralPreferenceFragment extends PreferenceFragment {
+    public static class GeneralPreferenceFragment extends PreferenceFragment implements IPermissionRequestResultCallback{
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
@@ -269,6 +303,35 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     return true;
                 }
             });
+
+            SwitchPreference switchPref = (SwitchPreference)findPreference("enable_logging");
+            switchPref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object o) {
+                    SettingsActivity.addPermissionResultCallback(GeneralPreferenceFragment.this);
+                    int permissionCheck = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if(permissionCheck == PackageManager.PERMISSION_GRANTED)
+                        return true;
+                    else {
+                        ActivityCompat.requestPermissions(getActivity(), new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, REQUEST_WRITE_EXTERNAK_STORAGE);
+                        return false;
+                    }
+                }
+            });
+
+        }
+
+        @Override
+        public void onPermissionRequestResultAvailable(String permission, int grantResult) {
+            if(permission.equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+                if(grantResult == PackageManager.PERMISSION_GRANTED){
+                    SwitchPreference pref = (SwitchPreference)findPreference("enable_logging");
+                    pref.setChecked(true);
+                }
+                else{
+
+                }
+            }
         }
     }
 }
