@@ -573,6 +573,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void processAddressIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK)
         {
+            slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+
             Uri uri = intent.getData();
             String[] projection = { ContactsContract.CommonDataKinds.StructuredPostal.CITY, ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, ContactsContract.CommonDataKinds.StructuredPostal.STREET};
 
