@@ -8,8 +8,8 @@ android {
         applicationId "de.roughriders.jf.eta"
         minSdkVersion 21
         targetSdkVersion 24
-        versionCode 22
-        versionName "1.21"
+        versionCode 23
+        versionName "1.22"
     }
     buildTypes {
         release {
@@ -46,4 +46,5 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:3.3.0'
     compile 'com.github.lzyzsd:circleprogress:1.1.0@aar'
     compile 'de.hdodenhof:circleimageview:2.1.0'
+    compile 'com.google.code.gson:gson:2.4'
 }

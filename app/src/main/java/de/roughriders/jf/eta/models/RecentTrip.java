@@ -5,11 +5,18 @@ import android.content.SharedPreferences;
 import android.databinding.parser.BindingExpressionParser;
 import android.preference.PreferenceManager;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+
+import org.json.JSONException;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import de.roughriders.jf.eta.helpers.Logger;
 
 /**
  * Created by b0wter on 6/11/16.
@@ -45,22 +52,29 @@ public class RecentTrip {
     }
 
     public static ArrayList<RecentTrip> getFromSharedPreferences(Context context){
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        ArrayList<RecentTrip> recentTrips = new ArrayList<RecentTrip>();
-        if(prefs.contains(SHARED_PREFERENCES_KEY)){
-            Set<String> set = prefs.getStringSet(SHARED_PREFERENCES_KEY, new HashSet<String>());
-            for(String element : set)
-                recentTrips.add(RecentTrip.fromString(element));
-            return recentTrips;
+        try {
+            final Gson gson = new Gson();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            ArrayList<RecentTrip> recentTrips = new ArrayList<RecentTrip>();
+            if (prefs.contains(SHARED_PREFERENCES_KEY)) {
+                Set<String> set = prefs.getStringSet(SHARED_PREFERENCES_KEY, new HashSet<String>());
+                for (String element : set)
+                    recentTrips.add(gson.fromJson(element, RecentTrip.class));
+                return recentTrips;
+            } else
+                return recentTrips;
+        } catch(JsonSyntaxException ex){
+            Logger.getInstance().w("RecentTrip", "There was a problem deserializing data stored in the shared preferences. Will remove all.\r\n" + ex.getMessage());
+            clearFromSharedPreferences(context);
+            return new ArrayList<>();
         }
-        else
-            return recentTrips;
     }
 
     public static void saveToSharedPreferences(List<RecentTrip> trips, Context context){
+        final Gson gson = new Gson();
         HashSet<String> set = new HashSet<>(trips.size());
         for(RecentTrip trip : trips)
-            set.add(trip.toString());
+            set.add(gson.toJson(trip));
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(context).edit();
         editor.putStringSet(SHARED_PREFERENCES_KEY, set);
         editor.apply();

@@ -16,9 +16,11 @@
         android:theme="@style/AppTheme">
 
         <!-- API Key for release -->
+        <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is" />
+            -->
 
         <!-- API Key for debugging (laptop) -->
         <!--
@@ -29,11 +31,9 @@
 
 
         <!-- API Key for debugging (desktop) -->
-        <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0" />
-        -->
 
         <service
             android:name=".services.DistanceNotificationService"

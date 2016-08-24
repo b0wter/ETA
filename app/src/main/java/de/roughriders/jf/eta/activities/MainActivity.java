@@ -43,6 +43,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
@@ -50,7 +52,9 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
 import com.google.android.gms.location.places.AutocompletePredictionBuffer;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.Places;
+import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
@@ -86,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private final int PICK_CONTACT = 0;
     private final int PICK_ADDRESS = 1;
+    private final int PICK_BY_PLACE_PICKER = 2;
     private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
     private final int REQUEST_CONTACTS_PERMISSION_KEY = 2;
     private final int SEARCH_RADIUS = 250;
@@ -519,6 +524,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             case PICK_ADDRESS:
                 processAddressIntent(resultCode, data);
                 break;
+            case PICK_BY_PLACE_PICKER:
+                processPlacesPickerIntent(resultCode, data);
+                break;
         }
     }
 
@@ -568,6 +576,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
         }
         return photoUri;
+    }
+
+    private void processPlacesPickerIntent(int resultCode, Intent intent){
+        if(resultCode == Activity.RESULT_OK){
+            Place place = PlacePicker.getPlace(intent, this);
+
+        }
     }
 
     private void processAddressIntent(int resultCode, Intent intent){
@@ -933,5 +948,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
         else
             currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
+    }
+
+    public void onUseMapToSelectDestinationClicked(View view) {
+        showMapDestinationPicker();
+    }
+
+    private void showMapDestinationPicker(){
+        PlacePicker.IntentBuilder builder = new PlacePicker.IntentBuilder();
+        try {
+            startActivityForResult(builder.build(this), PICK_BY_PLACE_PICKER);
+        }
+        catch (GooglePlayServicesRepairableException e) {
+            Logger.getInstance().w(TAG, "Places picker could not be startet: " + e.getMessage());
+            e.printStackTrace();
+        } catch (GooglePlayServicesNotAvailableException e) {
+            Logger.getInstance().w(TAG, "Google Play Services seem to not be available: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
