@@ -253,10 +253,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
             case REQUEST_SMS_PERMISSION_KEY:{
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
-                    // permission granted, yeah!
+                    // permission granted, press the button again
+                    startButton_Clicked(null);
                 }
                 else {
-                    //TODO: needs an additional hint!
+                    Toast.makeText(this, getString(R.string.smsPermissionNotGranted), Toast.LENGTH_LONG).show();
                 }
             }
             case REQUEST_CONTACTS_PERMISSION_KEY:{
@@ -894,7 +895,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void askForSmsPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_SMS_PERMISSION_KEY);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, REQUEST_SMS_PERMISSION_KEY);
     }
     //
     // -----------
