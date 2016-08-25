@@ -74,4 +74,5 @@
     <string name="not_all_information_entered_on_trip_start">Sie müssen eine Telefonnummer und eine Adresse eingeben um fortzufahren.</string>
     <string name="start">Start</string>
     <string name="internet_not_available_toast">Um die app zu verwenden wird eine aktive Datenverbindung benötigt.</string>
+    <string name="map">Karte</string>
 </resources>
