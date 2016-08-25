@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private CheckBox sendContinouosSmsCheckbox;
     private CheckBox sendAlmostThereSmsCheckbox;
     private CheckBox sendArrivalSmsCheckbox;
+    private CardView slidingPanelButtonCardview;
     private boolean ignoreNextAddressBoxChange = false;
     private boolean hasAskedForContactsPermission = false;
 
@@ -139,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setSupportActionBar(toolbar);
         targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
         startButton = (Button)findViewById(R.id.startButton);
+        slidingPanelButtonCardview = (CardView)findViewById(R.id.sliding_layout_select_destination_panel);
 
         targetPhoneBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -404,13 +406,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     ignoreNextAddressBoxChange = false;
                     return;
                 }
+
+                if(charSequence.length() == 0)
+                    return;
+
                 String text = charSequence.toString();
                 Log.i(TAG, "Text in destionationSearchBox has changed, new content: " + text);
                 sendAutocompleteRequest(charSequence.toString());
             }
 
             @Override
-            public void afterTextChanged(Editable editable) { }
+            public void afterTextChanged(Editable editable) {
+                // the number of characters in the textbox define the layout:
+                // no text -> show buttons (map, contacts,...) and recent destinations
+                // text -> show search results only
+                Log.i(TAG, "New length of the content of the destinationTextBox is: " + editable.length());
+                if(editable.length() == 0){
+                    slidingPanelButtonCardview.setVisibility(View.VISIBLE);
+                    recentDestinationsCardView.setVisibility(View.VISIBLE);
+                    predictionsCardView.setVisibility(View.GONE);
+                } else {
+                    slidingPanelButtonCardview.setVisibility(View.GONE);
+                    recentDestinationsCardView.setVisibility(View.GONE);
+                    predictionsCardView.setVisibility(View.VISIBLE);
+                }
+            }
         });
     }
     private void setDestinationEditTextFocusListener(){
@@ -589,7 +609,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void processAddressIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK)
         {
-            slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            //slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+            slidingPanel.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+            }, 150);
 
             Uri uri = intent.getData();
             String[] projection = { ContactsContract.CommonDataKinds.StructuredPostal.CITY, ContactsContract.CommonDataKinds.StructuredPostal.POSTCODE, ContactsContract.CommonDataKinds.StructuredPostal.STREET};
@@ -643,7 +669,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     secondary = "";
                 }
             }
-
             currentDestination = new RecentDestination(primary, secondary);
             Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.primaryText + " <> " + currentDestination.secondaryText);
             updateUi();
@@ -680,6 +705,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     Log.i(TAG, "Status of the predictions:\r\n" + statusMessage);
                     Log.i(TAG, "Received " + autocompletePredictions.getCount() + " predictions.");
                     Log.i(TAG, statusMessage);
+
+                    // sometimes the requests arrive although the destination textbox has already been cleared
+                    // to make the correct interface appear we need to make sure there are no new "ghost" completions
+                    if(destinationSearchBox.getText().length() == 0)
+                        return;
 
                     View view = findViewById(R.id.sliding_layout_search_result_card);
                     if(view != null)
@@ -738,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void onDestinationSelected(RecentDestination destination){
-        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.HIDDEN);
+        slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
         destinationSearchBox.setText(destination.primaryText + ", " + destination.secondaryText);
         currentDestination = destination;
         recentDestinationsAdapter.addItem(destination);
