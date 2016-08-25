@@ -3,6 +3,7 @@ package de.roughriders.jf.eta.activities;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -775,6 +776,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         recentDestinationsCardView.setVisibility(View.VISIBLE);
         recentDestinationsEmptyCardView.setVisibility(View.GONE);
         RecentDestination.saveToSharedPreferences(recentDestinationsAdapter.getItems(), this);
+    }
+
+    public void onPasteClipboardIntoDestination(View view){
+        ClipboardManager clipboard = (ClipboardManager)getSystemService(CLIPBOARD_SERVICE);
+        String content = clipboard.getText().toString();
+        if(!content.isEmpty())
+            destinationSearchBox.setText(content);
     }
 
     public void clearSearchEditText_onClick(View view){

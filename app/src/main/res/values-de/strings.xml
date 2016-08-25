@@ -75,4 +75,5 @@
     <string name="start">Start</string>
     <string name="internet_not_available_toast">Um die app zu verwenden wird eine aktive Datenverbindung benötigt.</string>
     <string name="map">Karte</string>
+    <string name="paste">Einfügen</string>
 </resources>
