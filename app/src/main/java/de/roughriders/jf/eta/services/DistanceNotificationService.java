@@ -60,6 +60,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String SEND_INITIAL_MESSAGE_EXTRA = "initialMessageUpdateExtra";
     public static final String SEND_ALMOST_THERE_MESSAGE_EXTRA = "almostThereMessageExtra";
     public static final String SEND_ARRIVAL_MESSAGE_EXTRA = "arrivalMessageExtra";
+    public static final String LATITUDE_EXTRA = "latitudeExtra";
+    public static final String LONGITUDE_EXTRA = "longitudeExtra";
     public static final String REQUEST_STATUS_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_UPDATE";
     public static final String SERVICE_STOPPED_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED";
     public static final String SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED_SUCCESS";
@@ -129,7 +131,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         switch(command){
             case COMMAND_START:
                 setExtras(extras);
-                start(extras.getString(PHONE_EXTRA), extras.getString(DESTINATION_EXTRA));
+                String longitude = null;
+                String latitude = null;
+                if(extras.containsKey(LATITUDE_EXTRA) && extras.containsKey(LONGITUDE_EXTRA)){
+                    longitude = extras.getString(LONGITUDE_EXTRA);
+                    latitude = extras.getString(LATITUDE_EXTRA);
+                }
+                start(extras.getString(PHONE_EXTRA), extras.getString(DESTINATION_EXTRA), longitude, latitude);
                 break;
             case COMMAND_STOP:
                 stop();
@@ -159,7 +167,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.writeToLogFile = PreferenceManager.getDefaultSharedPreferences(this).getBoolean("enable_logging", false);
     }
 
-    private void start(String phone, String destination){
+    private void start(String phone, String destination, String longitude, String latitude){
         Logger.getInstance().d(TAG, "Service received COMMAND_START");
         IsServiceRunning = true;
         converter = new Converter(this);

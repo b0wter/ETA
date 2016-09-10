@@ -33,6 +33,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -41,6 +42,7 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -60,6 +62,12 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.adapters.PredictionsAdapter;
@@ -87,6 +95,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private CheckBox sendAlmostThereSmsCheckbox;
     private CheckBox sendArrivalSmsCheckbox;
     private CardView slidingPanelButtonCardview;
+    private ImageButton clearDestinationSearchBoxButton;
+    private ImageButton clearPhoneNumberButton;
     private boolean ignoreNextAddressBoxChange = false;
     private boolean hasAskedForContactsPermission = false;
 
@@ -120,6 +130,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private GoogleApiClient googleApiClient;
 
+    private Pattern coordinatePattern = Pattern.compile("^(\\-?\\d+(\\.\\d+)?),\\s*(\\-?\\d+(\\.\\d+)?)$");
+
     private boolean locationServiceAutocompleteHintShown = false;
 
     @Override
@@ -142,6 +154,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
         startButton = (Button)findViewById(R.id.startButton);
         slidingPanelButtonCardview = (CardView)findViewById(R.id.sliding_layout_select_destination_panel);
+        clearDestinationSearchBoxButton = (ImageButton)findViewById(R.id.main_activity_clear_destination_searchbox);
+        clearPhoneNumberButton = (ImageButton)findViewById(R.id.main_activity_clear_phone_button);
 
         targetPhoneBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -150,6 +164,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     showContactsPermissionExplanationAndAsk();
                 }
             }
+        });
+        targetPhoneBox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+            @Override
+            public void afterTextChanged(Editable editable) { if(editable.length() == 0) { clearPhoneNumberButton.setVisibility(View.GONE); } else { clearPhoneNumberButton.setVisibility(View.VISIBLE); } }
         });
 
         sendStartSmsCheckbox = ((CheckBox) findViewById(R.id.main_activity_initial_message));
@@ -426,10 +448,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     slidingPanelButtonCardview.setVisibility(View.VISIBLE);
                     recentDestinationsCardView.setVisibility(View.VISIBLE);
                     predictionsCardView.setVisibility(View.GONE);
+                    predictionsEmptyCardView.setVisibility(View.GONE);
+                    clearDestinationSearchBoxButton.setVisibility(View.GONE);
                 } else {
                     slidingPanelButtonCardview.setVisibility(View.GONE);
                     recentDestinationsCardView.setVisibility(View.GONE);
+                    predictionsEmptyCardView.setVisibility(View.VISIBLE);
                     predictionsCardView.setVisibility(View.VISIBLE);
+                    clearDestinationSearchBoxButton.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -602,9 +628,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void processPlacesPickerIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK){
-            Place place = PlacePicker.getPlace(intent, this);
+            slidingPanel.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
+                }
+            }, 150);
 
+            Place place = PlacePicker.getPlace(this, intent);
+            // When a point is selected that is not a point of interest the coordinates will be used as name.
+            if(guessIfIsCoordinates(place.getName().toString()))
+            {
+                List<String> parts = Arrays.asList(place.getAddress().toString().split(","));
+
+                boolean isEventList = parts.size() % 2 == 0;
+                int halfSize = parts.size()/2;
+
+                List<String> primaryParts = parts.subList(0, halfSize + (isEventList ? 0 : 1));
+                List<String> secondaryParts = parts.subList(parts.size()/2 + (isEventList ? 0 : 1), parts.size());
+                String primary = TextUtils.join(", ", primaryParts).replace("  ", " ");
+                String secondary = TextUtils.join(", ", secondaryParts).replace("  ", " ");
+
+                currentDestination = new RecentDestination(primary, secondary);
+            } else {
+                currentDestination = new RecentDestination(place.getName().toString(), place.getAddress().toString(), place.getLatLng().latitude, place.getLatLng().longitude);
+            }
+            updateUi();
         }
+    }
+
+    private boolean guessIfIsCoordinates(String s){
+        return s.contains("\"") && s.contains("°") && (s.contains("N") || s.contains("S")) && (s.contains("E") || s.contains("W")) && s.contains("'");
     }
 
     private void processAddressIntent(int resultCode, Intent intent){
@@ -883,7 +937,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         startBackgroundService();
 
         Intent intent = new Intent(this, TripActivity.class);
-        intent.putExtra(TripActivity.DESTINATION_EXTRA, destinationSearchBox.getText().toString());
+        if(currentDestination.longitude != null && currentDestination.latitude != null && !currentDestination.longitude.isEmpty() && !currentDestination.latitude.isEmpty())
+            intent.putExtra(TripActivity.DESTINATION_EXTRA, currentDestination.latitude + "," + currentDestination.longitude);
+        else
+            intent.putExtra(TripActivity.DESTINATION_EXTRA, destinationSearchBox.getText().toString());
         intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneBox.getText().toString());
         if(contactPhotoUri != null)
             intent.putExtra(TripActivity.PHOTO_EXTRA, contactPhotoUri.toString());
