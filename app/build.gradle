@@ -44,7 +44,7 @@ dependencies {
     compile 'com.google.android.gms:play-services-cast:9.4.0'
     compile 'com.google.android.gms:play-services-location:9.4.0'
     compile 'com.sothree.slidinguppanel:library:3.3.0'
-    compile 'com.github.lzyzsd:circleprogress:1.1.0@aar'
+    compile project(':circleProgressBar')
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.google.code.gson:gson:2.4'
 }

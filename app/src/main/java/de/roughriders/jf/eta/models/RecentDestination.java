@@ -23,6 +23,8 @@ import de.roughriders.jf.eta.helpers.Logger;
 public class RecentDestination {
     public String primaryText = "";
     public String secondaryText = "";
+    public String latitude;
+    public String longitude;
 
     public static final String SERIALIZATION_FIELD_DELIMITER = ";";
     public static final String SHARED_PREFERENCES_KEY = "recentDestinations";
@@ -36,6 +38,12 @@ public class RecentDestination {
     public RecentDestination(String primaryText, String secondaryText){
         this.primaryText = primaryText.trim();
         this.secondaryText = secondaryText.trim();
+    }
+
+    public RecentDestination(String primaryText, String secondaryText, double latitude, double longitude){
+        this(primaryText, secondaryText);
+        this.latitude = String.valueOf(latitude).replace(",", ".");
+        this.longitude = String.valueOf(longitude).replace(",", ".");
     }
 
     public static RecentDestination fromPrediction(AutocompletePrediction prediction){
