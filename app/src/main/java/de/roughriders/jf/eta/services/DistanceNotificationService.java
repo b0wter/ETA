@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import de.roughriders.jf.eta.R;
+import de.roughriders.jf.eta.activities.MainActivity;
 import de.roughriders.jf.eta.activities.TripActivity;
 import de.roughriders.jf.eta.helpers.Converter;
 import de.roughriders.jf.eta.helpers.Logger;
@@ -95,6 +96,9 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private long lastUpdateCheckTicks = -1;
     private boolean isFirstRequest = true;
     private boolean isInitialLocationFix = true;
+    // If you change the update interval of the location updates you will get one immediate location fix and the next ones will be in the requested interval.
+    // This can cause a delay message to be triggered when it should not happen, see: https://github.com/b0wter/ETA/issues/48
+    private boolean isFirstFixAfterUpdateIntervalChanged = false;
     private BroadcastReceiver updateRequestBroadcastReceiver;
     private BroadcastReceiver sendSmsBroadcastReceiver;
     private IntervalManager intervalManager;
@@ -279,6 +283,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Logger.getInstance().i(TAG, "Setting new LocationListener with an interval of " + interval + "ms.");
             LocationServices.FusedLocationApi.requestLocationUpdates(apiClient, request, this);
+            isFirstFixAfterUpdateIntervalChanged = true;
         }
         else
             Logger.getInstance().e(TAG, "Cannot use the FusedLocationApi because the permission was not granted!");
@@ -291,7 +296,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     @Override
     public void onLocationChanged(Location location) {
         Logger.getInstance().i(TAG, "A location update has been received.");
-        computeRemainingDistanceAndTime(location);
+        if(isFirstFixAfterUpdateIntervalChanged)
+            isFirstFixAfterUpdateIntervalChanged = false;
+        else
+            computeRemainingDistanceAndTime(location);
     }
 
     /**
@@ -537,6 +545,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         callbackIntent.putExtra(COMMAND_EXTRA, COMMAND_STOP);
 
         PendingIntent serviceIntent = PendingIntent.getService(this, 1, callbackIntent, 0);
+        PendingIntent appIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         notificationBuilder = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))
@@ -544,6 +553,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                 .setSmallIcon(R.drawable.ic_directions_car_white_24dp)
                 .setWhen(System.currentTimeMillis())
                 .addAction(R.drawable.ic_stop_white_24dp, getString(R.string.stopCapital), serviceIntent)
+                .setContentIntent(appIntent)
                 .setOngoing(true);
 
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
