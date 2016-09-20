@@ -9,6 +9,7 @@ app/app-release.apk
 /captures
 # Built application files
 /*/build/
+projectFilesBackup/
 
 # Crashlytics configuations
 com_crashlytics_export_strings.xml
