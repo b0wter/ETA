@@ -296,7 +296,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     @Override
     public void onLocationChanged(Location location) {
         Logger.getInstance().i(TAG, "A location update has been received.");
-        if(isFirstFixAfterUpdateIntervalChanged)
+        if(isFirstFixAfterUpdateIntervalChanged && isFirstRequest == false)
             isFirstFixAfterUpdateIntervalChanged = false;
         else
             computeRemainingDistanceAndTime(location);
