@@ -73,7 +73,8 @@ public class TripActivity extends AppCompatActivity {
         setContentView(R.layout.activity_trip);
         converter = new Converter(this);
         initControls();
-        setIntentData();
+        if(!hasIntentDataBeenSet())
+            setIntentData();
         registerBroadcastReceivers();
         setDisplayStatus();
     }
@@ -124,6 +125,9 @@ public class TripActivity extends AppCompatActivity {
 
     private void setIntentData(){
         Bundle extras = getIntent().getExtras();
+        if(extras == null){
+            return;
+        }
         destination = extras.getString(DESTINATION_EXTRA);
         destinationTextView.setText(destination.replace(",", ",\r\n"));
         phoneNumber = extras.getString(PHONE_NUMBER_EXTRA);
@@ -139,6 +143,14 @@ public class TripActivity extends AppCompatActivity {
             ((View)contactImageView.getParent()).invalidate();
         }
         progressBar.setMax(Integer.MAX_VALUE);
+    }
+
+    private boolean hasIntentDataBeenSet(){
+        if(destination == null || phoneNumber == null)
+            return false;
+        if(destination.isEmpty() || phoneNumber.isEmpty())
+            return false;
+        return true;
     }
 
     private void registerBroadcastReceivers(){
