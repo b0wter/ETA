@@ -73,6 +73,7 @@ import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.adapters.PredictionsAdapter;
 import de.roughriders.jf.eta.adapters.RecentDestinationsAdapter;
 import de.roughriders.jf.eta.adapters.RecentTripsAdapter;
+import de.roughriders.jf.eta.helpers.DividerItemDecoration;
 import de.roughriders.jf.eta.helpers.IRecyclerViewItemClicked;
 import de.roughriders.jf.eta.helpers.ISettingsChangeRequiresReload;
 import de.roughriders.jf.eta.helpers.Logger;
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int SEARCH_RADIUS = 250;
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
     private final String ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY = "askedForContactsPermission";
+    private static final int VERTICAL_ITEM_SPACE = 48;
 
     private Contact currentContact;
     private RecentDestination currentDestination;
@@ -326,6 +328,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         predictionsCardView = (CardView)findViewById(R.id.sliding_layout_search_result_card);
         predictionsEmptyCardView = (CardView)findViewById(R.id.sliding_layout_no_search_results_container);
         predictionsView = (RecyclerView)findViewById(R.id.predictionsList);
+        predictionsView.addItemDecoration(new DividerItemDecoration(this));
         RecyclerView.LayoutManager predictionsLayoutManager = new LinearLayoutManager(this);
         predictionsView.setLayoutManager(predictionsLayoutManager);
         predictionsAdapter = new PredictionsAdapter();
@@ -343,6 +346,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         recentDestinationsCardView = (CardView)findViewById(R.id.sliding_layout_recent_destinations_card);
         recentDestinationsEmptyCardView = (CardView)findViewById(R.id.sliding_layout_no_recent_destinations_card);
         recentDestinationsView = (RecyclerView)findViewById(R.id.recentDestinations);
+        recentDestinationsView.addItemDecoration(new DividerItemDecoration(this));
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
         recentDestinationsView.setLayoutManager(layoutManager);
         recentDestinationsAdapter = new RecentDestinationsAdapter(this);
@@ -366,6 +370,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void initRecentTripsView(){
         recentTripsView = (RecyclerView)findViewById(R.id.main_activity_recent_trips_list);
+        recentTripsView.addItemDecoration(new DividerItemDecoration(this));
         recentTripsAdapter = new RecentTripsAdapter(this);
         noRecentTripsCardView = (CardView) findViewById(R.id.main_activity_no_recent_trips_card_view);
         recentTripsCardView = (CardView)findViewById(R.id.main_activity_recent_trips_card_view);
@@ -653,6 +658,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             } else {
                 currentDestination = new RecentDestination(place.getName().toString(), place.getAddress().toString(), place.getLatLng().latitude, place.getLatLng().longitude);
             }
+            recentDestinationsAdapter.addItem(currentDestination);
             updateUi();
         }
     }
@@ -725,6 +731,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
             currentDestination = new RecentDestination(primary, secondary);
+            recentDestinationsAdapter.addItem(currentDestination);
             Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.primaryText + " <> " + currentDestination.secondaryText);
             updateUi();
         }
