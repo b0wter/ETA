@@ -8,8 +8,8 @@ android {
         applicationId "de.roughriders.jf.eta"
         minSdkVersion 21
         targetSdkVersion 24
-        versionCode 25
-        versionName "1.24"
+        versionCode 26
+        versionName "1.25"
     }
     buildTypes {
         release {
@@ -38,11 +38,11 @@ dependencies {
     compile 'com.android.support:percent:24.2.1'
     compile 'com.google.maps:google-maps-services:0.1.15'
     compile 'com.google.maps.android:android-maps-utils:0.3.4'
-    compile 'com.google.android.gms:play-services-places:9.4.0'
-    compile 'com.google.android.gms:play-services-maps:9.4.0'
-    compile 'com.google.android.gms:play-services-base:9.4.0'
-    compile 'com.google.android.gms:play-services-cast:9.4.0'
-    compile 'com.google.android.gms:play-services-location:9.4.0'
+    compile 'com.google.android.gms:play-services-places:9.6.0'
+    compile 'com.google.android.gms:play-services-maps:9.6.0'
+    compile 'com.google.android.gms:play-services-base:9.6.0'
+    compile 'com.google.android.gms:play-services-cast:9.6.0'
+    compile 'com.google.android.gms:play-services-location:9.6.0'
     compile 'com.sothree.slidinguppanel:library:3.3.0'
     compile project(':circleProgressBar')
     compile 'de.hdodenhof:circleimageview:2.1.0'
