@@ -53,18 +53,23 @@ public class Converter {
      * @return
      */
     public String formatDuration(long durationInSeconds){
-        if(durationInSeconds <= 90*60){
+        if(durationInSeconds <= 90*60 && durationInSeconds > 120){
             long duration = durationInSeconds/60;
             return String.valueOf(duration) + " " + (duration == 1 ? minuteString  : minutesString );
         }
+        else if(durationInSeconds <= 120)
+        {
+            float duration = ((float)durationInSeconds)/60;
+            return String.format(Locale.getDefault(), "%.1f", duration) + " " + minutesString;
+        }
         else {
-            return String.format(Locale.getDefault(), "%.1f", (float) (durationInSeconds) / 60 / 60) + " " + hoursString;
+            return String.format(Locale.getDefault(), "%.hf", ((float)durationInSeconds) / 60 / 60) + " " + hoursString;
         }
     }
 
     public String formatDurationWithAbbreviatedUnits(long durationInSeconds){
         if(durationInSeconds < 120){
-            float minutes = durationInSeconds / 60;
+            float minutes = ((float)durationInSeconds) / 60;
             return String.format(Locale.getDefault(), "%.1f", minutes) + " " + minAbbreviationString;
         }
         else if(durationInSeconds <= 90*60){
