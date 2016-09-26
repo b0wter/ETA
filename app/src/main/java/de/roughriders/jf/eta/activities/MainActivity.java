@@ -452,14 +452,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if(editable.length() == 0){
                     slidingPanelButtonCardview.setVisibility(View.VISIBLE);
                     recentDestinationsCardView.setVisibility(View.VISIBLE);
-                    predictionsCardView.setVisibility(View.GONE);
+                    //predictionsCardView.setVisibility(View.GONE);
                     //predictionsEmptyCardView.setVisibility(View.GONE);
                     clearDestinationSearchBoxButton.setVisibility(View.GONE);
                 } else {
                     slidingPanelButtonCardview.setVisibility(View.GONE);
                     recentDestinationsCardView.setVisibility(View.GONE);
                     //predictionsEmptyCardView.setVisibility(View.VISIBLE);
-                    predictionsCardView.setVisibility(View.VISIBLE);
+                    //predictionsCardView.setVisibility(View.VISIBLE);
                     clearDestinationSearchBoxButton.setVisibility(View.VISIBLE);
                 }
             }
