@@ -10,11 +10,11 @@
     android:orientation="vertical"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="5dp">
+    android:paddingTop="4dp">
 
     <android.support.v7.widget.CardView
         android:id="@+id/sliding_layout_select_destination_panel"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="3dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
