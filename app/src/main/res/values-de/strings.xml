@@ -24,7 +24,7 @@
     <string name="stop">stop</string>
     <string name="stopCapital">Stop</string>
     <string name="title_activity_trip">Fahrt</string>
-    <string name="phone">Nummer</string>
+    <string name="phone">Telefonnummer</string>
     <string name="send_notification_now">Sende Benachrichtigung.</string>
     <string name="minutes">Minuten</string>
     <string name="remainingMinutesText">verbleibend</string>
