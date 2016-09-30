@@ -148,6 +148,44 @@
 
         </RelativeLayout>
 
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/trip_activity_initialization_overlay"
+        android:background="@color/colorPrimaryDark"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/trip_activity_activity_indicator"
+                android:text="Initializing Trip"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/colorAccent"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center"
+                />
+
+            <ProgressBar
+                android:id="@+id/trip_activity_activity_indicator"
+                android:layout_centerInParent="true"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:indeterminate="true"
+                android:layout_gravity="center"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/trip_activity_activity_indicator"
+                android:text="Please Stand By..."
+                android:layout_marginTop="10dp"
+                android:textColor="@color/colorAccent"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center"
+                />
 
     </RelativeLayout>
 
