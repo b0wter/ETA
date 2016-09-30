@@ -76,4 +76,6 @@
     <string name="internet_not_available_toast">Um die app zu verwenden wird eine aktive Datenverbindung benötigt.</string>
     <string name="map">Karte</string>
     <string name="paste">Einfügen</string>
+    <string name="initializing_trip">Bereite Fahrt vor.</string>
+    <string name="please_stand_by">Bitte warte...</string>
 </resources>
