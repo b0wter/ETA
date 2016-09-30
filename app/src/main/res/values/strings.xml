@@ -99,4 +99,6 @@
     <string name="internet_not_available_toast">You need an active internet connection to use this app.</string>
     <string name="map">Map</string>
     <string name="paste">Paste</string>
+    <string name="initializing_trip">Initializing Trip</string>
+    <string name="please_stand_by">Please Stand By...</string>
 </resources>
