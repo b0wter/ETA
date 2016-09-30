@@ -57,6 +57,7 @@ public class TripActivity extends AppCompatActivity {
 
     private boolean keepScreenOn = false;
     private Converter converter;
+    private boolean isInitializing = true;
 
     public static String DESTINATION_EXTRA = "destinationExtra";
     public static String PHONE_NUMBER_EXTRA = "phoneExtra";
@@ -311,6 +312,7 @@ public class TripActivity extends AppCompatActivity {
     }
 
     private void updateUi(int remainingTimeInSeconds, int remainingDistanceInMeters){
+        HideInitializationViewIfNecessary();
         ArcProgress progressBar = (ArcProgress)findViewById(R.id.trip_activity_time_remaining);
         if(progressBar.getMax() == Integer.MAX_VALUE)
             progressBar.setMax(remainingTimeInSeconds);
@@ -318,5 +320,15 @@ public class TripActivity extends AppCompatActivity {
 
         String remainingTime = converter.formatDurationWithAbbreviatedUnits(remainingTimeInSeconds).toUpperCase();
         progressBar.setBottomText(remainingTime);
+    }
+
+    private void HideInitializationViewIfNecessary(){
+        if(isInitializing) {
+            View frame = findViewById(R.id.trip_activity_initialization_overlay);
+            frame.animate().alpha(0f).setDuration(750);
+            isInitializing = false;
+            //frame.setVisibility(View.GONE);
+
+        }
     }
 }

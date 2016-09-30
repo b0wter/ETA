@@ -51,6 +51,8 @@ import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.AutocompleteFilter;
 import com.google.android.gms.location.places.AutocompletePrediction;
@@ -83,7 +85,7 @@ import de.roughriders.jf.eta.models.RecentDestination;
 import de.roughriders.jf.eta.models.RecentTrip;
 import de.roughriders.jf.eta.services.DistanceNotificationService;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, ISettingsChangeRequiresReload {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks, ISettingsChangeRequiresReload, LocationListener {
 
     private SlidingUpPanelLayout slidingPanel;
     private static String TAG = "MainActivity";
@@ -131,6 +133,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private RecentTripsAdapter recentTripsAdapter;
 
     private GoogleApiClient googleApiClient;
+    private Location lastLocationFix;
 
     private Pattern coordinatePattern = Pattern.compile("^(\\-?\\d+(\\.\\d+)?),\\s*(\\-?\\d+(\\.\\d+)?)$");
 
@@ -755,6 +758,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Logger.getInstance().w(TAG, "Google Api Client could not connect, reason: " + result.getErrorMessage());
     }
 
+    @Override
+    public void onConnected(Bundle connectionHint){
+        requestLocationFix();
+    }
+
+    @Override
+    public void onConnectionSuspended(int reason){
+        //
+    }
+
     private void sendAutocompleteRequest(String query){
         try {
             AutocompleteFilter filter = new AutocompleteFilter.Builder().setTypeFilter(AutocompleteFilter.TYPE_FILTER_NONE).build();
@@ -806,6 +819,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private LatLngBounds createBoundsFromLastKnownLocation(){
         Location location = getLastKnownLocation();
+
+        // last known location should be set if the location fix was successful but try anyway
+        if(location == null)
+            location = lastLocationFix;
+
         if(location != null) {
             Log.i(TAG, "last known location: " + location.getLatitude() + " - " + location.getLongitude());
             LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
@@ -918,6 +936,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         catch(Settings.SettingNotFoundException ex){
             // we have no clue about the gps status so just give it a try,...
             return true;
+        }
+    }
+
+    private void requestLocationFix(){
+        LocationRequest request = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(1000).setFastestInterval(1000).setNumUpdates(1);
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, request, this);
+        } else{
+            Logger.getInstance().w(TAG, "Tryed to get a location update but permission was not granted.");
         }
     }
 
@@ -1069,5 +1096,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             Logger.getInstance().w(TAG, "Google Play Services seem to not be available: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        lastLocationFix = location;
     }
 }
