@@ -291,6 +291,19 @@ public class TripActivity extends AppCompatActivity {
         }
     }
 
+    public void onStartNavigationClick(View view){
+        startNavigationForCurrentDestination();
+    }
+
+    private void startNavigationForCurrentDestination(){
+        String destination = destinationTextView.getText().toString().replace(' ', '+');
+        Uri navigationIntentUri = Uri.parse("google.navigation:q=" + destination);
+        Logger.getInstance().i(TAG, "Trying to start navigation intent with uri: " + destination);
+        Intent navigationIntent = new Intent(Intent.ACTION_VIEW, navigationIntentUri);
+        navigationIntent.setPackage("com.google.android.apps.maps");
+        startActivity(navigationIntent);
+    }
+
     @Override
     public void onBackPressed(){
         showExitAlert();
