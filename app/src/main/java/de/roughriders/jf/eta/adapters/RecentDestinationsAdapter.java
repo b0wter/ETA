@@ -47,7 +47,7 @@ public class RecentDestinationsAdapter extends RecyclerView.Adapter<RecentDestin
 
     private boolean alreadyContainsDestination(RecentDestination destination){
         for(RecentDestination item : recentDestinations){
-            if(item.primaryText.equals(destination.primaryText) && item.secondaryText.equals(destination.secondaryText))
+            if(item.getPrimaryText().equals(destination.getPrimaryText()) && item.getSecondaryText().equals(destination.getSecondaryText()))
                 return true;
         }
         return false;
@@ -71,8 +71,8 @@ public class RecentDestinationsAdapter extends RecyclerView.Adapter<RecentDestin
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         RecentDestination destination = recentDestinations.get(position);
-        holder.primaryTextView.setText(destination.primaryText);
-        holder.secondaryTextView.setText(destination.secondaryText);
+        holder.primaryTextView.setText(destination.getPrimaryText());
+        holder.secondaryTextView.setText(destination.getSecondaryText());
     }
 
     @Override
