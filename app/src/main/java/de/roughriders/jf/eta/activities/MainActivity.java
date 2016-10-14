@@ -557,7 +557,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void showSelectContactPicker(){
         if(currentDestination != null){
-            if(!(destinationSearchBox.getText().toString().contains(currentDestination.primaryText) && destinationSearchBox.getText().toString().contains(currentDestination.secondaryText))){
+            if(!(destinationSearchBox.getText().toString().contains(currentDestination.getPrimaryText()) && destinationSearchBox.getText().toString().contains(currentDestination.getSecondaryText()))){
                 currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
             }
         }
@@ -633,7 +633,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }, 150);
 
             Place place = PlacePicker.getPlace(this, intent);
-            // When a point is selected that is not a point of interest the coordinates will be used as name.
+            // places picker also offers coordinates for places that do not have a direct address
             if(guessIfIsCoordinates(place.getName().toString()))
             {
                 List<String> parts = Arrays.asList(place.getAddress().toString().split(","));
@@ -646,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 String primary = TextUtils.join(", ", primaryParts).replace("  ", " ");
                 String secondary = TextUtils.join(", ", secondaryParts).replace("  ", " ");
 
-                currentDestination = new RecentDestination(primary, secondary);
+                currentDestination = new RecentDestination(primary, secondary, place.getLatLng().latitude, place.getLatLng().longitude);
             } else {
                 currentDestination = new RecentDestination(place.getName().toString(), place.getAddress().toString(), place.getLatLng().latitude, place.getLatLng().longitude);
             }
@@ -731,7 +731,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             secondary = secondary.replace("\r\n", ", ").replace("\n", ", ");
             currentDestination = new RecentDestination(primary, secondary);
             recentDestinationsAdapter.addItem(currentDestination);
-            Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.primaryText + " <> " + currentDestination.secondaryText);
+            Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.getPrimaryText() + " <> " + currentDestination.getSecondaryText());
             updateUi();
         }
     }
@@ -845,7 +845,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private void onDestinationSelected(RecentDestination destination){
         slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.COLLAPSED);
-        destinationSearchBox.setText(destination.primaryText + ", " + destination.secondaryText);
+        destinationSearchBox.setText(destination.getPrimaryText() + ", " + destination.getSecondaryText());
         currentDestination = destination;
         recentDestinationsAdapter.addItem(destination);
         recentDestinationsCardView.setVisibility(View.VISIBLE);
@@ -967,8 +967,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         startBackgroundService();
 
         Intent intent = new Intent(this, TripActivity.class);
-        if(currentDestination.longitude != null && currentDestination.latitude != null && !currentDestination.longitude.isEmpty() && !currentDestination.latitude.isEmpty())
-            intent.putExtra(TripActivity.DESTINATION_EXTRA, currentDestination.latitude + "," + currentDestination.longitude);
+        if(currentDestination.getLongitude() != null && currentDestination.getLatitude() != null && !currentDestination.getLongitude().isEmpty() && !currentDestination.getLatitude().isEmpty())
+            intent.putExtra(TripActivity.DESTINATION_EXTRA, currentDestination.getLatitude() + "," + currentDestination.getLongitude());
         else
             intent.putExtra(TripActivity.DESTINATION_EXTRA, destinationSearchBox.getText().toString());
         intent.putExtra(TripActivity.PHONE_NUMBER_EXTRA, targetPhoneBox.getText().toString());
@@ -1034,12 +1034,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         if(currentDestination != null) {
             String destination;
-            if(!currentDestination.primaryText.isEmpty() && !currentDestination.secondaryText.isEmpty())
-                destination = currentDestination.primaryText + ", " + currentDestination.secondaryText;
-            else if(!currentDestination.primaryText.isEmpty() && currentDestination.secondaryText.isEmpty())
-                destination = currentDestination.primaryText;
-            else if(currentDestination.primaryText.isEmpty() && !currentDestination.secondaryText.isEmpty())
-                destination = currentDestination.secondaryText;
+            if(!currentDestination.getPrimaryText().isEmpty() && !currentDestination.getSecondaryText().isEmpty())
+                destination = currentDestination.getPrimaryText() + ", " + currentDestination.getSecondaryText();
+            else if(!currentDestination.getPrimaryText().isEmpty() && currentDestination.getSecondaryText().isEmpty())
+                destination = currentDestination.getPrimaryText();
+            else if(currentDestination.getPrimaryText().isEmpty() && !currentDestination.getSecondaryText().isEmpty())
+                destination = currentDestination.getSecondaryText();
             else
                 destination = "";
             destination = destination.replace(", ,", ", ").replace(",,", ",");
@@ -1058,16 +1058,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         if(currentDestination != null) {
             String enteredText = destinationSearchBox.getText().toString().replace(",", "").replace(" ", "");
-            String condensedText = (currentDestination.primaryText + currentDestination.secondaryText).replace(",", "").replace(" ","");
+            String condensedText = (currentDestination.getPrimaryText() + currentDestination.getSecondaryText()).replace(",", "").replace(" ","");
             if(!condensedText.contains(enteredText)) {
                 if(enteredText.contains(",")){
                     String firstPart = enteredText.substring(0, enteredText.indexOf(","));
                     String secondPart = enteredText.substring(enteredText.indexOf(",")+1);
-                    currentDestination.primaryText = firstPart;
-                    currentDestination.secondaryText = secondPart;
+                    currentDestination.setPrimaryText(firstPart);
+                    currentDestination.setSecondaryText(secondPart);
                 }
                 else
-                    currentDestination.primaryText = destinationSearchBox.getText().toString();
+                    currentDestination.setPrimaryText(destinationSearchBox.getText().toString());
             }
         }
         else

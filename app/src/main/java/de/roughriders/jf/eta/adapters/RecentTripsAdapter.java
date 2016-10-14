@@ -51,8 +51,8 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
         for(RecentTrip t : trips){
             if(     trip.contact.name.equals(t.contact.name) &&
                     trip.contact.phone.equals(t.contact.phone) &&
-                    trip.destination.primaryText.equals(t.destination.primaryText) &&
-                    trip.destination.secondaryText.equals(t.destination.secondaryText))
+                    trip.destination.getPrimaryText().equals(t.destination.getPrimaryText()) &&
+                    trip.destination.getSecondaryText().equals(t.destination.getSecondaryText()))
                 return true;
         }
         return false;
@@ -89,9 +89,9 @@ public class RecentTripsAdapter extends RecyclerView.Adapter<RecentTripsAdapter.
         else
             holder.primaryText.setText(trip.contact.phone);
 
-        holder.secondaryText.setText(trip.destination.primaryText);
-        if(!trip.destination.secondaryText.isEmpty())
-            holder.secondaryText.append(", " + trip.destination.secondaryText);
+        holder.secondaryText.setText(trip.destination.getPrimaryText());
+        if(!trip.destination.getSecondaryText().isEmpty())
+            holder.secondaryText.append(", " + trip.destination.getSecondaryText());
     }
 
     @Override

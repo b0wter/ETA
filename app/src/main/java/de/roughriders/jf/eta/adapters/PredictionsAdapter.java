@@ -38,8 +38,8 @@ public class PredictionsAdapter extends RecyclerView.Adapter<PredictionsAdapter.
     @Override
     public void onBindViewHolder(PredictionsAdapter.ViewHolder holder, int position) {
         RecentDestination prediction = destinations.get(position);
-        holder.primaryTextView.setText(prediction.primaryText);
-        holder.secondaryTextView.setText(prediction.secondaryText);
+        holder.primaryTextView.setText(prediction.getPrimaryText());
+        holder.secondaryTextView.setText(prediction.getSecondaryText());
     }
 
     public void clear(){

@@ -21,15 +21,15 @@ import de.roughriders.jf.eta.helpers.Logger;
  * Model to store and retrieve a recent destination to the SharedPreferences
  */
 public class RecentDestination {
-    public String primaryText = "";
-    public String secondaryText = "";
-    public String latitude;
-    public String longitude;
 
     public static final String SERIALIZATION_FIELD_DELIMITER = ";";
     public static final String SHARED_PREFERENCES_KEY = "recentDestinations";
-
     private static final String TAG = "RecentDestination";
+
+    private String primaryText = "";
+    private String secondaryText = "";
+    private String latitude;
+    private String longitude;
 
     public RecentDestination(String primaryText){
         this.primaryText = primaryText.trim();
@@ -128,5 +128,43 @@ public class RecentDestination {
             return secondaryText;
         else
             return "<unknown>";
+    }
+
+    public String getPrimaryText() {
+        return primaryText;
+    }
+
+    public void setPrimaryText(String primaryText) {
+        this.primaryText = primaryText;
+        // remove any existing coordinates because we cannot be sure they belong to this destination
+        this.longitude = null;
+        this.latitude = null;
+    }
+
+    public String getSecondaryText() {
+        return secondaryText;
+    }
+
+    public void setSecondaryText(String secondaryText) {
+        this.secondaryText = secondaryText;
+        // remove any existing coordinates because we cannot be sure they belong to this destination
+        this.longitude = null;
+        this.latitude = null;
+    }
+
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
     }
 }
