@@ -92,7 +92,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private EditText destinationSearchBox;
     private EditText targetPhoneBox;
-    private Button startButton;
     private CheckBox sendStartSmsCheckbox;
     private CheckBox sendContinouosSmsCheckbox;
     private CheckBox sendAlmostThereSmsCheckbox;
@@ -157,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Toolbar toolbar = (Toolbar) findViewById(R.id.main_toolbar);
         setSupportActionBar(toolbar);
         targetPhoneBox = (EditText)findViewById(R.id.editTextTargetPhone);
-        startButton = (Button)findViewById(R.id.startButton);
         slidingPanelButtonCardview = (CardView)findViewById(R.id.sliding_layout_select_destination_panel);
         clearDestinationSearchBoxButton = (ImageButton)findViewById(R.id.main_activity_clear_destination_searchbox);
         clearPhoneNumberButton = (ImageButton)findViewById(R.id.main_activity_clear_phone_button);
@@ -221,14 +219,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             return;
         }
 
-        if(entityName.equals("RecentDestinations")){
-            recentDestinationsAdapter.clearAll();
-        }
-        else if(entityName.equals("RecentTrips")){
-            recentTripsAdapter.clearAll();
-        }
-        else{
-            Logger.getInstance().w(TAG, "An update has been requestes for an unknown entity: " + entityName);
+        switch (entityName) {
+            case "RecentDestinations":
+                recentDestinationsAdapter.clearAll();
+                break;
+            case "RecentTrips":
+                recentTripsAdapter.clearAll();
+                break;
+            default:
+                Logger.getInstance().w(TAG, "An update has been requested for an unknown entity: " + entityName);
+                break;
         }
     }
 
@@ -271,7 +271,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode){
             case REQUEST_LOCATION_PERMISSION_KEY:{
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
@@ -478,7 +478,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         destinationSearchBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
-               if(b == true) {
+               if(b) {
                    slidingPanel.setPanelState(SlidingUpPanelLayout.PanelState.EXPANDED);
                    if(!isGPSEnabled())
                        showLocationServiceAutocompleteHint();
@@ -605,8 +605,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
             try {
                 contactPhotoUri = Uri.parse(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)));
-                //contactPhotoUri = Uri.withAppendedPath(intent.getData(), ContactsContract.Contacts.Photo.CONTENT_DIRECTORY);
-                //contactPhotoUri = getFacebookPhoto(number);
             }catch (NullPointerException ex){
                 // doesn't matter, no picture available
             }
@@ -620,20 +618,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         }
     }
 
-    public Uri getFacebookPhoto(String phoneNumber) {
-        Uri phoneUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        Uri photoUri = null;
-        ContentResolver cr = this.getContentResolver();
-        Cursor contact = cr.query(phoneUri,
-                new String[] { ContactsContract.Contacts._ID }, null, null, null);
-
-        if (contact.moveToFirst()) {
-            long userId = contact.getLong(contact.getColumnIndex(ContactsContract.Contacts._ID));
-            photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
-        }
-        return photoUri;
-    }
-
+    /**
+     * Callback used to process the data given by the places picker.
+     * @param resultCode Status of the called activity.
+     * @param intent Data passed by the called activity.
+     */
     private void processPlacesPickerIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK){
             slidingPanel.postDelayed(new Runnable() {
@@ -670,6 +659,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         return s.contains("\"") && s.contains("°") && (s.contains("N") || s.contains("S")) && (s.contains("E") || s.contains("W")) && s.contains("'");
     }
 
+    /**
+     * Callback used to process the address selected by the user in the contact picker.
+     * @param resultCode Status of the called activity.
+     * @param intent Data passed by the called activity.
+     */
     private void processAddressIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK)
         {
@@ -733,6 +727,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                     secondary = "";
                 }
             }
+            primary = primary.replace("\r\n", ", ").replace("\n", ", ");
+            secondary = secondary.replace("\r\n", ", ").replace("\n", ", ");
             currentDestination = new RecentDestination(primary, secondary);
             recentDestinationsAdapter.addItem(currentDestination);
             Logger.getInstance().i(TAG, "created new currentDestination: " + currentDestination.primaryText + " <> " + currentDestination.secondaryText);
@@ -1026,8 +1022,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void askForSmsPermission(){
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, REQUEST_SMS_PERMISSION_KEY);
     }
-    //
-    // -----------
 
     /**
      * Updates the ui with the values stored in the local variables.
