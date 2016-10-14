@@ -97,6 +97,7 @@
             app:civ_border_width="7dp" />
 
         <RelativeLayout
+            android:layout_marginTop="50dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_above="@id/trip_activity_bottom_control_container">
