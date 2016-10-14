@@ -172,7 +172,6 @@
     <RelativeLayout
         android:id="@+id/trip_activity_initialization_overlay"
         android:background="@color/colorPrimaryDark"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
