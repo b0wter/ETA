@@ -101,4 +101,5 @@
     <string name="paste">Paste</string>
     <string name="initializing_trip">Initializing Trip</string>
     <string name="please_stand_by">Please Stand By...</string>
+    <string name="trip_activity_catched_service_error">Encountered an error while trying to compute a route to your destination. It is likely unknown or too far away to be reached within reasonable time.</string>
 </resources>

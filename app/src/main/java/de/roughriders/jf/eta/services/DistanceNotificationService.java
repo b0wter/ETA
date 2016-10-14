@@ -69,6 +69,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String REQUEST_SEND_SMS_UPDATE = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_SEND_SMS";
     public static final String REQUEST_DESTINATION_NAME = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_DESTINATION_NAME";
     public static final String DESTINATION_NAME_REQUEST_NAME_EXTRA = "destinationNameRequestNameExtra";
+    public static final String SERVICE_ENCOUNTERED_ERROR = "DISTANCE_NOTIFICATION_SERVICE_ENCOUNTERED_ERROR";
+    public static final String SERVICE_ERROR_REASON_EXTRA = "errorExtra";
     public static boolean IsServiceRunning = false;
 
     private static final int NOTIFICATION_ID = 1;
@@ -320,6 +322,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         } catch(Exception ex){
             Logger.getInstance().e(TAG, "Unable to send DistanceMatrixApi-request, error:");
             Logger.getInstance().e(TAG, ex.getMessage());
+
+            // in case this request was the first cancel the service
+            if(isFirstRequest)
+                sendErrorBroadcast("Distance matrix API request failed.");
         }
     }
 
@@ -638,6 +644,13 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.getInstance().d(TAG, "Sending broadcast: " + SERVICE_STOPPED_BROADCAST);
         Intent intent = new Intent(SERVICE_STOPPED_BROADCAST);
         intent.putExtra(SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA, destinationReached);
+        sendBroadcast(intent);
+    }
+
+    private void sendErrorBroadcast(String message){
+        Logger.getInstance().d(TAG, "Sending broadcast: " + SERVICE_ENCOUNTERED_ERROR);
+        Intent intent = new Intent(SERVICE_ENCOUNTERED_ERROR);
+        intent.putExtra(SERVICE_ERROR_REASON_EXTRA, message);
         sendBroadcast(intent);
     }
 }

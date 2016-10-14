@@ -48,6 +48,7 @@ public class TripActivity extends AppCompatActivity {
     private BroadcastReceiver serviceUpdateBroadcastReceiver;
     private BroadcastReceiver serviceStoppedBroadcastReceiver;
     private BroadcastReceiver serviceDestinationNameBroadcastReceiver;
+    private BroadcastReceiver serviceEncounteredErrorBroadcastReceiver;
 
     private TextView destinationTextView;
     private TextView nameTextView;
@@ -158,6 +159,7 @@ public class TripActivity extends AppCompatActivity {
         registerServiceBroadCastReceiver();
         registerServiceStoppedBroadCastReceiver();
         registerServiceDestinationNameBroadcastReceiver();
+        registerServiceEncounteredErrorBroadcastReceiver();
     }
 
     private void registerServiceBroadCastReceiver(){
@@ -217,6 +219,29 @@ public class TripActivity extends AppCompatActivity {
         registerReceiver(serviceDestinationNameBroadcastReceiver, filter);
     }
 
+    private void registerServiceEncounteredErrorBroadcastReceiver(){
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(DistanceNotificationService.SERVICE_ENCOUNTERED_ERROR);
+        serviceEncounteredErrorBroadcastReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                Log.e(TAG, "Received an error message from the service.");
+                Bundle extras = intent.getExtras();
+                String errorReason = extras.getString(DistanceNotificationService.SERVICE_ERROR_REASON_EXTRA);
+                Log.e(TAG, "The reason given for the error is: " + errorReason);
+                unregisterBroadCastReceivers();
+                new AlertDialog.Builder(TripActivity.this).setTitle(getString(R.string.app_name)).setMessage(getString(R.string.trip_activity_catched_service_error)).setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
+                        TripActivity.this.finish();
+                    }
+                }).show();
+            }
+        };
+        registerReceiver(serviceEncounteredErrorBroadcastReceiver, filter);
+    }
+
     private void unregisterBroadCastReceivers(){
         if(serviceUpdateBroadcastReceiver != null) {
             unregisterReceiver(serviceUpdateBroadcastReceiver);
@@ -231,6 +256,11 @@ public class TripActivity extends AppCompatActivity {
         if(serviceDestinationNameBroadcastReceiver != null){
             unregisterReceiver(serviceDestinationNameBroadcastReceiver);
             serviceDestinationNameBroadcastReceiver = null;
+        }
+
+        if(serviceEncounteredErrorBroadcastReceiver != null){
+            unregisterReceiver(serviceEncounteredErrorBroadcastReceiver);
+            serviceEncounteredErrorBroadcastReceiver = null;
         }
     }
 
