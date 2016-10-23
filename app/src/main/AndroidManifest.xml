@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.READ_CONTACTS" />
 
     <application
+        android:name=".helpers.ApplicationEx"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,16 +24,16 @@
             -->
 
         <!-- API Key for debugging (laptop) -->
-        <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyAD9XkkUbtIyOdTe5-J1Och5ne3deHU5fw" />
-        -->
 
         <!-- API Key for debugging (desktop) -->
+        <!--
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0" />
+        -->
 
         <service
             android:name=".services.DistanceNotificationService"

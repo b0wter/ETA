@@ -125,7 +125,6 @@ public class TripActivity extends AppCompatActivity {
         if(extras.containsKey(PHOTO_EXTRA)) {
             contactImageView.setImageURI(Uri.parse(extras.getString(PHOTO_EXTRA)));
             contactImageView.bringToFront();
-            ((RelativeLayout)findViewById(R.id.trip_activity_main_container)).bringChildToFront(contactImageView);
             (contactImageView.getParent()).requestLayout();
             ((View)contactImageView.getParent()).invalidate();
         }
