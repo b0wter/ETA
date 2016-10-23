@@ -79,4 +79,5 @@
     <string name="initializing_trip">Bereite Fahrt vor.</string>
     <string name="please_stand_by">Bitte warte...</string>
     <string name="trip_activity_catched_service_error">Es ist ein Fehler aufgetreten während versucht wurde eine Route zum Ziel zu bestimmen. Das Ziel ist entweder nicht bekannt, oder zu weit weg um in vernünftiger Zeit erreicht zu werden.</string>
+    <string name="uncaught_exception_message">Es ist ein unbekannter Fehler aufgetreten. Bitte senden Sie die Details an den Entwickler.</string>
 </resources>
