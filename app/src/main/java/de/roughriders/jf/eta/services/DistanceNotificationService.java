@@ -337,7 +337,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onResult(DistanceMatrix result) {
         Logger.getInstance().i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
-        updateRemainingDistanceAndTime(element.duration.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
+        updateRemainingDistanceAndTime(element.durationInTraffic.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
 
         // replace the given destination with the destination given by the api since that is where we are actually going
         if(!destination.equalsIgnoreCase(result.destinationAddresses[0])) {
