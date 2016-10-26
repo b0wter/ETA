@@ -33,6 +33,7 @@ import com.google.maps.PendingResult;
 import com.google.maps.model.DistanceMatrix;
 import com.google.maps.model.DistanceMatrixElement;
 import com.google.maps.model.LatLng;
+import com.google.maps.model.TrafficModel;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -313,6 +314,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Logger.getInstance().i(TAG, "location (lat/long): " + location.getLatitude() + "-" + location.getLongitude() + "; accuracy: " + location.getAccuracy());
         DistanceMatrixApiRequest request = DistanceMatrixApi.newRequest(geoApiContext);
         request.origins(convertLocationToLatLng(location));
+        request.departureTime(new org.joda.time.DateTime());
+        request.trafficModel(TrafficModel.BEST_GUESS);
         request.destinations(destination);
         try{
             Logger.getInstance().d(TAG, "Trying to send DistanceMatrixApi-request.");
@@ -337,7 +340,8 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onResult(DistanceMatrix result) {
         Logger.getInstance().i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
-    updateRemainingDistanceAndTime(element.durationInTraffic.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
+        long duration = element.durationInTraffic == null ? element.duration.inSeconds : element.durationInTraffic.inSeconds;
+        updateRemainingDistanceAndTime(duration, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
 
         // replace the given destination with the destination given by the api since that is where we are actually going
         if(!destination.equalsIgnoreCase(result.destinationAddresses[0])) {
