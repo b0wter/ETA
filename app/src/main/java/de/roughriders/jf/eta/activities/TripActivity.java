@@ -120,6 +120,8 @@ public class TripActivity extends AppCompatActivity {
         phoneNumber = extras.getString(PHONE_NUMBER_EXTRA);
         if(extras.containsKey(NAME_EXTRA))
             name = extras.getString(NAME_EXTRA);
+        else
+            name = phoneNumber;
         if (name != null || name.isEmpty())
             nameTextView.setText(name);
         if(extras.containsKey(PHOTO_EXTRA)) {

@@ -337,7 +337,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public void onResult(DistanceMatrix result) {
         Logger.getInstance().i(TAG, "Received distance matrix api result.");
         DistanceMatrixElement element = result.rows[0].elements[0];
-        updateRemainingDistanceAndTime(element.durationInTraffic.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
+    updateRemainingDistanceAndTime(element.durationInTraffic.inSeconds, element.distance.inMeters, result.originAddresses[0], result.destinationAddresses[0]);
 
         // replace the given destination with the destination given by the api since that is where we are actually going
         if(!destination.equalsIgnoreCase(result.destinationAddresses[0])) {
@@ -551,7 +551,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         callbackIntent.putExtra(COMMAND_EXTRA, COMMAND_STOP);
 
         PendingIntent serviceIntent = PendingIntent.getService(this, 1, callbackIntent, 0);
-        PendingIntent appIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+
+        Intent pendingAppIntent = new Intent(this, MainActivity.class);
+        pendingAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent appIntent = PendingIntent.getActivity(this, 0, pendingAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         notificationBuilder = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))
