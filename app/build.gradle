@@ -8,8 +8,8 @@ android {
         applicationId "de.roughriders.jf.eta"
         minSdkVersion 21
         targetSdkVersion 24
-        versionCode 32
-        versionName "1.31"
+        versionCode 33
+        versionName "1.32"
     }
     buildTypes {
         release {
