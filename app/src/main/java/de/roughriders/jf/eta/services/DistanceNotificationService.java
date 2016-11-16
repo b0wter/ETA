@@ -77,7 +77,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private static final int NOTIFICATION_ID = 1;
     private static final long MAX_API_RETRY_INTERVAL_IN_SECONDS = 5*60; // upper limit for the location update interval if the api encountered an error and tries again
     private static final long TARGET_DESTINATION_RADIUS_IN_METERS = 75; // "size" of the target. used to check if the user is at his destination
-    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 20;         // maximum duration to decide whether the user has reached his destination or not
+    private static final long TARGET_DURATION_LOWER_LIMIT_IN_SECONDS = 25;         // maximum duration to decide whether the user has reached his destination or not
     private static final long ALMOST_THERE_DURATION_IN_SECONDS = 3*60;
 
     private boolean almostThereMessageSent = false;
@@ -569,10 +569,6 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                 .setContentIntent(appIntent)
                 .setOngoing(true);
 
-        /*
-        NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
-        */
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
