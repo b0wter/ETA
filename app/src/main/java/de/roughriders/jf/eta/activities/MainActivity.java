@@ -589,32 +589,37 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void processContactIntent(int resultCode, Intent intent){
         if(resultCode == Activity.RESULT_OK)
         {
-            Uri uri = intent.getData();
-            String[] projection = { ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME,ContactsContract.Contacts.PHOTO_URI };
-
-            Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
-            if(cursor == null)
-                return;
-            cursor.moveToFirst();
-
-            int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
-            String number = cursor.getString(numberColumnIndex);
-
-            int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
-            String name = cursor.getString(nameColumnIndex);
-
             try {
-                contactPhotoUri = Uri.parse(cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts.PHOTO_URI)));
-            }catch (NullPointerException ex){
-                // doesn't matter, no picture available
+                Uri uri = intent.getData();
+                String[] projection = {ContactsContract.CommonDataKinds.Phone.NUMBER, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME};
+
+                Cursor cursor = getContentResolver().query(uri, projection, null, null, null);
+                if (cursor == null)
+                    return;
+                cursor.moveToFirst();
+
+                int numberColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+                String number = cursor.getString(numberColumnIndex);
+
+                int nameColumnIndex = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+                String name = cursor.getString(nameColumnIndex);
+
+                cursor.close();
+                currentContact = new Contact(name, number);
+
+                Log.i(TAG, "Contact selected: name: " + name + " - phone: " + number);
+
+                updateUi();
             }
-
-            cursor.close();
-            currentContact = new Contact(name, number);
-
-            Log.i(TAG, "Contact selected: name: " + name + " - phone: " + number);
-
-            updateUi();
+            catch(Exception ex) {
+                Logger.getInstance().w(TAG, ex.getMessage());
+                Logger.getInstance().w(TAG, ex.getStackTrace().toString());
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setCancelable(true);
+                builder.setTitle("ETA");
+                builder.setMessage(ex.getMessage() + "\r\n" + ex.getStackTrace().toString());
+                builder.show();
+            }
         }
     }
 

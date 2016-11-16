@@ -569,8 +569,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                 .setContentIntent(appIntent)
                 .setOngoing(true);
 
+        /*
         NotificationManager notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+        */
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     private void updateNotification(){
