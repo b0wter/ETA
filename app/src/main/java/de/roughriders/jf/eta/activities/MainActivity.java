@@ -100,7 +100,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private ImageButton clearDestinationSearchBoxButton;
     private ImageButton clearPhoneNumberButton;
     private boolean ignoreNextAddressBoxChange = false;
-    private boolean hasAskedForContactsPermission = false;
 
     private final int PICK_CONTACT = 0;
     private final int PICK_ADDRESS = 1;
@@ -109,8 +108,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int REQUEST_CONTACTS_PERMISSION_KEY = 2;
     private final int SEARCH_RADIUS = 250;
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
-    private final String ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY = "askedForContactsPermission";
-    private static final int VERTICAL_ITEM_SPACE = 48;
 
     private Contact currentContact;
     private RecentDestination currentDestination;
@@ -160,6 +157,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         clearDestinationSearchBoxButton = (ImageButton)findViewById(R.id.main_activity_clear_destination_searchbox);
         clearPhoneNumberButton = (ImageButton)findViewById(R.id.main_activity_clear_phone_button);
 
+        // TODO: evaluate if this piece of code should be used to ask for the read contacts permission as well
+        /*
         targetPhoneBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
@@ -168,6 +167,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
         });
+        */
+
         targetPhoneBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -280,6 +281,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 else {
                     finish();
                 }
+                break;
             }
             case REQUEST_SMS_PERMISSION_KEY:{
                 if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
@@ -289,30 +291,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 else {
                     Toast.makeText(this, getString(R.string.smsPermissionNotGranted), Toast.LENGTH_LONG).show();
                 }
+                break;
             }
             case REQUEST_CONTACTS_PERMISSION_KEY:{
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putBoolean(ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY, true);
-                editor.commit();
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    selectContactButton_Clicked(null);
+                }
+                break;
             }
         }
     }
 
     private void showContactsPermissionExplanationAndAsk(){
-        if(PreferenceManager.getDefaultSharedPreferences(MainActivity.this).getBoolean(ASKED_FOR_CONTACTS_PERMISSION_PREFERENCE_KEY, false) == false) {
-            new AlertDialog.Builder(this)
-                    .setTitle("ETA")
-                    .setMessage(getString(R.string.contactPermissionExplanation))
-                    .setCancelable(false)
-                    .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            askForContactsPermission();
-                        }
-                    }).show();
-        }
-        hasAskedForContactsPermission = true;
+        new AlertDialog.Builder(this)
+                .setTitle("ETA")
+                .setMessage(getString(R.string.contactPermissionExplanation))
+                .setCancelable(false)
+                .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
+                                                               @Override
+                                                               public void onClick(DialogInterface dialogInterface, int i) {
+                        askForContactsPermission();
+                }
+            }).show();
     }
 
     private void askForContactsPermission(){
@@ -556,19 +556,32 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void showSelectContactPicker(){
-        if(currentDestination != null){
-            if(!(destinationSearchBox.getText().toString().contains(currentDestination.getPrimaryText()) && destinationSearchBox.getText().toString().contains(currentDestination.getSecondaryText()))){
-                currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
-            }
-        }
-        else{
-            if(!destinationSearchBox.getText().toString().isEmpty())
-                currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
-        }
 
-        Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
-        intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
-        startActivityForResult(intent, PICK_CONTACT);
+        if(!wasContactsPermissionGranted())
+            showContactsPermissionExplanationAndAsk();
+        else {
+
+            if (currentDestination != null) {
+                if (!(destinationSearchBox.getText().toString().contains(currentDestination.getPrimaryText()) && destinationSearchBox.getText().toString().contains(currentDestination.getSecondaryText()))) {
+                    currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
+                }
+            } else {
+                if (!destinationSearchBox.getText().toString().isEmpty())
+                    currentDestination = new RecentDestination(destinationSearchBox.getText().toString());
+            }
+
+            Intent intent = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+            intent.setType(ContactsContract.CommonDataKinds.Phone.CONTENT_TYPE);
+            startActivityForResult(intent, PICK_CONTACT);
+        }
+    }
+
+    /**
+     * Returns if the app has read access for the contacts of the user.
+     * @return
+     */
+    private boolean wasContactsPermissionGranted(){
+        return ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED;
     }
 
     public void onActivityResult(int reqCode, int resultCode, Intent data) {

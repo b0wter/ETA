@@ -46,7 +46,7 @@
     <string name="userFinishedTripSms">Ich bin am Ziel angekommen.</string>
     <string name="mainActivity_apiClientConnectionFailure">Konnte keine Verbindung mit der Google Api herstellen, sind Sie online?</string>
     <string name="locationPermissionExplanation">Die App benötogt Zugriff auf Ihre Position um bestimmen zu können wie lange Sie noch unterwegs sind.</string>
-    <string name="contactPermissionExplanation">Die App hat einige zusätzliche Features, beispielsweise Kontaktbilder, für die Zugriff auf das Adressbuch benötigt wird.</string>
+    <string name="contactPermissionExplanation">Manche Hersteller verlangen, dass Apps nach der Erlaubnis fragen Kontakte auszulesen um eine Kontaktauswahl anzuzueigen. Da die Liste der Geräte sich ständig ändert wird diese Erlaubnis für alle Geräte abgefragt. Die App liest weder ihr gesamtes Adressbuch ein, noch sendet sie Kontaktinformationen an fremde Server.</string>
     <string name="keep_screen_on">Display dauerhaft aktivieren</string>
     <string name="delete_recent_destinations">Kürzliche Ziele löschen</string>
     <string name="delete_recent_trips">Kürzliche Fahrten löschen</string>
