@@ -105,7 +105,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private final int PICK_ADDRESS = 1;
     private final int PICK_BY_PLACE_PICKER = 2;
     private final int REQUEST_LOCATION_PERMISSION_KEY = 1;
+    /**
+     * This key is used if the user is asked for the permission after clicking the contact picker for
+     * the phone numbers.
+     */
     private final int REQUEST_CONTACTS_PERMISSION_KEY = 2;
+    /**
+     * This key is used if the user is asked for the permission after clicking the "contact" option
+     * for address selection in the slider.
+     */
+    private final int REQUEST_CONTACTS_PERMISSION_FROM_SLIDER_KEY = 3;
     private final int SEARCH_RADIUS = 250;
     private static final int REQUEST_SMS_PERMISSION_KEY = 0;
 
@@ -299,10 +308,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
                 break;
             }
+            case REQUEST_CONTACTS_PERMISSION_FROM_SLIDER_KEY:{
+                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    selectContactForAddressButton(null);
+                }
+                break;
+            }
         }
     }
 
-    private void showContactsPermissionExplanationAndAsk(){
+    private void showContactsPermissionExplanationAndAsk(final boolean askedFromSlider){
         new AlertDialog.Builder(this)
                 .setTitle("ETA")
                 .setMessage(getString(R.string.contactPermissionExplanation))
@@ -310,13 +325,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 .setPositiveButton(getString(android.R.string.ok), new DialogInterface.OnClickListener() {
                                                                @Override
                                                                public void onClick(DialogInterface dialogInterface, int i) {
-                        askForContactsPermission();
+                        askForContactsPermission(askedFromSlider);
                 }
             }).show();
     }
 
-    private void askForContactsPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, REQUEST_CONTACTS_PERMISSION_KEY);
+    private void askForContactsPermission(boolean askedFromSlider){
+        int key = askedFromSlider ? REQUEST_CONTACTS_PERMISSION_FROM_SLIDER_KEY : REQUEST_CONTACTS_PERMISSION_KEY;
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_CONTACTS}, key);
     }
 
     private void startTripActivityIfServiceRunning(){
@@ -533,7 +549,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     public void selectContactForAddressButton(View view){
-        showSelectContactForAddressPicker();
+        if(!wasContactsPermissionGranted())
+            showContactsPermissionExplanationAndAsk(true);
+        else {
+            showSelectContactForAddressPicker();
+        }
     }
 
     private void showSelectContactForAddressPicker(){
@@ -558,7 +578,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private void showSelectContactPicker(){
 
         if(!wasContactsPermissionGranted())
-            showContactsPermissionExplanationAndAsk();
+            showContactsPermissionExplanationAndAsk(false);
         else {
 
             if (currentDestination != null) {
