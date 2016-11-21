@@ -63,7 +63,7 @@ public class Converter {
             return String.format(Locale.getDefault(), "%.1f", duration) + " " + minutesString;
         }
         else {
-            return String.format(Locale.getDefault(), "%.hf", ((float)durationInSeconds) / 60 / 60) + " " + hoursString;
+            return String.format(Locale.getDefault(), "%.1f", ((float)durationInSeconds) / 60 / 60) + " " + hoursString;
         }
     }
 

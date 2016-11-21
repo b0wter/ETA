@@ -317,11 +317,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         request.departureTime(new org.joda.time.DateTime());
         request.trafficModel(TrafficModel.BEST_GUESS);
         request.destinations(destination);
+        DistanceMatrix result;
         try{
             Logger.getInstance().d(TAG, "Trying to send DistanceMatrixApi-request.");
-            DistanceMatrix result = request.await();
+            result = request.await();
             Logger.getInstance().d(TAG, "Received result from DistanceMatrixApi");
-            onResult(result);
         } catch(Exception ex){
             Logger.getInstance().e(TAG, "Unable to send DistanceMatrixApi-request, error:");
             Logger.getInstance().e(TAG, ex.getMessage());
@@ -329,7 +329,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
             // in case this request was the first cancel the service
             if(isFirstRequest)
                 sendErrorBroadcast("Distance matrix API request failed.");
+
+            return;
         }
+
+        onResult(result);
     }
 
     /**
