@@ -166,18 +166,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         clearDestinationSearchBoxButton = (ImageButton)findViewById(R.id.main_activity_clear_destination_searchbox);
         clearPhoneNumberButton = (ImageButton)findViewById(R.id.main_activity_clear_phone_button);
 
-        // TODO: evaluate if this piece of code should be used to ask for the read contacts permission as well
-        /*
-        targetPhoneBox.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View v, boolean hasFocus) {
-                if(hasFocus && !hasAskedForContactsPermission){
-                    showContactsPermissionExplanationAndAsk();
-                }
-            }
-        });
-        */
-
         targetPhoneBox.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
@@ -339,7 +327,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         if(DistanceNotificationService.IsServiceRunning) {
             Log.i(TAG, "Background service is running, starting TripActivity");
             Intent intent = new Intent(this, TripActivity.class);
-            startActivity(intent);
+            //startActivity(intent);
         }
     }
 
@@ -471,7 +459,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 if(editable.length() == 0){
                     slidingPanelButtonCardview.setVisibility(View.VISIBLE);
                     recentDestinationsCardView.setVisibility(View.VISIBLE);
-                    //predictionsCardView.setVisibility(View.GONE);
+                    predictionsCardView.setVisibility(View.GONE);
                     //predictionsEmptyCardView.setVisibility(View.GONE);
                     clearDestinationSearchBoxButton.setVisibility(View.GONE);
                 } else {

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -79,8 +80,14 @@ public class TripActivity extends AppCompatActivity {
     @Override
     public void onStart(){
         super.onStart();
+        exitIfServiceNotRunning();
         tryUpdatingFromService();
         setToggleDisplayTimeoutButtonState();
+    }
+
+    private void exitIfServiceNotRunning(){
+        if(!DistanceNotificationService.IsServiceRunning)
+            finish();
     }
 
     private void setToggleDisplayTimeoutButtonState(){
@@ -335,7 +342,8 @@ public class TripActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
-                        finish();
+                        //finish();
+                        NavUtils.navigateUpFromSameTask(TripActivity.this);
                     }
                 }).show();
     }
