@@ -5,6 +5,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -558,19 +559,29 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Intent callbackIntent = new Intent(COMMAND_STOP, null, this, DistanceNotificationService.class);
         callbackIntent.putExtra(COMMAND_EXTRA, COMMAND_STOP);
 
-        PendingIntent serviceIntent = PendingIntent.getService(this, 1, callbackIntent, 0);
+        //PendingIntent serviceIntent = PendingIntent.getService(this, 1, callbackIntent, 0);
 
-        Intent pendingAppIntent = new Intent(this, MainActivity.class);
-        pendingAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent appIntent = PendingIntent.getActivity(this, 0, pendingAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        //Intent pendingAppIntent = new Intent(this, MainActivity.class);
+        //pendingAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        //PendingIntent appIntent = PendingIntent.getActivity(this, 0, pendingAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(TripActivity.class);
+        stackBuilder.addNextIntent(new Intent(this, TripActivity.class));
+        PendingIntent currentStackIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+        //PendingIntent restoreActivityIntent = PendingIntent.getActivity(this, 0, new Intent(this, TripActivity.class), 0);
 
         notificationBuilder = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.distancenotificationservice_is_initializing_notification_message))
                 .setSmallIcon(R.drawable.ic_directions_car_white_24dp)
                 .setWhen(System.currentTimeMillis())
-                .addAction(R.drawable.ic_stop_white_24dp, getString(R.string.stopCapital), serviceIntent)
-                .setContentIntent(appIntent)
+         //       .addAction(R.drawable.ic_stop_white_24dp, getString(R.string.stopCapital), serviceIntent)
+         //       .setContentIntent(appIntent)
+         //       .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, TripActivity.class), 0))
+                .setContentIntent(currentStackIntent)
                 .setOngoing(true);
 
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
