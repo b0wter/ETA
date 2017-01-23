@@ -69,10 +69,12 @@ public class TripActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterBroadCastReceivers();
+        /*
         if(isFinishing()) {
             stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
             Logger.getInstance().close();
         }
+        */
         super.onDestroy();
     }
 
@@ -154,6 +156,7 @@ public class TripActivity extends AppCompatActivity {
         serviceUpdateBroadcastReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Logger.getInstance().i(TAG, "Broadcast received from service, refreshing time and destination");
                 Bundle extras = intent.getExtras();
                 long remainingTimeInSeconds = extras.getLong(SERVICE_UPDATE_TIME_KEY);
                 long remainingDistanceInMeters = extras.getLong(SERVICE_UPDATE_DISTANCE_KEY);
