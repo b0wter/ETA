@@ -70,10 +70,12 @@ public class TripActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterBroadCastReceivers();
+        /*
         if(isFinishing()) {
             stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
             Logger.getInstance().close();
         }
+        */
         super.onDestroy();
     }
 
