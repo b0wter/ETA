@@ -70,12 +70,6 @@ public class TripActivity extends AppCompatActivity {
     @Override
     protected void onDestroy(){
         unregisterBroadCastReceivers();
-        /*
-        if(isFinishing()) {
-            stopService(new Intent(TripActivity.this, DistanceNotificationService.class));
-            Logger.getInstance().close();
-        }
-        */
         super.onDestroy();
     }
 
@@ -127,11 +121,11 @@ public class TripActivity extends AppCompatActivity {
         destination = extras.getString(DESTINATION_EXTRA);
         destinationTextView.setText(destination.replace(",", ",\r\n"));
         phoneNumber = extras.getString(PHONE_NUMBER_EXTRA);
-        if(extras.containsKey(NAME_EXTRA))
+        if(extras.containsKey(NAME_EXTRA) && !extras.getString(NAME_EXTRA).isEmpty())
             name = extras.getString(NAME_EXTRA);
         else
             name = phoneNumber;
-        if (name != null || name.isEmpty())
+        if (name != null && !name.isEmpty())
             nameTextView.setText(name);
         if(extras.containsKey(PHOTO_EXTRA)) {
             contactImageView.setImageURI(Uri.parse(extras.getString(PHOTO_EXTRA)));

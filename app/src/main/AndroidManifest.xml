@@ -33,7 +33,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCWsaloybxe1BiEl_E_1WEbvg_RQvPZSc0" />
-            -->
+        -->
 
         <service
             android:name=".services.DistanceNotificationService"
