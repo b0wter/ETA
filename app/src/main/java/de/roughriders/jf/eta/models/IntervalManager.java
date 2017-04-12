@@ -55,6 +55,6 @@ public class IntervalManager {
                 return interval;
             }
         }
-        return null;
+        return intervals.get(0);
     }
 }
