@@ -1024,6 +1024,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         intent.putExtra(DistanceNotificationService.SEND_CONTINUOUS_UPDATES_EXTRA, ( findViewById(R.id.main_activity_continuous_updates)) != null ? ((CheckBox) findViewById(R.id.main_activity_continuous_updates)).isChecked() : false);
         intent.putExtra(DistanceNotificationService.SEND_ALMOST_THERE_MESSAGE_EXTRA, ( findViewById(R.id.main_activity_almost_there_message)) != null ? ((CheckBox) findViewById(R.id.main_activity_almost_there_message)).isChecked() : false);
         intent.putExtra(DistanceNotificationService.SEND_ARRIVAL_MESSAGE_EXTRA, ( findViewById(R.id.main_activity_arrival_message)) != null ? ((CheckBox) findViewById(R.id.main_activity_arrival_message)).isChecked() : false);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        intent.putExtra(DistanceNotificationService.FORCE_24H_FORMAT_KEY, prefs.getBoolean(getString(R.string.option_24h_key), false));
+
         startService(intent);
         return true;
     }

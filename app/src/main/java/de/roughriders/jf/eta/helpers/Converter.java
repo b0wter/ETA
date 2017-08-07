@@ -87,8 +87,12 @@ public class Converter {
      * @param remainingDurationInSeconds
      * @return
      */
-    public String formatArrivalTime(long remainingDurationInSeconds){
-        SimpleDateFormat format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+    public String formatArrivalTime(long remainingDurationInSeconds, boolean force24h){
+        SimpleDateFormat format = null;
+        if(force24h)
+            format = new SimpleDateFormat("HH:mm", Locale.getDefault());
+        else
+            format = new SimpleDateFormat("HH:mm", Locale.GERMANY);
         Date arrivalTime = new Date(System.currentTimeMillis() + remainingDurationInSeconds*1000);
         String arrivalTimeString = format.format(arrivalTime);
         return arrivalTimeString;

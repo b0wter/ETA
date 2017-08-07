@@ -19,6 +19,12 @@
         android:key="@string/delete_recent_trips_key"
         />
 
+    <Preference
+        android:summary="@string/force_24h_format"
+        android:title="@string/option_24h"
+        android:key="@string/option_24h_key"
+        />
+
     <PreferenceCategory
         android:title="@string/preferences_sms_settings"/>
     <CheckBoxPreference
