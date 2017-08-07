@@ -65,6 +65,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     public static final String SEND_ARRIVAL_MESSAGE_EXTRA = "arrivalMessageExtra";
     public static final String LATITUDE_EXTRA = "latitudeExtra";
     public static final String LONGITUDE_EXTRA = "longitudeExtra";
+    public static final String FORCE_24H_FORMAT_KEY = "force24hFormat";
     public static final String REQUEST_STATUS_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_REQUEST_UPDATE";
     public static final String SERVICE_STOPPED_BROADCAST = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED";
     public static final String SERVICE_STOPPED_BROADCAST_SUCCESS_EXTRA = "DISTANCE_NOTIFICATION_SERVICE_DESTINATION_REACHED_SUCCESS";
@@ -106,6 +107,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private BroadcastReceiver updateRequestBroadcastReceiver;
     private BroadcastReceiver sendSmsBroadcastReceiver;
     private IntervalManager intervalManager;
+    private boolean force24hFormat = false;
 
     public DistanceNotificationService(){
         Log.d(TAG, "Instantiating new DistanceNotificationService");
@@ -145,6 +147,10 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                     longitude = extras.getString(LONGITUDE_EXTRA);
                     latitude = extras.getString(LATITUDE_EXTRA);
                 }
+
+                if(extras.containsKey(FORCE_24H_FORMAT_KEY))
+                    force24hFormat = extras.getBoolean(FORCE_24H_FORMAT_KEY);
+
                 start(extras.getString(PHONE_EXTRA), extras.getString(DESTINATION_EXTRA), longitude, latitude);
                 break;
             case COMMAND_STOP:
@@ -546,7 +552,7 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
     private String fillSmsTemplate(String text){
         text = text.replace("%%DESTINATION%%", destination);
         text = text.replace("%%DURATION%%", converter.formatDuration(remainingDurationInSeconds));
-        text = text.replace("%%ARRIVAL%%", converter.formatArrivalTime(remainingDurationInSeconds));
+        text = text.replace("%%ARRIVAL%%", converter.formatArrivalTime(remainingDurationInSeconds, force24hFormat));
         return text;
     }
 

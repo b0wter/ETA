@@ -103,4 +103,7 @@
     <string name="please_stand_by">Please Stand By...</string>
     <string name="trip_activity_catched_service_error">Encountered an error while trying to compute a route to your destination. It is likely unknown or too far away to be reached within reasonable time.</string>
     <string name="uncaught_exception_message">The app has encountered an uncatched error. Please send an email containg the error details to the developer.</string>
+    <string name="force_24h_format">Force 24h format.</string>
+    <string name="option_24h">24-hours format</string>
+    <string name="option_24h_key" translatable="false">option_24h_key</string>
 </resources>
