@@ -89,7 +89,7 @@ public class Converter {
      */
     public String formatArrivalTime(long remainingDurationInSeconds, boolean force24h){
         SimpleDateFormat format = null;
-        if(force24h)
+        if(!force24h)
             format = new SimpleDateFormat("HH:mm", Locale.getDefault());
         else
             format = new SimpleDateFormat("HH:mm", Locale.GERMANY);
