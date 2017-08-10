@@ -19,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
+import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -39,6 +40,7 @@ import com.google.maps.model.TrafficModel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import de.roughriders.jf.eta.R;
 import de.roughriders.jf.eta.activities.MainActivity;
@@ -565,28 +567,16 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         Intent callbackIntent = new Intent(COMMAND_STOP, null, this, DistanceNotificationService.class);
         callbackIntent.putExtra(COMMAND_EXTRA, COMMAND_STOP);
 
-        //PendingIntent serviceIntent = PendingIntent.getService(this, 1, callbackIntent, 0);
-
-        //Intent pendingAppIntent = new Intent(this, MainActivity.class);
-        //pendingAppIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        //PendingIntent appIntent = PendingIntent.getActivity(this, 0, pendingAppIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addParentStack(TripActivity.class);
         stackBuilder.addNextIntent(new Intent(this, TripActivity.class));
         PendingIntent currentStackIntent = stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-        //PendingIntent restoreActivityIntent = PendingIntent.getActivity(this, 0, new Intent(this, TripActivity.class), 0);
 
         notificationBuilder = new Notification.Builder(getApplicationContext())
                 .setContentTitle(getString(R.string.app_name))
                 .setContentText(getString(R.string.distancenotificationservice_is_initializing_notification_message))
                 .setSmallIcon(R.drawable.ic_directions_car_white_24dp)
                 .setWhen(System.currentTimeMillis())
-         //       .addAction(R.drawable.ic_stop_white_24dp, getString(R.string.stopCapital), serviceIntent)
-         //       .setContentIntent(appIntent)
-         //       .setContentIntent(PendingIntent.getActivity(this, 0, new Intent(this, TripActivity.class), 0))
                 .setContentIntent(currentStackIntent)
                 .setOngoing(true);
 
@@ -598,7 +588,11 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
         String duration = converter.formatDuration(remainingDurationInSeconds);
 
         Date date = new Date(lastUpdateCheckTicks);
-        String lastCheck = SimpleDateFormat.getTimeInstance().format(date);
+        String lastCheck = "";
+        if(force24hFormat)
+            lastCheck = (DateFormat.format("HH:mm", date)).toString();
+        else
+            lastCheck = SimpleDateFormat.getTimeInstance().format(date);
 
         Date arrivalTime = new Date(System.currentTimeMillis() + remainingDurationInSeconds *1000);
         String arrivalTimeString = SimpleDateFormat.getTimeInstance().format(arrivalTime);
