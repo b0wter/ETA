@@ -2,13 +2,10 @@ package de.roughriders.jf.eta.models;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.databinding.parser.BindingExpressionParser;
 import android.preference.PreferenceManager;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
-
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Date;
