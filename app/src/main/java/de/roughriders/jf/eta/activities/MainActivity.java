@@ -1025,7 +1025,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private boolean wasSmsPermissionGranted(){
-        return ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+        boolean smsPermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED;
+        boolean phoneStatePermissionGranted = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED;
+
+        Logger.getInstance().i(TAG, "SMS permission granted: " + String.valueOf(smsPermissionGranted));
+        Logger.getInstance().i(TAG, "Phone permission granted: " + String.valueOf(phoneStatePermissionGranted));
+
+        return smsPermissionGranted && phoneStatePermissionGranted;
     }
 
     private void showSmsPermissionExplanationAndAsk(){
@@ -1042,7 +1048,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
 
     private void askForSmsPermission(){
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS}, REQUEST_SMS_PERMISSION_KEY);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.SEND_SMS, Manifest.permission.READ_PHONE_STATE}, REQUEST_SMS_PERMISSION_KEY);
     }
 
     /**

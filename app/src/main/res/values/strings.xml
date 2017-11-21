@@ -19,7 +19,7 @@
     <string name="stop">stop</string>
 
     <!-- Strings fuer die TripActivity -->
-    <string name="smsPermissionNotGranted">The app needs your permission to send sms messages to the recipient to tell him/her how long it takes you to arrive.</string>
+    <string name="smsPermissionNotGranted">The app needs your permission to read the phone state and send sms messages to the recipient to tell him/her how long it takes you to arrive.</string>
     <string name="activate_gps_hint">Please enable the location services. Otherwise the app has no means of detecting your current location and cannot estimate arrival times.</string>
     <string name="exit_hint">If you go back the app will no longer monitor your position and send status updates. Do you want to go back?</string>
 
