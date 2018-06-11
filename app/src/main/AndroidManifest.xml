@@ -20,7 +20,7 @@
         <!-- API Key for release -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCLZJ4HjXNi4QqOq1g9R0cgMCMD1g1c5Is" />
+            android:value="AIzaSyBmbyBvOrA6w_vFxuwj44ZxsJNHDMp11AA"/>
 
         <!-- API Key for debugging (laptop) -->
         <!--
