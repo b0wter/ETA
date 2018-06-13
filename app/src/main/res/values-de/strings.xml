@@ -82,4 +82,5 @@
     <string name="uncaught_exception_message">Es ist ein unbekannter Fehler aufgetreten. Bitte senden Sie die Details an den Entwickler.</string>
     <string name="force_24h_format">24h Stundenformat erzwingen.</string>
     <string name="option_24h">24 Stunden Format</string>
+    <string name="notification_channel_description">Benachrichtigungen vom ETA Notifier.</string>
 </resources>
