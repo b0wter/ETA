@@ -106,4 +106,6 @@
     <string name="force_24h_format">Force 24h format.</string>
     <string name="option_24h">24-hours format</string>
     <string name="option_24h_key" translatable="false">option_24h_key</string>
+    <string name="notification_channel_name" translatable="false">ETA Notifier</string>
+    <string name="notification_channel_description">Notifications from ETA Notifier.</string>
 </resources>

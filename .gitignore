@@ -5,6 +5,7 @@ app/app-release.apk
 /.idea/workspace.xml
 /.idea/libraries
 /.idea
+/app/release/
 .DS_Store
 /build
 /captures

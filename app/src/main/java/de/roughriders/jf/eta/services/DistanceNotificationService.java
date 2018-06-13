@@ -1,7 +1,9 @@
 package de.roughriders.jf.eta.services;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -12,11 +14,13 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.telephony.SmsManager;
 import android.text.format.DateFormat;
@@ -580,7 +584,27 @@ public class DistanceNotificationService extends Service implements GoogleApiCli
                 .setContentIntent(currentStackIntent)
                 .setOngoing(true);
 
+        if(Build.VERSION.SDK_INT >= 27) {
+            String channelId = createNotificationChannel();
+            notificationBuilder.setChannelId(channelId);
+        }
+
         startForeground(NOTIFICATION_ID, notificationBuilder.build());
+    }
+
+    @TargetApi(27)
+    private String createNotificationChannel() {
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        String id = "eta_notification_channel";
+        CharSequence name = getString(R.string.notification_channel_name);
+        String description = getString(R.string.notification_channel_description);
+        int importance = notificationManager.IMPORTANCE_LOW;
+
+        NotificationChannel channel = new NotificationChannel(id, name, importance);
+        channel.enableLights(false);
+        channel.enableVibration(false);
+        notificationManager.createNotificationChannel(channel);
+        return id;
     }
 
     private void updateNotification(){
