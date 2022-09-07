@@ -1,86 +1,105 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="action_settings">Einstellungen</string>
-    <string name="activate_gps_hint">Bitte aktivieren Sie die Ortungsdienste. Ohne diese kann die App nicht korrekt arbeiten und keine Ankunftszeiten verschicken.</string>
-    <string name="arrivalSms">Ich bin angekommen, meine aktuelle Position ist %%DESTINATION%%.\n\nGesendet von ETA: https://goo.gl/bPqq17</string>
-    <string name="arrivalTimeChangedSms">Meine Ankunftszeit hat sich geändert. Ich werde in %%DURATION%% da sein, um %%ARRIVAL%%.</string>
-    <string name="contact">Kontakt</string>
-    <string name="destination">Ziel</string>
-    <string name="distancenotificationservice_is_initializing_notification_message">Initialisiere den Trip.</string>
-    <string name="distancenotificationservice_is_running_notification_message">Die Fahrzeit beträgt %%DURATION%%, letztes Update um %%LASTCHECK%%.</string>
-    <string name="distancenotificationservice_is_running_notification_message_details">Verbleibende Distanz: %%DISTANCE%%, Dauer: %%DURATION%%. Letztes Update um %%LASTCHECK%% Uhr.</string>
-    <string name="duringTripSms">Ich bin immer noch unterwegs Richtung %%DESTINATION%%. Ich werde in zirka %%DURATION%% da sein, um %%ARRIVAL%%.</string>
-    <string name="exit_hint">Wenn Sie jetzt zurückgehen wird die App Ihre Position nicht weiter verfolgen und keine Statusupdates senden. Wollen Sie wirklich zurück?</string>
-    <string name="no_recent_trips">Keine kürzliche Fahrten.</string>
-    <string name="recent_destinations">Kürzliche Ziele</string>
-    <string name="recent_trips">Kürzliche Fahrten</string>
-    <string name="remaining_time">Verbleibende Zeit</string>
-    <string name="send_almost_there_notification">Sende beinah da SMS.</string>
-    <string name="send_arrival_notification">Sende Ankunfts-SMS.</string>
-    <string name="send_initial_notification">Sende initiale SMS.</string>
-    <string name="send_periodic_notifications">Sende kontinuierliche Updates.</string>
-    <string name="smsPermissionNotGranted">Die App benötigt Ihre Erlaubnis SMS zu versenden um Ihren Kontakt über Ihre Ankunftszeit zu informieren. Ohne diese Erlaubnis ist die App funktionslos.</string>
-    <string name="startTripSms">Ich bin jetzt auf dem Weg zu %%DESTINATION%%. Ich werde vermutlich in %%DURATION%% da sein, um %%ARRIVAL%%. Gesendet von ETA: https://goo.gl/bPqq17</string>
-    <string name="stop">stop</string>
+    <string name="app_name" translatable="false">ETA</string>
+    <string name="action_settings">Settings</string>
+    <string name="recent_destinations">Recent destinations</string>
+    <string name="destination">Destination</string>
+    <string name="recent_trips">Recent trips</string>
+    <string name="send_arrival_notification">Send arrival notification</string>
+    <string name="send_almost_there_notification">Send almost there notification</string>
+    <string name="send_initial_notification">Send initial notification</string>
+    <string name="send_periodic_notifications">Send periodic notifications</string>
+    <string name="no_recent_trips">No recent trips</string>
+
+    <string name="title_activity_trip">TripActivity</string>
+    <string name="colon" translatable="false">:</string>
+    <string name="remaining_time">Remaining time</string>
+
+    <string name="contact">Contact</string>
     <string name="stopCapital">Stop</string>
-    <string name="title_activity_trip">Fahrt</string>
-    <string name="phone">Telefonnummer</string>
-    <string name="send_notification_now">Sende Benachrichtigung.</string>
-    <string name="minutes">Minuten</string>
-    <string name="remainingMinutesText">verbleibend</string>
-    <string name="sms_update_sent">Es wurde ein Update an den Kontakt geschickt.</string>
-    <string name="minute">Minute</string>
-    <string name="hours">Stunden</string>
-    <string name="hour">Stunde</string>
-    <string name="meters">Meter</string>
-    <string name="km">Km</string>
-    <string name="no_recent_destinations">Keine kürzlichen Ziele.</string>
-    <string name="no_search_results_found">Keine Suchergebnisse gefunden.</string>
-    <string name="search_results">Suchergebnisse</string>
-    <string name="gps_needed_for_autocomplete">Die Location-Dienste müssen aktiviert sein um die Autovervollständigung zu nutzen.</string>
-    <string name="sms_sent_toast">Nachricht wurde versendet.</string>
+    <string name="stop">stop</string>
+
+    <!-- Strings fuer die TripActivity -->
+    <string name="smsPermissionNotGranted">The app needs your permission to read the phone state and send sms messages to the recipient to tell him/her how long it takes you to arrive.</string>
+    <string name="activate_gps_hint">Please enable the location services. Otherwise the app has no means of detecting your current location and cannot estimate arrival times.</string>
+    <string name="exit_hint">If you go back the app will no longer monitor your position and send status updates. Do you want to go back?</string>
+
+    <!-- Strings for the distance notification service -->
+    <string name="distancenotificationservice_is_initializing_notification_message">Initializing the trip.</string>
+    <string name="distancenotificationservice_is_running_notification_message">Trip duration: %%DURATION%%, last updated on %%LASTCHECK%%.</string>
+    <string name="distancenotificationservice_is_running_notification_message_details">Remaining distance: %%DISTANCE%%. Duration: %%DURATION%%. Last updated on %%LASTCHECK%%.</string>
+
+    <!-- Strings for sms -->
+    <string name="arrivalSms">I have arrived at %%DESTINATION%%.\n\nSent by ETA: https://goo.gl/bPqq17</string>
+    <string name="startTripSms">I am now on my way to %%DESTINATION%%. I will probably arrive in %%DURATION%%, at %%ARRIVAL%%.\n\nSent by ETA: https://goo.gl/bPqq17</string>
+    <string name="duringTripSms">I am still on my way to %%DESTINATION%%. I\'ll be there in about %%DURATION%%, at %%ARRIVAL%%.</string>
+    <string name="arrivalTimeChangedSms">My arrival time has changed. I\'ll be there in about %%DURATION%%, at %%ARRIVAL%%.</string>
+    <string name="phone">Phone</string>
+    <string name="send_notification_now">Send notification now</string>
+    <string name="minutes">minutes</string>
+    <string name="remainingMinutesText">Remaining</string>
+    <string name="sms_update_sent">An update has been sent.</string>
+    <string name="minute">minute</string>
+    <string name="hours">hours</string>
+    <string name="hour">hour</string>
+    <string name="meters">meters</string>
+    <string name="km">km</string>
+    <string name="no_search_results_found">No search results found.</string>
+    <string name="search_results">Search results</string>
+    <string name="no_recent_destinations">No recent destinations</string>
+    <string name="gps_needed_for_autocomplete">Location services are required for the autocompletion of places.</string>
+    <string name="sms_sent_toast">Message has been sent.</string>
     <string name="min_abbreviation">min</string>
     <string name="hour_abbreviation">h</string>
-    <string name="almostThereSms">Ich bin fast da. Meine Ankunftszeit ist %%ARRIVAL%%, das sind noch %%DURATION%%.</string>
-    <string name="tripActivityFinishButtonMessage">Wollen Sie die Fahrt beenden und Ihren Kontakt informieren, dass Sie angekommen sind?</string>
-    <string name="userFinishedTripSms">Ich bin am Ziel angekommen.</string>
-    <string name="mainActivity_apiClientConnectionFailure">Konnte keine Verbindung mit der Google Api herstellen, sind Sie online?</string>
-    <string name="locationPermissionExplanation">Die App benötogt Zugriff auf Ihre Position um bestimmen zu können wie lange Sie noch unterwegs sind.</string>
-    <string name="contactPermissionExplanation">Manche Hersteller verlangen, dass Apps nach der Erlaubnis fragen Kontakte auszulesen um eine Kontaktauswahl anzuzueigen. Da die Liste der Geräte sich ständig ändert wird diese Erlaubnis für alle Geräte abgefragt. Die App liest weder ihr gesamtes Adressbuch ein, noch sendet sie Kontaktinformationen an fremde Server.</string>
-    <string name="keep_screen_on">Display dauerhaft aktivieren</string>
-    <string name="delete_recent_destinations">Kürzliche Ziele löschen</string>
-    <string name="delete_recent_trips">Kürzliche Fahrten löschen</string>
-    <string name="delete_recent_destinations_summary">Löscht alle Ziele die Sie für Ihre bisherigen Fahrten benutzt haben.</string>
-    <string name="delete_recent_trips_summary">Löscht alle Fahrten die Sie bisher unternommen haben.</string>
-    <string name="preferences_enable_logging_summary">Speichere Debug-Informationen in einer externen Log-Datei.</string>
-    <string name="preferences_enable_logging">Aktiviere Loggin</string>
-    <string name="title_activity_settings">Einstellungen</string>
-    <string name="preferences_general_settings_header">Allgemeine</string>
+    <string name="almostThereSms">I am almost at the destination. My remaining time is %%DURATION%%, I\'ll be arriving at aroung %%ARRIVAL%%.</string>
+    <string name="tripActivityFinishButtonMessage">Do you want to finish this trip and inform your contact that you have arrived?</string>
+    <string name="userFinishedTripSms">I have arrived at the destination.</string>
+    <string name="mainActivity_apiClientConnectionFailure">The Google API Client could connect to the remote party. Are you online?</string>
+    <string name="locationPermissionExplanation">The app needs to access your location in order to compute the time it takes to reach your destination. The app is useless if you do not grant this permission.</string>
+    <string name="contactPermissionExplanation">Some manufactures require that apps ask for the permission to read contacts in order to show a contact picker. Since the list of devices is changing rapidly the permission is asked for on every device. The app will not read your entire address book nor will it send any contact information to an external server.</string>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+    <string name="keep_screen_on">Keep screen on</string>
+    <string name="delete_recent_trips">Clear recent trips.</string>
+    <string name="delete_recent_destinations">Clear recent destinations</string>
+
+    <!-- Example General settings -->
+    <string name="pref_header_general" translatable="false">General</string>
+
+    <string name="delete_recent_destinations_button" translatable="false">delete_recent_destinations_button</string>
+    <string name="delete_recent_destinations_summary">Removes all destinations that you have selected in the past.</string>
+    <string name="delete_recent_trips_key" translatable="false">delete_recent_trips</string>
+    <string name="delete_recent_trips_summary">Removes all previous trips.</string>
+    <string name="preferences_enable_logging_summary">Record debug information in external log file.</string>
+    <string name="preferences_enable_logging">Enable logging</string>
+    <string name="preferences_general_settings_header">General</string>
     <string name="preferences_debugging_header">Debugging</string>
     <string name="preferences_sms_settings">SMS</string>
-    <string name="preferences_default_send_start_sms_key">SMS bei Fahrtantritt senden</string>
-    <string name="preferences_default_send_start_sms_summary">Standardeinstellung für das Senden einer SMS bei Fahrtantritt.</string>
-    <string name="preferences_default_send_continuous_sms_summary">Standardeinstellung für das Senden von SMS Updates während der Fahrt.</string>
+    <string name="preferences_default_send_start_sms_key">Send SMS on Trip Start</string>
+    <string name="preferences_default_send_start_sms_summary">Default setting for sending sms at trip start.</string>
+    <string name="preferences_default_send_continuous_sms_summary">Default setting for sending sms updates during the trip.</string>
     <string name="preferences_default_send_continuous_sms_key">SMS Updates</string>
-    <string name="preferences_default_send_almost_there_sms_key">SMS Update wenn in der Nähe</string>
-    <string name="preferences_default_send_almost_there_sms_summary">Standardeinstellung für das Senden einer SMS wenn das Ziel fast erreicht ist.</string>
-    <string name="preferences_default_send_trip_finished_sms_key">SMS Update bei Ankunft</string>
-    <string name="preferences_default_send_trip_finished_sms_summary">Standardeinstellung für das Senden einer SMS wenn das Ziel erreicht wurde.</string>
-    <string name="show_keep_display_on_hint">Die App wird den Bildschirm aktiviert lassen, bis er manuell ausgeschaltet wird.</string>
-    <string name="show_keep_display_off_hint">Die App wird den Bildschirm nicht mehr aktiviert lassen.</string>
+    <string name="preferences_default_send_almost_there_sms_key">Send SMS when almost there</string>
+    <string name="preferences_default_send_almost_there_sms_summary">Default setting for sending sms update when the destination is almost reached.</string>
+    <string name="preferences_default_send_trip_finished_sms_key">Send SMS on arrival</string>
+    <string name="preferences_default_send_trip_finished_sms_summary">Default setting for sending sms when the destination is arrived.</string>
+    <string name="show_keep_display_on_hint">The app will keep the display active until toggled of manually.</string>
+    <string name="show_keep_display_off_hint">The app will no longer keep the display active.</string>
     <string name="feedback">Feedback</string>
-    <string name="send_feedback_explanation">Sende ein Email an den Entwickler.</string>
-    <string name="send_feedback">Sende Email</string>
-    <string name="not_all_information_entered_on_trip_start">Sie müssen eine Telefonnummer und eine Adresse eingeben um fortzufahren.</string>
+    <string name="send_feedback_explanation">Send an email to the developer.</string>
+    <string name="send_feedback">Send Email</string>
+    <string name="not_all_information_entered_on_trip_start">You have to enter a phone number and a destination to start a trip.</string>
     <string name="start">Start</string>
-    <string name="internet_not_available_toast">Um die app zu verwenden wird eine aktive Datenverbindung benötigt.</string>
-    <string name="map">Karte</string>
-    <string name="paste">Einfügen</string>
-    <string name="initializing_trip">Bereite Fahrt vor.</string>
-    <string name="please_stand_by">Bitte warte...</string>
-    <string name="trip_activity_catched_service_error">Es ist ein Fehler aufgetreten während versucht wurde eine Route zum Ziel zu bestimmen. Das Ziel ist entweder nicht bekannt, oder zu weit weg um in vernünftiger Zeit erreicht zu werden.</string>
-    <string name="uncaught_exception_message">Es ist ein unbekannter Fehler aufgetreten. Bitte senden Sie die Details an den Entwickler.</string>
-    <string name="force_24h_format">24h Stundenformat erzwingen.</string>
-    <string name="option_24h">24 Stunden Format</string>
-    <string name="notification_channel_description">Benachrichtigungen vom ETA Notifier.</string>
+    <string name="internet_not_available_toast">You need an active internet connection to use this app.</string>
+    <string name="map">Map</string>
+    <string name="paste">Paste</string>
+    <string name="initializing_trip">Initializing Trip</string>
+    <string name="please_stand_by">Please Stand By...</string>
+    <string name="trip_activity_catched_service_error">Encountered an error while trying to compute a route to your destination. It is likely unknown or too far away to be reached within reasonable time.</string>
+    <string name="uncaught_exception_message">The app has encountered an uncatched error. Please send an email containg the error details to the developer.</string>
+    <string name="force_24h_format">Force 24h format.</string>
+    <string name="option_24h">24-hours format</string>
+    <string name="option_24h_key" translatable="false">option_24h_key</string>
+    <string name="notification_channel_name" translatable="false">ETA Notifier</string>
+    <string name="notification_channel_description">Notifications from ETA Notifier.</string>
 </resources>
